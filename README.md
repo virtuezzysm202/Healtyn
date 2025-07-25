@@ -3,7 +3,7 @@
 
 # ElderCare
 ElderCare+ is a React Native mobile application designed to assist elderly users in managing their daily routines.
->>>>>>> 289c2163e12859843835b07334286fe467a2709e
+
 
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
