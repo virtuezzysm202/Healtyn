@@ -1,4 +1,10 @@
+<<<<<<< HEAD
 # Welcome to your Expo app 👋
+
+# ElderCare
+ElderCare+ is a React Native mobile application designed to assist elderly users in managing their daily routines.
+>>>>>>> 289c2163e12859843835b07334286fe467a2709e
+
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
@@ -48,3 +54,4 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+=======
