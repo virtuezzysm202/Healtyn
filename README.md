@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # Welcome to your Expo app 👋
 
 # ElderCare
