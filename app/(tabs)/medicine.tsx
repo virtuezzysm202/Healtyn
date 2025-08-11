@@ -1,219 +1,242 @@
-import { useState } from 'react'
+import React, { useState } from "react";
 import {
   View,
   Text,
   TextInput,
-  TouchableOpacity,
-  FlatList,
-  Platform,
   StyleSheet,
-  Alert,
-} from 'react-native'
-import DateTimePicker from '@react-native-community/datetimepicker'
-import { format } from 'date-fns'
+  ScrollView,
+  Platform,
+  Switch,
+} from "react-native";
+import AdaptivePicker from "../../components/AdaptivePicker";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
-type Medicine = {
-  name: string
-  disease: string
-  note: string
-  time: Date
-}
+export default function MedicineScreen() {
+  const [medicineName, setMedicineName] = useState("");
+  const [medicineForm, setMedicineForm] = useState("");
+  const [disease, setDisease] = useState("");
+  const [dosagePerTime, setDosagePerTime] = useState("");
+  const [frequencyPerDay, setFrequencyPerDay] = useState("");
+  const [usageTime, setUsageTime] = useState("");
+  const [mustFinish, setMustFinish] = useState(false);
+  const [notes, setNotes] = useState("");
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
 
-export default function MedicinePage() {
-  const [medicineName, setMedicineName] = useState('')
-  const [disease, setDisease] = useState('')
-  const [note, setNote] = useState('')
-  const [time, setTime] = useState(new Date())
-  const [showPicker, setShowPicker] = useState(false)
-  const [medicines, setMedicines] = useState<Medicine[]>([])
+  const medicineForms = [
+    { label: "Tablet", value: "tablet" },
+    { label: "Kapsul", value: "kapsul" },
+    { label: "Sirup", value: "sirup" },
+    { label: "Tetes", value: "tetes" },
+    { label: "Salep", value: "salep" },
+  ];
 
-  const onChange = (_event: any, selectedDate?: Date) => {
-    if (Platform.OS === 'android') setShowPicker(false)
-    if (selectedDate) setTime(selectedDate)
-  }
-
-  const addMedicine = () => {
-    if (!medicineName || !disease) {
-      Alert.alert('⚠️ Mohon isi nama obat dan penyakitnya.')
-      return
+  const renderDatePicker = (label: string, date: Date, setDate: (d: Date) => void) => {
+    if (Platform.OS === "web") {
+      return (
+        <View style={styles.pickerContainer}>
+          <Text style={styles.label}>{label}</Text>
+          <input
+            type="date"
+            value={date.toISOString().split("T")[0]}
+            onChange={(e) => setDate(new Date(e.target.value))}
+            style={styles.webDateInput as React.CSSProperties}
+          />
+        </View>
+      );
+    } else {
+      return (
+        <View style={styles.pickerContainer}>
+          <Text style={styles.label}>{label}</Text>
+          <DateTimePicker
+            value={date}
+            mode="date"
+            display={Platform.OS === "ios" ? "spinner" : "default"}
+            onChange={(_, selectedDate) => {
+              if (selectedDate) setDate(selectedDate);
+            }}
+          />
+        </View>
+      );
     }
-
-    const newMedicine: Medicine = {
-      name: medicineName,
-      disease,
-      note,
-      time,
-    }
-
-    setMedicines([...medicines, newMedicine].sort((a, b) => a.time.getTime() - b.time.getTime()))
-    setMedicineName('')
-    setDisease('')
-    setNote('')
-    Alert.alert('✅ Obat berhasil ditambahkan.')
-  }
-
-  const deleteMedicine = (index: number) => {
-    Alert.alert('Hapus Obat', 'Yakin ingin menghapus?', [
-      { text: 'Batal', style: 'cancel' },
-      {
-        text: 'Hapus',
-        style: 'destructive',
-        onPress: () => {
-          setMedicines(medicines.filter((_, i) => i !== index))
-        },
-      },
-    ])
-  }
+  };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>🎗️ Pengingat Obat</Text>
+    <ScrollView style={styles.container}>
+      <Text style={styles.title}>Pengingat Obat</Text>
 
-      <TextInput
-        value={medicineName}
-        onChangeText={setMedicineName}
-        placeholder="💊 Nama Obat"
-        style={styles.input}
-      />
-
-      <TextInput
-        value={disease}
-        onChangeText={setDisease}
-        placeholder="🩺 Untuk Penyakit"
-        style={styles.input}
-      />
-
-      <TextInput
-        value={note}
-        onChangeText={setNote}
-        placeholder="📝 Catatan (misal: setelah makan)"
-        style={styles.input}
-      />
-
-      <TouchableOpacity onPress={() => setShowPicker(true)} style={styles.timeButton}>
-        <Text style={styles.timeText}>⏰ Jam: {format(time, 'HH:mm')}</Text>
-      </TouchableOpacity>
-
-      {showPicker && (
-        <DateTimePicker
-          value={time}
-          mode="time"
-          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-          onChange={onChange}
-          is24Hour
+      {/* Nama / Jenis Obat */}
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Jenis Obat</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Ketik jenis obat (misal: Amoxicillin)"
+          value={medicineName}
+          onChangeText={setMedicineName}
         />
-      )}
+      </View>
 
-      <TouchableOpacity onPress={addMedicine} style={styles.addButton}>
-        <Text style={styles.addButtonText}>➕ Tambah Obat</Text>
-      </TouchableOpacity>
+      {/* Bentuk Obat */}
+      <View style={styles.pickerContainer}>
+        <Text style={styles.label}>Bentuk Obat</Text>
+        <AdaptivePicker
+          label="Pilih Bentuk Obat"
+          selectedValue={medicineForm}
+          onValueChange={(value) => {
+            setMedicineForm(value);
+            // reset related inputs if bentuk obat berubah
+            setDosagePerTime("");
+            setFrequencyPerDay("");
+            setUsageTime("");
+          }}
+          items={medicineForms}
+        />
+      </View>
 
-      <FlatList
-        data={medicines}
-        keyExtractor={(_, i) => i.toString()}
-        style={{ marginTop: 24 }}
-        ListEmptyComponent={<Text style={styles.emptyText}>Belum ada obat yang ditambahkan.</Text>}
-        renderItem={({ item, index }) => (
-          <View style={styles.card}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.cardTitle}>💊 {item.name}</Text>
-              <Text style={styles.cardDetail}>🩺 {item.disease}</Text>
-              <Text style={styles.cardDetail}>🕒 {format(item.time, 'HH:mm')}</Text>
-              {item.note ? <Text style={styles.cardNote}>📝 {item.note}</Text> : null}
-            </View>
-            <TouchableOpacity onPress={() => deleteMedicine(index)}>
-              <Text style={styles.deleteButton}>🗑️</Text>
-            </TouchableOpacity>
-          </View>
+      {/* Penyakit */}
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Untuk Penyakit</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Misal: Demam, Batuk, Flu"
+          value={disease}
+          onChangeText={setDisease}
+        />
+      </View>
+
+      {/* Dosis Sekali Minum */}
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Dosis Sekali Minum</Text>
+        {medicineForm === "tablet" || medicineForm === "kapsul" ? (
+          <TextInput
+            style={styles.input}
+            placeholder="Masukkan jumlah (angka)"
+            keyboardType="numeric"
+            value={dosagePerTime}
+            onChangeText={setDosagePerTime}
+          />
+        ) : (
+          <TextInput
+            style={styles.input}
+            placeholder="Masukkan dosis (misal: 1 sendok, 5 ml)"
+            value={dosagePerTime}
+            onChangeText={setDosagePerTime}
+          />
         )}
-      />
-    </View>
-  )
+      </View>
+
+      {/* Frekuensi Sehari */}
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Frekuensi Sehari</Text>
+        {medicineForm === "tablet" || medicineForm === "kapsul" ? (
+          <TextInput
+            style={styles.input}
+            placeholder="Berapa kali sehari (angka)"
+            keyboardType="numeric"
+            value={frequencyPerDay}
+            onChangeText={setFrequencyPerDay}
+          />
+        ) : (
+          <TextInput
+            style={styles.input}
+            placeholder="Misal: 3 kali sehari"
+            value={frequencyPerDay}
+            onChangeText={setFrequencyPerDay}
+          />
+        )}
+      </View>
+
+      {/* Waktu Minum/Pakai */}
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Waktu Minum/Pakai</Text>
+        {medicineForm === "tablet" || medicineForm === "kapsul" ? (
+          <TextInput
+            style={styles.input}
+            placeholder="Setiap berapa jam (angka)"
+            keyboardType="numeric"
+            value={usageTime}
+            onChangeText={setUsageTime}
+          />
+        ) : (
+          <TextInput
+            style={styles.input}
+            placeholder="Misal: Sebelum tidur, pagi dan sore"
+            value={usageTime}
+            onChangeText={setUsageTime}
+          />
+        )}
+      </View>
+
+      {/* Harus Dihabiskan */}
+      <View style={styles.switchContainer}>
+        <Text style={styles.label}>Harus Dihabiskan?</Text>
+        <Switch value={mustFinish} onValueChange={setMustFinish} />
+      </View>
+
+      {/* Tanggal Mulai & Selesai */}
+      {renderDatePicker("Tanggal Mulai", startDate, setStartDate)}
+      {renderDatePicker("Tanggal Selesai", endDate, setEndDate)}
+
+      {/* Catatan */}
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Catatan</Text>
+        <TextInput
+          value={notes}
+          onChangeText={setNotes}
+          style={[styles.input, { height: 80, textAlignVertical: "top" }]}
+          placeholder="Peringatan atau informasi tambahan"
+          multiline
+        />
+      </View>
+    </ScrollView>
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#F7FAFC',
     padding: 20,
+    backgroundColor: "#fff",
+    flex: 1,
   },
-  header: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#002147',
+  title: {
+    fontSize: 22,
+    fontWeight: "600",
     marginBottom: 20,
-    textAlign: 'center',
+    color: "#000",
+  },
+  pickerContainer: {
+    marginBottom: 15,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 5,
+    color: "#333",
+  },
+  inputContainer: {
+    marginBottom: 15,
   },
   input: {
+    height: 45,
     borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 12,
-    backgroundColor: '#FFFFFF',
+    borderColor: "#ccc",
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    backgroundColor: "#f9f9f9",
+  },
+  switchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 15,
+    justifyContent: "space-between",
+  },
+  webDateInput: {
+    height: 40,
     fontSize: 16,
+    padding: 8,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    width: "100%",
+    backgroundColor: "#f9f9f9",
   },
-  timeButton: {
-    backgroundColor: '#004B8D',
-    borderRadius: 12,
-    padding: 12,
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  timeText: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  addButton: {
-    backgroundColor: '#FFB347',
-    borderRadius: 12,
-    padding: 14,
-    alignItems: 'center',
-  },
-  addButtonText: {
-    fontWeight: 'bold',
-    fontSize: 16,
-    color: '#002147',
-  },
-  card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 4,
-    color: '#1F2937',
-  },
-  cardDetail: {
-    fontSize: 16,
-    color: '#374151',
-    marginBottom: 2,
-  },
-  cardNote: {
-    fontSize: 15,
-    fontStyle: 'italic',
-    color: '#6B7280',
-  },
-  deleteButton: {
-    fontSize: 22,
-    color: '#DC2626',
-    marginLeft: 12,
-  },
-  emptyText: {
-    textAlign: 'center',
-    color: '#6B7280',
-    fontStyle: 'italic',
-    marginTop: 24,
-  },
-})
+});
