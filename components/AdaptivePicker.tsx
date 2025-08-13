@@ -1,5 +1,6 @@
+import { Picker } from "@react-native-picker/picker";
 import React from "react";
-import { Platform, View, StyleSheet, Text } from "react-native";
+import { Platform, StyleSheet, Text, View } from "react-native";
 
 type PickerItem = {
   label: string;
@@ -10,7 +11,7 @@ type Props = {
   selectedValue: string;
   onValueChange: (value: string) => void;
   items: PickerItem[];
-  label?: string; // untuk aksesibilitas
+  label?: string;
 };
 
 export default function AdaptivePicker({ selectedValue, onValueChange, items, label }: Props) {
@@ -29,6 +30,7 @@ export default function AdaptivePicker({ selectedValue, onValueChange, items, la
           onChange={(e) => onValueChange(e.target.value)}
           style={styles.webSelect as React.CSSProperties}
         >
+          <option value="">Pilih...</option>
           {items.map((item) => (
             <option key={item.value} value={item.value}>
               {item.label}
@@ -39,17 +41,26 @@ export default function AdaptivePicker({ selectedValue, onValueChange, items, la
     );
   }
 
+  // Android & iOS
   return (
-    <View style={styles.nativeFallback}>
-      <Text>Pilihannya cuma tersedia di web untuk sekarang</Text>
+    <View style={styles.nativeContainer}>
+      {label && <Text style={styles.nativeLabel}>{label}</Text>}
+      <Picker
+        selectedValue={selectedValue}
+        onValueChange={(value) => onValueChange(value)}
+        style={styles.nativePicker}
+      >
+        <Picker.Item label="Pilih..." value="" />
+        {items.map((item) => (
+          <Picker.Item key={item.value} label={item.label} value={item.value} />
+        ))}
+      </Picker>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  webContainer: {
-    width: "100%",
-  },
+  webContainer: { width: "100%" },
   webSelect: {
     height: 40,
     fontSize: 16,
@@ -59,9 +70,12 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     width: "100%",
   },
-  nativeFallback: {
-    padding: 10,
-    backgroundColor: "#eee",
-    borderRadius: 5,
+  nativeContainer: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    backgroundColor: "#fff",
   },
+  nativeLabel: { fontWeight: "600", fontSize: 14, marginBottom: 4, color: "#333" },
+  nativePicker: { height: 50, width: "100%" },
 });

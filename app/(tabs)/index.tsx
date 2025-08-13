@@ -1,17 +1,17 @@
 // app/(tabs)/index.tsx
-import {
-  View,
-  StyleSheet,
-  ScrollView,
-  Switch,
-  Pressable,
-  ActivityIndicator,
-} from 'react-native';
-import { useState, useEffect } from 'react';
-import LansiaText from '../../components/ui/LansiaText';
-import { useRouter } from 'expo-router';
-import { FontAwesome5, Feather } from '@expo/vector-icons';
+import { Feather, FontAwesome5 } from '@expo/vector-icons';
 import * as Location from 'expo-location';
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  View,
+} from 'react-native';
+import LansiaText from '../../components/ui/LansiaText';
 
 const API_KEY = process.env.EXPO_PUBLIC_WEATHER_API_KEY ?? '';
 
@@ -42,6 +42,7 @@ export default function HomePage() {
     { icon: 'user-md', label: 'Hubungi Dokter', route: '/call-doctor' },
     { icon: 'users', label: 'Hubungi Keluarga', route: '/family' },
     { icon: 'heartbeat', label: 'Kesehatan Hari Ini', route: '/health' },
+    { icon: 'music', label: 'Musik Relaksasi & Meditasi', route: '/relax-music' },
   ];
 
   const mapIconToEmoji = (icon?: string) => {

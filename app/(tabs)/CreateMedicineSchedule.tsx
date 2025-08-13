@@ -1,0 +1,560 @@
+import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as ImagePicker from "expo-image-picker";
+import * as Notifications from "expo-notifications";
+import React, { useState } from "react";
+import {
+  Alert,
+  Dimensions,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import AdaptivePicker from "../../components/AdaptivePicker";
+
+const { width } = Dimensions.get("window");
+
+// Setup notifikasi handler
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
+
+interface MedicineSchedule {
+  id: string;
+  medicineName: string;
+  medicineType: string;
+  disease: string;
+  medicineForm: string;
+  dosageAmount: string;
+  dosageUnit: string;
+  spoonSize?: string;
+  notes: string;
+  usageTime: string;
+  timesPerDay: number;
+  alarmTimes: Date[];
+  mustFinish: boolean;
+  startDate: Date;
+  endDate: Date;
+  medicineImage?: string;
+}
+
+interface CreateMedicineScheduleProps {
+  navigation: any;
+}
+
+export default function CreateMedicineSchedule({ navigation }: CreateMedicineScheduleProps) {
+  const [medicineName, setMedicineName] = useState("");
+  const [medicineType, setMedicineType] = useState("");
+  const [disease, setDisease] = useState("");
+  const [medicineForm, setMedicineForm] = useState("");
+  const [dosageAmount, setDosageAmount] = useState("");
+  const [dosageUnit, setDosageUnit] = useState("");
+  const [spoonSize, setSpoonSize] = useState("");
+  const [notes, setNotes] = useState("");
+  const [usageTime, setUsageTime] = useState("");
+  const [timesPerDay, setTimesPerDay] = useState(1);
+  const [mustFinish, setMustFinish] = useState(false);
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
+  const [medicineImage, setMedicineImage] = useState<string | null>(null);
+  const [alarmTimes, setAlarmTimes] = useState([new Date()]);
+
+  const medicineTypes = [
+    { label: "Antibiotik", value: "antibiotik" },
+    { label: "Analgesik", value: "analgesik" },
+    { label: "Antiinflamasi", value: "antiinflamasi" },
+    { label: "Antasida", value: "antasada" },
+    { label: "Vitamin", value: "vitamin" },
+    { label: "Suplemen", value: "suplemen" },
+    { label: "Herbal", value: "herbal" },
+    { label: "Lainnya", value: "lainnya" },
+  ];
+
+  const diseases = [
+    { label: "Demam", value: "demam" },
+    { label: "Batuk", value: "batuk" },
+    { label: "Flu", value: "flu" },
+    { label: "Sakit Kepala", value: "sakit_kepala" },
+    { label: "Diare", value: "diare" },
+    { label: "Maag", value: "maag" },
+    { label: "Hipertensi", value: "hipertensi" },
+    { label: "Diabetes", value: "diabetes" },
+    { label: "Asma", value: "asma" },
+    { label: "Alergi", value: "alergi" },
+    { label: "Lainnya", value: "lainnya" },
+  ];
+
+  const medicineForms = [
+    { label: "Tablet", value: "tablet" },
+    { label: "Kapsul", value: "kapsul" },
+    { label: "Sirup", value: "sirup" },
+    { label: "Tetes", value: "tetes" },
+    { label: "Salep", value: "salep" },
+    { label: "Inhaler", value: "inhaler" },
+    { label: "Suntikan", value: "injection" },
+    { label: "Bubuk", value: "bubuk" },
+  ];
+
+  const spoonSizes = [
+    { label: "Sendok Teh (5ml)", value: "sendok_teh" },
+    { label: "Sendok Makan (15ml)", value: "sendok_makan" },
+    { label: "Sendok Takar", value: "sendok_takar" },
+  ];
+
+  const resetForm = () => {
+    setMedicineName("");
+    setMedicineType("");
+    setDisease("");
+    setMedicineForm("");
+    setDosageAmount("");
+    setDosageUnit("");
+    setSpoonSize("");
+    setNotes("");
+    setUsageTime("");
+    setTimesPerDay(1);
+    setMustFinish(false);
+    setStartDate(new Date());
+    setEndDate(new Date());
+    setMedicineImage(null);
+    setAlarmTimes([new Date()]);
+  };
+
+  const handleTimesPerDayChange = (times: number) => {
+    setTimesPerDay(times);
+    const newAlarmTimes: Date[] = [];
+    for (let i = 0; i < times; i++) {
+      const time = new Date();
+      time.setHours(8 + i * 4, 0, 0, 0);
+      newAlarmTimes.push(time);
+    }
+    setAlarmTimes(newAlarmTimes);
+  };
+
+  const pickImage = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permissionResult.granted) {
+      Alert.alert("Izin Diperlukan", "Mohon izinkan akses galeri untuk menambah foto obat.");
+      return;
+    }
+
+    Alert.alert("Pilih Foto Obat", "Pilih sumber foto obat", [
+      { text: "Kamera", onPress: openCamera },
+      { text: "Galeri", onPress: openGallery },
+      { text: "Batal", style: "cancel" },
+    ]);
+  };
+
+  const openCamera = async () => {
+    const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+    if (!permissionResult.granted) {
+      Alert.alert("Izin Diperlukan", "Mohon izinkan akses kamera untuk mengambil foto obat.");
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      setMedicineImage(result.assets[0].uri);
+    }
+  };
+
+  const openGallery = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      setMedicineImage(result.assets[0].uri);
+    }
+  };
+
+  const saveMedicineSchedule = async () => {
+    if (!medicineName.trim()) return Alert.alert("Error", "Nama obat wajib diisi!");
+    if (!medicineType.trim()) return Alert.alert("Error", "Jenis obat wajib diisi!");
+    if (!disease.trim()) return Alert.alert("Error", "Penyakit wajib diisi!");
+    if (!medicineForm.trim()) return Alert.alert("Error", "Bentuk obat wajib diisi!");
+    if (!dosageAmount.trim()) return Alert.alert("Error", "Dosis wajib diisi!");
+    if (!usageTime.trim()) return Alert.alert("Error", "Waktu minum/pakai wajib diisi!");
+
+    const newSchedule: MedicineSchedule = {
+      id: Date.now().toString(),
+      medicineName,
+      medicineType,
+      disease,
+      medicineForm,
+      dosageAmount,
+      dosageUnit,
+      spoonSize,
+      notes,
+      usageTime,
+      timesPerDay,
+      alarmTimes: [...alarmTimes],
+      mustFinish,
+      startDate: new Date(startDate),
+      endDate: new Date(endDate),
+      medicineImage: medicineImage || undefined,
+    };
+
+    try {
+      const existingSchedules = await AsyncStorage.getItem("medicineSchedules");
+      const schedules = existingSchedules ? JSON.parse(existingSchedules) : [];
+      schedules.push(newSchedule);
+      await AsyncStorage.setItem("medicineSchedules", JSON.stringify(schedules));
+      await scheduleNotifications(newSchedule);
+
+      Alert.alert("Berhasil", "Jadwal obat berhasil disimpan!", [
+        {
+          text: "OK",
+          onPress: () => {
+            resetForm();
+            navigation.goBack();
+          },
+        },
+      ]);
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Error", "Gagal menyimpan jadwal obat");
+    }
+  };
+
+  const scheduleNotifications = async (schedule: MedicineSchedule) => {
+    const { status } = await Notifications.requestPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Izin Diperlukan", "Mohon aktifkan notifikasi untuk pengingat obat.");
+      return;
+    }
+
+    try {
+      for (let i = 0; i < schedule.alarmTimes.length; i++) {
+        const time = schedule.alarmTimes[i];
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: "Waktu Minum Obat!",
+            body: `Saatnya minum ${schedule.medicineName} - ${schedule.dosageAmount} ${schedule.dosageUnit}`,
+            data: { medicineId: schedule.id },
+          },
+          trigger: {
+            hour: time.getHours(),
+            minute: time.getMinutes(),
+            repeats: true,
+          },
+        });
+      }
+    } catch (error) {
+      console.error("Error scheduling notifications:", error);
+    }
+  };
+
+  const renderDosageInput = () => {
+    if (medicineForm === "tablet" || medicineForm === "kapsul") {
+      return (
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>Dosis Sekali Minum</Text>
+          <View style={styles.inputContainer}>
+            <Ionicons name="medical" size={20} color="#007AFF" />
+            <TextInput
+              style={styles.input}
+              placeholder="Masukkan jumlah (contoh: 1, 0.5, 2)"
+              keyboardType="numeric"
+              value={dosageAmount}
+              onChangeText={(text) => {
+                setDosageAmount(text);
+                setDosageUnit(medicineForm);
+              }}
+              placeholderTextColor="#C7C7CC"
+            />
+            <Text style={styles.unitText}>{medicineForm}</Text>
+          </View>
+        </View>
+      );
+    } else if (medicineForm === "sirup" || medicineForm === "tetes") {
+      return (
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>Dosis Sekali Minum</Text>
+          <View style={styles.dosageContainer}>
+            <View style={styles.inputContainer}>
+              <Ionicons name="water" size={20} color="#007AFF" />
+              <TextInput
+                style={styles.input}
+                placeholder="Jumlah (contoh: 1, 2, 0.5)"
+                keyboardType="numeric"
+                value={dosageAmount}
+                onChangeText={setDosageAmount}
+                placeholderTextColor="#C7C7CC"
+              />
+            </View>
+
+            <View style={styles.pickerWrapper}>
+              <AdaptivePicker
+                label="Pilih Ukuran"
+                selectedValue={spoonSize}
+                onValueChange={(value) => {
+                  setSpoonSize(value);
+                  const selectedSpoon = spoonSizes.find((s) => s.value === value);
+                  setDosageUnit(selectedSpoon?.label || "sendok");
+                }}
+                items={spoonSizes}
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Ionicons name="flask" size={20} color="#007AFF" />
+              <TextInput
+                style={styles.input}
+                placeholder="Atau masukkan dalam ml (opsional)"
+                keyboardType="numeric"
+                placeholderTextColor="#C7C7CC"
+              />
+              <Text style={styles.unitText}>ml</Text>
+            </View>
+          </View>
+        </View>
+      );
+    } else {
+      return (
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>Dosis Sekali Pakai</Text>
+          <View style={styles.inputContainer}>
+            <Ionicons name="medical" size={20} color="#007AFF" />
+            <TextInput
+              style={styles.input}
+              placeholder="Masukkan dosis (contoh: 1 tube, secukupnya)"
+              value={dosageAmount}
+              onChangeText={(text) => {
+                setDosageAmount(text);
+                setDosageUnit("");
+              }}
+              placeholderTextColor="#C7C7CC"
+            />
+          </View>
+        </View>
+      );
+    }
+  };
+
+  const renderTimesPerDaySelector = () => (
+    <View style={styles.section}>
+      <Text style={styles.sectionLabel}>Frekuensi Per Hari</Text>
+      <View style={styles.frequencyContainer}>
+        {[1, 2, 3, 4, 5, 6].map((times) => (
+          <TouchableOpacity
+            key={times}
+            style={[
+              styles.frequencyButton,
+              timesPerDay === times && styles.frequencyButtonActive,
+            ]}
+            onPress={() => handleTimesPerDayChange(times)}
+          >
+            <Text
+              style={[
+                styles.frequencyButtonText,
+                timesPerDay === times && styles.frequencyButtonTextActive,
+              ]}
+            >
+              {times}x
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </View>
+  );
+
+  const renderAlarmTimes = () => (
+    <View style={styles.section}>
+      <Text style={styles.sectionLabel}>Waktu Pengingat ({timesPerDay}x sehari)</Text>
+      {alarmTimes.slice(0, timesPerDay).map((time, index) => (
+        <View key={index} style={styles.alarmTimeContainer}>
+          <View style={styles.timeDisplayContainer}>
+            <View style={styles.timeIcon}>
+              <Ionicons name="time" size={18} color="#007AFF" />
+            </View>
+            <View style={styles.timeInfo}>
+              <Text style={styles.timeText}>
+                {time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+              </Text>
+              <Text style={styles.timeSubtext}>Pengingat ke-{index + 1}</Text>
+            </View>
+          </View>
+        </View>
+      ))}
+    </View>
+  );
+
+  return (
+    <KeyboardAvoidingView
+      style={{ flex: 1, backgroundColor: "#F5F5F5" }}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
+      <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>Nama Obat</Text>
+          <View style={styles.inputContainer}>
+            <Ionicons name="medkit" size={20} color="#007AFF" />
+            <TextInput
+              style={styles.input}
+              placeholder="Masukkan nama obat"
+              value={medicineName}
+              onChangeText={setMedicineName}
+              placeholderTextColor="#C7C7CC"
+            />
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <AdaptivePicker
+            label="Jenis Obat"
+            selectedValue={medicineType}
+            onValueChange={setMedicineType}
+            items={medicineTypes}
+          />
+        </View>
+
+        <View style={styles.section}>
+          <AdaptivePicker
+            label="Penyakit"
+            selectedValue={disease}
+            onValueChange={setDisease}
+            items={diseases}
+          />
+        </View>
+
+        <View style={styles.section}>
+          <AdaptivePicker
+            label="Bentuk Obat"
+            selectedValue={medicineForm}
+            onValueChange={setMedicineForm}
+            items={medicineForms}
+          />
+        </View>
+
+        {renderDosageInput()}
+
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>Waktu Minum/Pakai</Text>
+          <View style={styles.inputContainer}>
+            <Ionicons name="time" size={20} color="#007AFF" />
+            <TextInput
+              style={styles.input}
+              placeholder="Contoh: Setelah makan, sebelum tidur"
+              value={usageTime}
+              onChangeText={setUsageTime}
+              placeholderTextColor="#C7C7CC"
+            />
+          </View>
+        </View>
+
+        {renderTimesPerDaySelector()}
+
+        {renderAlarmTimes()}
+
+        <View style={styles.section}>
+          <TouchableOpacity style={styles.buttonPrimary} onPress={pickImage}>
+            <Text style={styles.buttonPrimaryText}>Pilih Foto Obat</Text>
+          </TouchableOpacity>
+          {medicineImage && (
+            <View style={{ marginTop: 10, alignItems: "center" }}>
+              <Text style={{ color: "#333" }}>Foto sudah dipilih</Text>
+            </View>
+          )}
+        </View>
+
+        <View style={styles.section}>
+  <Text style={styles.sectionLabel}>Catatan</Text>
+  <View style={styles.inputContainer}>
+    <Ionicons name="create" size={20} color="#007AFF" />
+    <TextInput
+      style={styles.input}
+      placeholder="Tambahkan catatan untuk obat ini"
+      value={notes}
+      onChangeText={setNotes}
+      placeholderTextColor="#C7C7CC"
+      multiline
+    />
+  </View>
+</View>
+
+<View style={styles.section}>
+  <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+    <Text style={styles.sectionLabel}>Perlu dihabiskan?</Text>
+    <Switch
+      value={mustFinish}
+      onValueChange={setMustFinish}
+      trackColor={{ false: "#ccc", true: "#007AFF" }}
+      thumbColor={mustFinish ? "#fff" : "#f4f3f4"}
+    />
+  </View>
+</View>
+
+        <View style={styles.section}>
+          <TouchableOpacity style={styles.buttonSuccess} onPress={saveMedicineSchedule}>
+            <Text style={styles.buttonPrimaryText}>Simpan Jadwal Obat</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+
+  
+
+  
+}
+
+const styles = StyleSheet.create({
+  section: { marginVertical: 12, paddingHorizontal: 16 },
+  sectionLabel: { fontWeight: "600", fontSize: 16, marginBottom: 6, color: "#333" },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 10,
+    padding: 12,
+    backgroundColor: "#fff",
+    marginBottom: 8,
+  },
+  input: { flex: 1, marginLeft: 10, color: "#000", fontSize: 16 },
+  unitText: { marginLeft: 10, fontWeight: "500", color: "#007AFF" },
+  pickerWrapper: { marginTop: 8 },
+  dosageContainer: { flexDirection: "column", gap: 8 },
+  frequencyContainer: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 8 },
+  frequencyButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#007AFF",
+    backgroundColor: "#fff",
+  },
+  frequencyButtonActive: { backgroundColor: "#007AFF" },
+  frequencyButtonText: { color: "#007AFF", fontWeight: "500" },
+  frequencyButtonTextActive: { color: "#fff" },
+  alarmTimeContainer: { flexDirection: "column", marginVertical: 6, paddingHorizontal: 16 },
+  timeDisplayContainer: { flexDirection: "row", alignItems: "center", marginBottom: 4 },
+  timeIcon: { marginRight: 10 },
+  timeInfo: { flexDirection: "column" },
+  timeText: { fontSize: 16, fontWeight: "600" },
+  timeSubtext: { fontSize: 12, color: "#777" },
+  buttonPrimary: { backgroundColor: "#007AFF", padding: 14, borderRadius: 10, alignItems: "center" },
+  buttonSuccess: { backgroundColor: "#28a745", padding: 14, borderRadius: 10, alignItems: "center" },
+  buttonPrimaryText: { color: "#fff", fontWeight: "600", fontSize: 16 },
+});
