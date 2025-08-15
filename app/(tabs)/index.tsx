@@ -1,5 +1,6 @@
 // app/(tabs)/index.tsx
 import { Feather, FontAwesome5 } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -27,12 +28,22 @@ type MenuItem = {
   route: string;
 };
 
+interface HealthTip {
+  id: string;
+  tip: string;
+  showOnHome?: boolean;
+}
+
 export default function HomePage() {
   const router = useRouter();
   const [darkMode, setDarkMode] = useState(false);
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loadingWeather, setLoadingWeather] = useState(true);
   const [weatherError, setWeatherError] = useState<string | null>(null);
+  
+  // State untuk health data
+  const [healthCondition, setHealthCondition] = useState<"healthy" | "sick" | null>(null);
+  const [healthReminders, setHealthReminders] = useState<HealthTip[]>([]);
 
   const toggleDarkMode = () => setDarkMode((v) => !v);
 
@@ -64,6 +75,42 @@ export default function HomePage() {
     if (temp > 15) return { icon: '🧥', text: 'Jaket tipis' };
     return { icon: '🧥', text: 'Jaket tebal & syal' };
   };
+
+  // Load health data
+  useEffect(() => {
+    const loadHealthData = async () => {
+      try {
+        const savedCondition = await AsyncStorage.getItem("healthCondition");
+        if (savedCondition) {
+          setHealthCondition(savedCondition as "healthy" | "sick");
+        }
+
+        // Load default tips
+        const savedDefaultTips = await AsyncStorage.getItem("defaultHealthTips");
+        const defaultTips = savedDefaultTips ? JSON.parse(savedDefaultTips) : { healthy: [], sick: [] };
+        
+        // Load custom tips
+        const savedCustomTips = await AsyncStorage.getItem("customTipsByCondition");
+        const customTips = savedCustomTips ? JSON.parse(savedCustomTips) : { healthy: [], sick: [] };
+
+        if (savedCondition) {
+          const condition = savedCondition as "healthy" | "sick";
+          const defaultReminders = defaultTips[condition]?.filter((tip: HealthTip) => tip.showOnHome) || [];
+          const customReminders = customTips[condition]?.filter((tip: HealthTip) => tip.showOnHome) || [];
+          
+          setHealthReminders([...defaultReminders, ...customReminders]);
+        }
+      } catch (error) {
+        console.error('Error loading health data:', error);
+      }
+    };
+
+    loadHealthData();
+    
+    // Listen for changes (optional: you can add this if you want real-time updates)
+    const interval = setInterval(loadHealthData, 5000); // Check every 5 seconds
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -101,6 +148,28 @@ export default function HomePage() {
     };
   }, []);
 
+  const getGreetingMessage = () => {
+    if (!healthCondition) return null;
+    
+    if (healthCondition === 'sick') {
+      return {
+        title: '🤗 Semoga Cepat Sembuh!',
+        subtitle: 'Jangan lupa istirahat yang cukup ya',
+        bgColor: '#FFE5E5',
+        textColor: '#D32F2F'
+      };
+    } else {
+      return {
+        title: '😊 Tetap Jaga Kesehatan!',
+        subtitle: 'Hari yang indah untuk hidup sehat',
+        bgColor: '#E8F5E8',
+        textColor: '#2E7D32'
+      };
+    }
+  };
+
+  const greeting = getGreetingMessage();
+
   return (
     <ScrollView style={[styles.container, darkMode && styles.darkContainer]}>
       {/* Header */}
@@ -134,6 +203,27 @@ export default function HomePage() {
           </Pressable>
         </View>
       </View>
+
+      {/* Greeting Card (jika ada kondisi kesehatan) */}
+      {greeting && (
+        <View style={[
+          styles.greetingCard, 
+          { backgroundColor: darkMode ? '#1C1C1E' : greeting.bgColor }
+        ]}>
+          <LansiaText style={[
+            styles.greetingTitle, 
+            { color: darkMode ? '#FFFFFF' : greeting.textColor }
+          ]}>
+            {greeting.title}
+          </LansiaText>
+          <LansiaText style={[
+            styles.greetingSubtitle, 
+            { color: darkMode ? '#8E8E93' : greeting.textColor }
+          ]}>
+            {greeting.subtitle}
+          </LansiaText>
+        </View>
+      )}
 
       {/* Weather Card - iOS Modern Design */}
       <View style={[styles.weatherCard, darkMode && styles.darkWeatherCard]}>
@@ -201,25 +291,102 @@ export default function HomePage() {
         )}
       </View>
 
-      {/* Daily Reminder Card */}
-      <View style={[styles.reminderCard, darkMode && styles.darkReminderCard]}>
-        <View style={styles.reminderHeader}>
-          <View style={styles.reminderIconContainer}>
-            <LansiaText style={styles.reminderIcon}>🕙</LansiaText>
-          </View>
-          <View style={styles.reminderContent}>
-            <LansiaText style={[styles.reminderTitle, darkMode && styles.darkText]}>
-              Pengingat Hari Ini
-            </LansiaText>
-            <LansiaText style={[styles.reminderText, darkMode && styles.darkSubText]}>
-              Minum air putih jam 10:00
-            </LansiaText>
-          </View>
-          <View style={styles.reminderBadge}>
-            <LansiaText style={styles.reminderBadgeText}>1</LansiaText>
-          </View>
+      {/* Health Reminder Cards */}
+      {healthReminders.length > 0 && (
+        <View>
+          <LansiaText style={[styles.sectionTitle, darkMode && styles.darkText]}>
+            Pengingat Kesehatan
+          </LansiaText>
+          {healthReminders.map((reminder) => (
+            <View key={reminder.id} style={[styles.reminderCard, darkMode && styles.darkReminderCard]}>
+              <View style={styles.reminderHeader}>
+                <View style={styles.reminderIconContainer}>
+                  <LansiaText style={styles.reminderIcon}>💊</LansiaText>
+                </View>
+                <View style={styles.reminderContent}>
+                  <LansiaText style={[styles.reminderTitle, darkMode && styles.darkText]}>
+                    Tips Kesehatan
+                  </LansiaText>
+                  <LansiaText style={[styles.reminderText, darkMode && styles.darkSubText]}>
+                    {reminder.tip}
+                  </LansiaText>
+                </View>
+              </View>
+            </View>
+          ))}
         </View>
+      )}
+
+     {/* Default Daily Reminder Card jika tidak ada health reminders */}
+{healthReminders.length === 0 && (
+  <View
+    style={[
+      styles.reminderCard,
+      darkMode && styles.darkReminderCard,
+      {
+        borderRadius: 16,
+        padding: 16,
+        shadowColor: '#000',
+        shadowOpacity: 0.1,
+        shadowOffset: { width: 0, height: 4 },
+        shadowRadius: 6,
+        elevation: 3,
+      },
+    ]}
+  >
+    <View style={styles.reminderHeader}>
+      {/* Ikon Lingkaran */}
+      <View
+        style={[
+          styles.reminderIconContainer,
+          { backgroundColor: darkMode ? '#444' : '#E3F2FD', borderRadius: 30, padding: 12 },
+        ]}
+      >
+        <LansiaText style={{ fontSize: 22 }}>🕙</LansiaText>
       </View>
+
+      {/* Konten */}
+      <View style={[styles.reminderContent, { marginLeft: 12 }]}>
+        <LansiaText
+          style={[
+            styles.reminderTitle,
+            darkMode && styles.darkText,
+            { fontWeight: '600', fontSize: 16 },
+          ]}
+        >
+          Pengingat Hari Ini
+        </LansiaText>
+        <LansiaText
+          style={[
+            styles.reminderText,
+            darkMode && styles.darkSubText,
+            { fontSize: 13, marginTop: 2 },
+          ]}
+        >
+          Belum ada pengingat. Tambahkan di halaman Kesehatan 
+        </LansiaText>
+      </View>
+
+      {/* Badge */}
+      <View
+        style={[
+          styles.reminderBadge,
+          {
+            backgroundColor: darkMode ? '#F48FB1' : '#42A5F5',
+            borderRadius: 12,
+            paddingHorizontal: 8,
+            paddingVertical: 2,
+            marginLeft: 'auto',
+          },
+        ]}
+      >
+        <LansiaText style={[styles.reminderBadgeText, { color: '#fff', fontWeight: '600' }]}>
+          !
+        </LansiaText>
+      </View>
+    </View>
+  </View>
+)}
 
       {/* Menu Grid */}
       <View style={styles.menuContainer}>
@@ -304,6 +471,36 @@ const styles = StyleSheet.create({
   smallLabel: {
     fontSize: 16,
     marginRight: 8,
+  },
+
+  // Greeting Card Styles
+  greetingCard: {
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  greetingTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  greetingSubtitle: {
+    fontSize: 14,
+    fontWeight: '400',
+  },
+
+  // Section Title
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1D1D1F',
+    marginBottom: 12,
+    marginTop: 8,
   },
 
   // Weather Card Styles
@@ -426,7 +623,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 16,
-    marginBottom: 24,
+    marginBottom: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -486,6 +683,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     gap: 12,
+    marginTop: 16,
   },
   menuItem: {
     width: '48%',
