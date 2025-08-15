@@ -1,8 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import * as ImagePicker from "expo-image-picker";
 import * as Notifications from "expo-notifications";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+
 import {
   Alert,
   Dimensions,
@@ -67,9 +69,16 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
   const [timesPerDay, setTimesPerDay] = useState(1);
   const [mustFinish, setMustFinish] = useState(false);
   const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(() => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 7); // Default 7 days from today
+    return tomorrow;
+  });
   const [medicineImage, setMedicineImage] = useState<string | null>(null);
   const [alarmTimes, setAlarmTimes] = useState([new Date()]);
+
+  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
+  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
 
   const medicineTypes = [
     { label: "Antibiotik", value: "antibiotik" },
@@ -129,7 +138,14 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
     setEndDate(new Date());
     setMedicineImage(null);
     setAlarmTimes([new Date()]);
+    setStartDate(new Date());
   };
+
+  useEffect(() => {
+    const newEndDate = new Date();
+    newEndDate.setDate(newEndDate.getDate() + 7);
+    setEndDate(newEndDate);
+  }, []);
 
   const handleTimesPerDayChange = (times: number) => {
     setTimesPerDay(times);
@@ -140,6 +156,46 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
       newAlarmTimes.push(time);
     }
     setAlarmTimes(newAlarmTimes);
+  };
+
+
+  const onStartDateChange = (event: any, selectedDate?: Date) => {
+    setShowStartDatePicker(Platform.OS === 'ios');
+    if (selectedDate) {
+      setStartDate(selectedDate);
+      // Auto-adjust end date if it's before start date
+      if (selectedDate > endDate) {
+        const newEndDate = new Date(selectedDate);
+        newEndDate.setDate(newEndDate.getDate() + 7);
+        setEndDate(newEndDate);
+      }
+    }
+  };
+
+  const onEndDateChange = (event: any, selectedDate?: Date) => {
+    setShowEndDatePicker(Platform.OS === 'ios');
+    if (selectedDate) {
+      if (selectedDate >= startDate) {
+        setEndDate(selectedDate);
+      } else {
+        Alert.alert("Error", "Tanggal selesai tidak boleh sebelum tanggal mulai!");
+      }
+    }
+  };
+
+  const calculateDuration = () => {
+    const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('id-ID', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   };
 
   const pickImage = async () => {
@@ -195,6 +251,11 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
     if (!medicineForm.trim()) return Alert.alert("Error", "Bentuk obat wajib diisi!");
     if (!dosageAmount.trim()) return Alert.alert("Error", "Dosis wajib diisi!");
     if (!usageTime.trim()) return Alert.alert("Error", "Waktu minum/pakai wajib diisi!");
+    if (endDate <= startDate) {
+      return Alert.alert("Error", "Tanggal selesai harus setelah tanggal mulai!");
+
+    }
+    
 
     const newSchedule: MedicineSchedule = {
       id: Date.now().toString(),
@@ -253,11 +314,7 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
             body: `Saatnya minum ${schedule.medicineName} - ${schedule.dosageAmount} ${schedule.dosageUnit}`,
             data: { medicineId: schedule.id },
           },
-          trigger: {
-            hour: time.getHours(),
-            minute: time.getMinutes(),
-            repeats: true,
-          },
+          trigger: { date: time },
         });
       }
     } catch (error) {
@@ -265,6 +322,7 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
     }
   };
 
+  
   const renderDosageInput = () => {
     if (medicineForm === "tablet" || medicineForm === "kapsul") {
       return (
@@ -400,6 +458,74 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
     </View>
   );
 
+  const renderDatePickerSection = () => (
+    <>
+      <View style={styles.section}>
+        <Text style={styles.sectionLabel}>Tanggal Mulai Konsumsi</Text>
+        <TouchableOpacity
+          style={styles.datePickerContainer}
+          onPress={() => setShowStartDatePicker(true)}
+        >
+          <Ionicons name="calendar" size={20} color="#007AFF" />
+          <View style={styles.dateTextContainer}>
+            <Text style={styles.dateText}>{formatDate(startDate)}</Text>
+            <Text style={styles.dateSubtext}>Ketuk untuk mengubah</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color="#C7C7CC" />
+        </TouchableOpacity>
+      </View>
+  
+      <View style={styles.section}>
+        <Text style={styles.sectionLabel}>Tanggal Selesai Konsumsi</Text>
+        <TouchableOpacity
+          style={styles.datePickerContainer}
+          onPress={() => setShowEndDatePicker(true)}
+        >
+          <Ionicons name="calendar" size={20} color="#007AFF" />
+          <View style={styles.dateTextContainer}>
+            <Text style={styles.dateText}>{formatDate(endDate)}</Text>
+            <Text style={styles.dateSubtext}>Ketuk untuk mengubah</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color="#C7C7CC" />
+        </TouchableOpacity>
+      </View>
+  
+      <View style={styles.section}>
+        <View style={styles.durationContainer}>
+          <Ionicons name="time" size={20} color="#28a745" />
+          <Text style={styles.durationText}>
+            Durasi konsumsi: {calculateDuration()} hari
+          </Text>
+        </View>
+      </View>
+  
+      {/* Date Pickers */}
+      {showStartDatePicker && (
+        <DateTimePicker
+          testID="startDatePicker"
+          value={startDate}
+          mode="date"
+          is24Hour={true}
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          onChange={onStartDateChange}
+          minimumDate={new Date()}
+        />
+      )}
+  
+      {showEndDatePicker && (
+        <DateTimePicker
+          testID="endDatePicker"
+          value={endDate}
+          mode="date"
+          is24Hour={true}
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          onChange={onEndDateChange}
+          minimumDate={startDate}
+        />
+      )}
+    </>
+  );
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: "#F5F5F5" }}
@@ -466,6 +592,8 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
         {renderTimesPerDaySelector()}
 
         {renderAlarmTimes()}
+
+        {renderDatePickerSection()}
 
         <View style={styles.section}>
           <TouchableOpacity style={styles.buttonPrimary} onPress={pickImage}>
@@ -557,4 +685,44 @@ const styles = StyleSheet.create({
   buttonPrimary: { backgroundColor: "#007AFF", padding: 14, borderRadius: 10, alignItems: "center" },
   buttonSuccess: { backgroundColor: "#28a745", padding: 14, borderRadius: 10, alignItems: "center" },
   buttonPrimaryText: { color: "#fff", fontWeight: "600", fontSize: 16 },
-});
+
+    datePickerContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      borderWidth: 1,
+      borderColor: "#ccc",
+      borderRadius: 10,
+      padding: 12,
+      backgroundColor: "#fff",
+      marginBottom: 8,
+    },
+    dateTextContainer: {
+      flex: 1,
+      marginLeft: 10,
+    },
+    dateText: {
+      fontSize: 16,
+      color: "#000",
+      fontWeight: "500",
+    },
+    dateSubtext: {
+      fontSize: 12,
+      color: "#777",
+      marginTop: 2,
+    },
+    durationContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: "#E8F5E8",
+      padding: 12,
+      borderRadius: 10,
+      marginBottom: 8,
+    },
+    durationText: {
+      marginLeft: 8,
+      fontSize: 14,
+      color: "#28a745",
+      fontWeight: "500",
+    },
+  });
+

@@ -41,7 +41,7 @@ export default function HomePage() {
     { icon: 'book', label: 'Pindai Buku', route: '/scan' },
     { icon: 'user-md', label: 'Hubungi Dokter', route: '/call-doctor' },
     { icon: 'users', label: 'Hubungi Keluarga', route: '/family' },
-    { icon: 'heartbeat', label: 'Kesehatan Hari Ini', route: '/health' },
+    { icon: 'heartbeat', label: 'Kesehatan', route: '/health' },
     { icon: 'music', label: 'Musik Relaksasi & Meditasi', route: '/relax-music' },
   ];
 

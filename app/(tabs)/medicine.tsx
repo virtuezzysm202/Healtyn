@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
+import { getAllSchedules } from '../../app/services/medicineStorage';
+
 import {
   ActivityIndicator,
   Dimensions,
@@ -28,13 +29,12 @@ interface MedicineSchedule {
   notes: string;
   usageTime: string;
   timesPerDay: number;
-  alarmTimes: Date[];
+  alarmTimes: (string | Date)[]; // ubah ke union type untuk fleksibilitas
   mustFinish: boolean;
-  startDate: Date;
-  endDate: Date;
+  startDate: string | Date;      // ubah ke union type
+  endDate: string | Date;        // ubah ke union type
   medicineImage?: string;
 }
-
 export default function MedicineScreen() {
   const router = useRouter();
   const [savedSchedules, setSavedSchedules] = useState<MedicineSchedule[]>([]);
@@ -49,20 +49,17 @@ export default function MedicineScreen() {
   const loadSchedules = async () => {
     try {
       setLoading(true);
-      const schedules = await AsyncStorage.getItem("medicineSchedules");
-      if (schedules) {
-        const parsed = JSON.parse(schedules);
-        // convert string dates back to Date objects
-        const schedulesWithDates = parsed.map((item: any) => ({
-          ...item,
-          startDate: new Date(item.startDate),
-          endDate: new Date(item.endDate),
-          alarmTimes: item.alarmTimes.map((t: string) => new Date(t)),
-        }));
-        setSavedSchedules(schedulesWithDates);
-      } else {
-        setSavedSchedules([]);
-      }
+      const schedules = await getAllSchedules(); // Gunakan function dari storage
+      
+      // Convert string dates back to Date objects untuk display
+      const schedulesWithDates = schedules.map((item) => ({
+        ...item,
+        startDate: new Date(item.startDate),
+        endDate: new Date(item.endDate),
+        alarmTimes: item.alarmTimes.map((t: string) => new Date(t)),
+      })) as MedicineSchedule[];
+      
+      setSavedSchedules(schedulesWithDates);
     } catch (e) {
       console.error(e);
     } finally {
@@ -77,47 +74,54 @@ export default function MedicineScreen() {
   );
 
 
-  const renderScheduleCard = ({ item }: { item: MedicineSchedule }) => (
-    <View style={styles.scheduleCard}>
-      {item.medicineImage && (
-        <Image source={{ uri: item.medicineImage }} style={styles.scheduleImage} />
-      )}
-      <View style={styles.scheduleContent}>
-        <Text style={styles.scheduleName}>{item.medicineName}</Text>
-        <Text style={styles.scheduleType}>
-          {item.medicineType} • {item.disease}
-        </Text>
-        <Text style={styles.scheduleDosage}>
-          {item.dosageAmount} {item.dosageUnit} • {item.timesPerDay}x sehari
-        </Text>
-        <Text style={styles.scheduleTime}>{item.usageTime}</Text>
-
-        <View style={styles.scheduleAlarms}>
-          {item.alarmTimes.slice(0, item.timesPerDay).map((time, index) => (
-            <View key={index} style={styles.alarmBadge}>
-              <Text style={styles.alarmBadgeText}>
-                {time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-              </Text>
-            </View>
-          ))}
-        </View>
-
-        {item.mustFinish && (
-          <View style={styles.mustFinishBadge}>
-            <Ionicons name="checkmark-circle" size={14} color="#34C759" />
-            <Text style={styles.mustFinishText}>Harus dihabiskan</Text>
-          </View>
+  const renderScheduleCard = ({ item }: { item: MedicineSchedule }) => {
+    // Pastikan alarmTimes adalah Date objects
+    const alarmTimes = item.alarmTimes.map(time => 
+      time instanceof Date ? time : new Date(time)
+    );
+    
+    return (
+      <View style={styles.scheduleCard}>
+        {item.medicineImage && (
+          <Image source={{ uri: item.medicineImage }} style={styles.scheduleImage} />
         )}
-
-        <Text style={styles.scheduleDates}>
-          {item.startDate.toLocaleDateString("id-ID")} -{" "}
-          {item.endDate.toLocaleDateString("id-ID")}
-        </Text>
-
-        {item.notes && <Text style={styles.scheduleNotes}>{item.notes}</Text>}
+        <View style={styles.scheduleContent}>
+          <Text style={styles.scheduleName}>{item.medicineName}</Text>
+          <Text style={styles.scheduleType}>
+            {item.medicineType} • {item.disease}
+          </Text>
+          <Text style={styles.scheduleDosage}>
+            {item.dosageAmount} {item.dosageUnit} • {item.timesPerDay}x sehari
+          </Text>
+          <Text style={styles.scheduleTime}>{item.usageTime}</Text>
+  
+          <View style={styles.scheduleAlarms}>
+            {alarmTimes.slice(0, item.timesPerDay).map((time, index) => (
+              <View key={index} style={styles.alarmBadge}>
+                <Text style={styles.alarmBadgeText}>
+                  {time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                </Text>
+              </View>
+            ))}
+          </View>
+  
+          {item.mustFinish && (
+            <View style={styles.mustFinishBadge}>
+              <Ionicons name="checkmark-circle" size={14} color="#34C759" />
+              <Text style={styles.mustFinishText}>Harus dihabiskan</Text>
+            </View>
+          )}
+  
+          <Text style={styles.scheduleDates}>
+            {(item.startDate instanceof Date ? item.startDate : new Date(item.startDate)).toLocaleDateString("id-ID")} -{" "}
+            {(item.endDate instanceof Date ? item.endDate : new Date(item.endDate)).toLocaleDateString("id-ID")}
+          </Text>
+  
+          {item.notes && <Text style={styles.scheduleNotes}>{item.notes}</Text>}
+        </View>
       </View>
-    </View>
-  );
+    );
+  };
 
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
