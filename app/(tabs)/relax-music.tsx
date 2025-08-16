@@ -1,31 +1,171 @@
-import { ScrollView, StyleSheet } from 'react-native';
+// app/(tabs)/musik.tsx
+import { Feather } from '@expo/vector-icons';
+import { AVPlaybackStatus, Audio } from 'expo-av';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import LansiaText from '../../components/ui/LansiaText';
 
-export default function RelaxMusicPage() {
+interface MusicItem {
+  id: number;
+  title: string;
+  description: string;
+  duration?: number; // dalam ms
+  uri: any;
+}
+
+export default function MusikScreen() {
+  const [musicList, setMusicList] = useState<MusicItem[]>([
+    {
+      id: 1,
+      title: 'Suara Alam & Air Mengalir',
+      description: 'Kombinasi suara alam yang menenangkan dengan gemericik air',
+      uri: require('../../assets/audio/nature-sounds.mp3'),
+    },
+    {
+      id: 2,
+      title: 'Musik Piano Lembut',
+      description: 'Melodi piano yang menenangkan untuk meditasi',
+      uri: require('../../assets/audio/piano-relaxing.mp3'),
+    },
+    {
+      id: 3,
+      title: 'Suara Hujan & Petir Jauh',
+      description: 'Suara hujan yang tenang dengan petir lembut di kejauhan',
+      uri: require('../../assets/audio/rain-sounds.mp3'),
+    },
+  ]);
+
+  const [sound, setSound] = useState<Audio.Sound | null>(null);
+  const [currentTrack, setCurrentTrack] = useState<MusicItem | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // format durasi jadi mm:ss
+  const formatDuration = (millis: number) => {
+    const totalSeconds = Math.floor(millis / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+  };
+
+  const playSound = async (musicItem: MusicItem) => {
+    try {
+      setIsLoading(true);
+
+      // stop & unload jika ada sound sebelumnya
+      if (sound) {
+        await sound.unloadAsync();
+        setSound(null);
+        setIsPlaying(false);
+      }
+
+      // jika lagu sama diklik saat sedang main → stop
+      if (currentTrack?.id === musicItem.id && isPlaying) {
+        setCurrentTrack(null);
+        setIsLoading(false);
+        return;
+      }
+
+      const { sound: newSound } = await Audio.Sound.createAsync(
+        musicItem.uri,
+        { shouldPlay: true, isLooping: true }
+      );
+
+      // ambil status (durasi)
+      const status = await newSound.getStatusAsync();
+      if ((status as any).isLoaded && (status as any).durationMillis) {
+        setMusicList((prev) =>
+          prev.map((m) =>
+            m.id === musicItem.id ? { ...m, duration: (status as any).durationMillis } : m
+          )
+        );
+      }
+
+      setSound(newSound);
+      setCurrentTrack(musicItem);
+      setIsPlaying(true);
+      setIsLoading(false);
+
+      // event selesai
+      newSound.setOnPlaybackStatusUpdate((status: AVPlaybackStatus) => {
+        if ('didJustFinish' in status && status.didJustFinish) {
+          setIsPlaying(false);
+          setCurrentTrack(null);
+        }
+      });
+    } catch (error) {
+      console.log('Error playing sound:', error);
+      setIsLoading(false);
+      Alert.alert('Error', 'Tidak dapat memutar musik. Periksa file audio di folder assets.');
+    }
+  };
+
+  // cleanup 
+  useEffect(() => {
+    return sound ? () => { sound.unloadAsync(); } : undefined;
+  }, [sound]);
+
   return (
     <ScrollView style={styles.container}>
-      <LansiaText style={styles.title}>🎵 Musik Relaksasi & Meditasi</LansiaText>
-      <LansiaText style={styles.text}>
-        Dengarkan musik relaksasi untuk membantu menenangkan pikiran dan tubuh.
-      </LansiaText>
-      {/* Di sini nanti bisa tambahkan daftar musik atau player audio */}
+      <LansiaText style={styles.title}>Musik Relaksasi</LansiaText>
+      {musicList.map((item) => (
+        <MusicCard
+          key={item.id}
+          item={item}
+          isActive={currentTrack?.id === item.id && isPlaying}
+          isLoading={isLoading && currentTrack?.id === item.id}
+          onPress={() => playSound(item)}
+          formatDuration={formatDuration}
+        />
+      ))}
     </ScrollView>
   );
 }
 
+// 🎵 Kartu Musik
+function MusicCard({ item, isActive, isLoading, onPress, formatDuration }: any) {
+  return (
+    <Pressable style={[styles.card, isActive && styles.cardActive]} onPress={onPress}>
+      <View style={styles.cardContent}>
+        <View style={{ flex: 1 }}>
+          <LansiaText style={styles.musicTitle}>{item.title}</LansiaText>
+          <LansiaText style={styles.musicDesc}>{item.description}</LansiaText>
+          <LansiaText style={styles.musicDuration}>
+            Durasi: {item.duration ? formatDuration(item.duration) : '...'}
+          </LansiaText>
+        </View>
+        {isLoading ? (
+          <ActivityIndicator size="small" color="#007AFF" />
+        ) : (
+          <Feather
+            name={isActive ? 'pause-circle' : 'play-circle'}
+            size={40}
+            color={isActive ? '#FF6B6B' : '#007AFF'}
+          />
+        )}
+      </View>
+    </Pressable>
+  );
+}
+
+// styles
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F2F2F7',
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
+  container: { flex: 1, backgroundColor: '#F9FAFB', padding: 16 },
+  title: { fontSize: 22, fontWeight: 'bold', marginBottom: 16, color: '#111827' },
+  card: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 16,
     marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  text: {
-    fontSize: 16,
-    lineHeight: 22,
-  },
+  cardActive: { borderWidth: 2, borderColor: '#007AFF' },
+  cardContent: { flexDirection: 'row', alignItems: 'center' },
+  musicTitle: { fontSize: 18, fontWeight: '600', marginBottom: 4, color: '#1F2937' },
+  musicDesc: { fontSize: 14, color: '#4B5563', marginBottom: 8 },
+  musicDuration: { fontSize: 13, color: '#6B7280' },
 });
