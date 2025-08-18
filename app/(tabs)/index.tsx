@@ -13,6 +13,7 @@ import {
   View,
 } from 'react-native';
 import LansiaText from '../../components/ui/LansiaText';
+import { getAllSchedules } from '../services/medicineStorage';
 
 const API_KEY = process.env.EXPO_PUBLIC_WEATHER_API_KEY ?? '';
 
@@ -34,6 +35,25 @@ interface HealthTip {
   showOnHome?: boolean;
 }
 
+interface MedicineSchedule {
+  id: string;
+  medicineName: string;
+  medicineType: string;
+  disease: string;
+  medicineForm: string;
+  dosageAmount: string;
+  dosageUnit: string;
+  spoonSize?: string;
+  notes: string;
+  usageTime: string;
+  timesPerDay: number;
+  alarmTimes: (string | Date)[];
+  mustFinish: boolean;
+  startDate: string | Date;
+  endDate: string | Date;
+  medicineImage?: string;
+}
+
 export default function HomePage() {
   const router = useRouter();
   const [darkMode, setDarkMode] = useState(false);
@@ -44,6 +64,10 @@ export default function HomePage() {
   // State untuk health data
   const [healthCondition, setHealthCondition] = useState<"healthy" | "sick" | null>(null);
   const [healthReminders, setHealthReminders] = useState<HealthTip[]>([]);
+  
+  // State untuk medicine reminders
+  const [medicineSchedules, setMedicineSchedules] = useState<MedicineSchedule[]>([]);
+  const [loadingMedicine, setLoadingMedicine] = useState(true);
 
   const toggleDarkMode = () => setDarkMode((v) => !v);
 
@@ -75,6 +99,65 @@ export default function HomePage() {
     if (temp > 15) return { icon: '🧥', text: 'Jaket tipis' };
     return { icon: '🧥', text: 'Jaket tebal & syal' };
   };
+
+  // Get next medicine reminder
+  const getNextMedicineReminder = () => {
+    if (medicineSchedules.length === 0) return null;
+    
+    const now = new Date();
+    const currentTime = now.getHours() * 60 + now.getMinutes();
+    
+    let nextReminder = null;
+    let minTimeDiff = Infinity;
+    
+    for (const schedule of medicineSchedules) {
+      // Check if schedule is still active
+      const endDate = new Date(schedule.endDate);
+      if (endDate < now) continue;
+      
+      for (const alarmTime of schedule.alarmTimes) {
+        const alarm = new Date(alarmTime);
+        const alarmMinutes = alarm.getHours() * 60 + alarm.getMinutes();
+        
+        // Calculate time difference (handle next day)
+        let timeDiff = alarmMinutes - currentTime;
+        if (timeDiff < 0) timeDiff += 24 * 60; // Add 24 hours if it's tomorrow
+        
+        if (timeDiff < minTimeDiff) {
+          minTimeDiff = timeDiff;
+          nextReminder = {
+            medicine: schedule.medicineName,
+            time: alarm.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            dosage: `${schedule.dosageAmount} ${schedule.dosageUnit}`,
+            isToday: timeDiff < 24 * 60
+          };
+        }
+      }
+    }
+    
+    return nextReminder;
+  };
+
+  // Load medicine schedules
+  useEffect(() => {
+    const loadMedicineSchedules = async () => {
+      try {
+        setLoadingMedicine(true);
+        const schedules = await getAllSchedules();
+        setMedicineSchedules(schedules);
+      } catch (error) {
+        console.error('Error loading medicine schedules:', error);
+      } finally {
+        setLoadingMedicine(false);
+      }
+    };
+
+    loadMedicineSchedules();
+    
+    // Refresh medicine schedules periodically
+    const interval = setInterval(loadMedicineSchedules, 30000); // Every 30 seconds
+    return () => clearInterval(interval);
+  }, []);
 
   // Load health data
   useEffect(() => {
@@ -169,6 +252,7 @@ export default function HomePage() {
   };
 
   const greeting = getGreetingMessage();
+  const nextMedicineReminder = getNextMedicineReminder();
 
   return (
     <ScrollView style={[styles.container, darkMode && styles.darkContainer]}>
@@ -224,6 +308,76 @@ export default function HomePage() {
           </LansiaText>
         </View>
       )}
+
+      {/* Medicine Reminder Card */}
+      {!loadingMedicine && medicineSchedules.length > 0 && (
+  <View>
+    <LansiaText style={[styles.sectionTitle, darkMode && styles.darkText]}>
+      Pengingat Obat Hari Ini
+    </LansiaText>
+
+    {medicineSchedules
+      .filter((schedule) => {
+        const today = new Date();
+        const start = new Date(schedule.startDate);
+        const end = new Date(schedule.endDate);
+
+        // cek apakah hari ini dalam rentang start–end
+        const inDateRange = today >= start && today <= end;
+
+        // cek apakah masih ada alarm di hari ini
+        const hasTodayAlarm =
+          Array.isArray(schedule.alarmTimes) &&
+          schedule.alarmTimes.some((t) => {
+            const alarmDate = new Date(t);
+            return (
+              alarmDate.toDateString() === today.toDateString() // alarm di hari yang sama
+            );
+          });
+
+        return inDateRange && hasTodayAlarm;
+      })
+      .map((schedule) => (
+        <Pressable
+          key={schedule.id}
+          style={[
+            styles.medicineReminderCard,
+            darkMode && styles.darkMedicineReminderCard,
+          ]}
+          onPress={() => router.push("/medicine")}
+        >
+          <View style={styles.reminderHeader}>
+            <View
+              style={[styles.reminderIconContainer, { backgroundColor: "#007AFF" }]}
+            >
+              <LansiaText style={styles.reminderIcon}>💊</LansiaText>
+            </View>
+            <View style={styles.reminderContent}>
+              <LansiaText style={[styles.reminderTitle, darkMode && styles.darkText]}>
+                {schedule.medicineName}
+              </LansiaText>
+              <LansiaText style={[styles.reminderText, darkMode && styles.darkSubText]}>
+                {schedule.dosageAmount} {schedule.dosageUnit} •{" "}
+                {Array.isArray(schedule.alarmTimes) && schedule.alarmTimes.length > 0
+                  ? schedule.alarmTimes
+                      .map((t) =>
+                        new Date(t).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      )
+                      .join(", ")
+                  : "-"}
+              </LansiaText>
+            </View>
+            <View style={styles.reminderBadge}>
+              <LansiaText style={styles.reminderBadgeText}>Hari ini</LansiaText>
+            </View>
+          </View>
+        </Pressable>
+      ))}
+  </View>
+)}
 
       {/* Weather Card - iOS Modern Design */}
       <View style={[styles.weatherCard, darkMode && styles.darkWeatherCard]}>
@@ -317,76 +471,76 @@ export default function HomePage() {
         </View>
       )}
 
-     {/* Default Daily Reminder Card jika tidak ada health reminders */}
-{healthReminders.length === 0 && (
-  <View
-    style={[
-      styles.reminderCard,
-      darkMode && styles.darkReminderCard,
-      {
-        borderRadius: 16,
-        padding: 16,
-        shadowColor: '#000',
-        shadowOpacity: 0.1,
-        shadowOffset: { width: 0, height: 4 },
-        shadowRadius: 6,
-        elevation: 3,
-      },
-    ]}
-  >
-    <View style={styles.reminderHeader}>
-      {/* Ikon Lingkaran */}
-      <View
-        style={[
-          styles.reminderIconContainer,
-          { backgroundColor: darkMode ? '#444' : '#E3F2FD', borderRadius: 30, padding: 12 },
-        ]}
-      >
-        <LansiaText style={{ fontSize: 22 }}>🕙</LansiaText>
-      </View>
-
-      {/* Konten */}
-      <View style={[styles.reminderContent, { marginLeft: 12 }]}>
-        <LansiaText
+      {/* Default Daily Reminder Card jika tidak ada health reminders dan tidak ada medicine reminder */}
+      {healthReminders.length === 0 && !nextMedicineReminder && !loadingMedicine && (
+        <View
           style={[
-            styles.reminderTitle,
-            darkMode && styles.darkText,
-            { fontWeight: '600', fontSize: 16 },
+            styles.reminderCard,
+            darkMode && styles.darkReminderCard,
+            {
+              borderRadius: 16,
+              padding: 16,
+              shadowColor: '#000',
+              shadowOpacity: 0.1,
+              shadowOffset: { width: 0, height: 4 },
+              shadowRadius: 6,
+              elevation: 3,
+            },
           ]}
         >
-          Pengingat Hari Ini
-        </LansiaText>
-        <LansiaText
-          style={[
-            styles.reminderText,
-            darkMode && styles.darkSubText,
-            { fontSize: 13, marginTop: 2 },
-          ]}
-        >
-          Belum ada pengingat. Tambahkan di halaman Kesehatan 
-        </LansiaText>
-      </View>
+          <View style={styles.reminderHeader}>
+            {/* Ikon Lingkaran */}
+            <View
+              style={[
+                styles.reminderIconContainer,
+                { backgroundColor: darkMode ? '#444' : '#E3F2FD', borderRadius: 30, padding: 12 },
+              ]}
+            >
+              <LansiaText style={{ fontSize: 22 }}>🕙</LansiaText>
+            </View>
 
-      {/* Badge */}
-      <View
-        style={[
-          styles.reminderBadge,
-          {
-            backgroundColor: darkMode ? '#F48FB1' : '#42A5F5',
-            borderRadius: 12,
-            paddingHorizontal: 8,
-            paddingVertical: 2,
-            marginLeft: 'auto',
-          },
-        ]}
-      >
-        <LansiaText style={[styles.reminderBadgeText, { color: '#fff', fontWeight: '600' }]}>
-          !
-        </LansiaText>
-      </View>
-    </View>
-  </View>
-)}
+            {/* Konten */}
+            <View style={[styles.reminderContent, { marginLeft: 12 }]}>
+              <LansiaText
+                style={[
+                  styles.reminderTitle,
+                  darkMode && styles.darkText,
+                  { fontWeight: '600', fontSize: 16 },
+                ]}
+              >
+                Pengingat Hari Ini
+              </LansiaText>
+              <LansiaText
+                style={[
+                  styles.reminderText,
+                  darkMode && styles.darkSubText,
+                  { fontSize: 13, marginTop: 2 },
+                ]}
+              >
+                Belum ada pengingat. Tambahkan di halaman Kesehatan 
+              </LansiaText>
+            </View>
+
+            {/* Badge */}
+            <View
+              style={[
+                styles.reminderBadge,
+                {
+                  backgroundColor: darkMode ? '#F48FB1' : '#42A5F5',
+                  borderRadius: 12,
+                  paddingHorizontal: 8,
+                  paddingVertical: 2,
+                  marginLeft: 'auto',
+                },
+              ]}
+            >
+              <LansiaText style={[styles.reminderBadgeText, { color: '#fff', fontWeight: '600' }]}>
+                !
+              </LansiaText>
+            </View>
+          </View>
+        </View>
+      )}
 
       {/* Menu Grid */}
       <View style={styles.menuContainer}>
@@ -492,6 +646,31 @@ const styles = StyleSheet.create({
   greetingSubtitle: {
     fontSize: 14,
     fontWeight: '400',
+  },
+
+  // Medicine Reminder Card Styles
+  medicineReminderCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
+    borderLeftWidth: 4,
+    borderLeftColor: '#007AFF',
+  },
+  darkMedicineReminderCard: {
+    backgroundColor: '#1C1C1E',
+    borderLeftColor: '#007AFF',
+  },
+  medicineNameText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1D1D1F',
+    marginBottom: 2,
   },
 
   // Section Title
@@ -664,12 +843,10 @@ const styles = StyleSheet.create({
     fontWeight: '400',
   },
   reminderBadge: {
-    width: 24,
-    height: 24,
+    backgroundColor: '#FF9500',
     borderRadius: 12,
-    backgroundColor: '#FF3B30',
-    alignItems: 'center',
-    justifyContent: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
   },
   reminderBadgeText: {
     fontSize: 12,

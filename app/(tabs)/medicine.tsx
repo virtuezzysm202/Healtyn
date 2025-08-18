@@ -1,10 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
-import { getAllSchedules } from '../../app/services/medicineStorage';
+import { deleteSchedule, getAllSchedules } from '../../app/services/medicineStorage';
 
 import {
   ActivityIndicator,
+  Alert,
   Dimensions,
   FlatList,
   Image,
@@ -15,7 +16,6 @@ import {
 } from "react-native";
 
 const { width } = Dimensions.get("window");
-
 
 interface MedicineSchedule {
   id: string;
@@ -29,22 +29,23 @@ interface MedicineSchedule {
   notes: string;
   usageTime: string;
   timesPerDay: number;
-  alarmTimes: (string | Date)[]; // ubah ke union type untuk fleksibilitas
+  alarmTimes: (string | Date)[]; 
   mustFinish: boolean;
-  startDate: string | Date;      // ubah ke union type
-  endDate: string | Date;        // ubah ke union type
+  startDate: string | Date;      
+  endDate: string | Date;        
   medicineImage?: string;
 }
+
 export default function MedicineScreen() {
   const router = useRouter();
   const [savedSchedules, setSavedSchedules] = useState<MedicineSchedule[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   
   const navigateToCreateSchedule = () => {
-    router.push('/(tabs)/CreateMedicineSchedule'); // sesuaikan dengan nama file & folder
+    router.push('/(tabs)/CreateMedicineSchedule'); 
   };
 
-  
   // Load schedules from AsyncStorage when screen is focused
   const loadSchedules = async () => {
     try {
@@ -67,12 +68,50 @@ export default function MedicineScreen() {
     }
   };
 
+  // Handle delete schedule with confirmation
+  const handleDeleteSchedule = (schedule: MedicineSchedule) => {
+    Alert.alert(
+      "Hapus Jadwal Obat",
+      `Apakah Anda yakin ingin menghapus jadwal obat "${schedule.medicineName}"? Tindakan ini tidak dapat dibatalkan.`,
+      [
+        {
+          text: "Batal",
+          style: "cancel",
+        },
+        {
+          text: "Hapus",
+          style: "destructive",
+          onPress: () => confirmDeleteSchedule(schedule.id),
+        },
+      ]
+    );
+  };
+
+  // Actually delete the schedule
+  const confirmDeleteSchedule = async (scheduleId: string) => {
+    try {
+      setDeletingId(scheduleId);
+      await deleteSchedule(scheduleId); // Panggil function delete dari storage
+      
+      // Update local state
+      setSavedSchedules(prevSchedules => 
+        prevSchedules.filter(schedule => schedule.id !== scheduleId)
+      );
+      
+      Alert.alert("Berhasil", "Jadwal obat berhasil dihapus.");
+    } catch (error) {
+      console.error("Error deleting schedule:", error);
+      Alert.alert("Error", "Gagal menghapus jadwal obat. Silakan coba lagi.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   useFocusEffect(
     useCallback(() => {
       loadSchedules();
     }, [])
   );
-
 
   const renderScheduleCard = ({ item }: { item: MedicineSchedule }) => {
     // Pastikan alarmTimes adalah Date objects
@@ -80,16 +119,36 @@ export default function MedicineScreen() {
       time instanceof Date ? time : new Date(time)
     );
     
+    const isDeleting = deletingId === item.id;
+    
     return (
       <View style={styles.scheduleCard}>
         {item.medicineImage && (
           <Image source={{ uri: item.medicineImage }} style={styles.scheduleImage} />
         )}
         <View style={styles.scheduleContent}>
-          <Text style={styles.scheduleName}>{item.medicineName}</Text>
-          <Text style={styles.scheduleType}>
-            {item.medicineType} • {item.disease}
-          </Text>
+          <View style={styles.scheduleHeader}>
+            <View style={styles.scheduleHeaderLeft}>
+              <Text style={styles.scheduleName}>{item.medicineName}</Text>
+              <Text style={styles.scheduleType}>
+                {item.medicineType} • {item.disease}
+              </Text>
+            </View>
+            
+            {/* Delete Button */}
+            <TouchableOpacity
+              style={[styles.deleteButton, isDeleting && styles.deleteButtonDisabled]}
+              onPress={() => handleDeleteSchedule(item)}
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <ActivityIndicator size="small" color="#FF3B30" />
+              ) : (
+                <Ionicons name="trash-outline" size={20} color="#FF3B30" />
+              )}
+            </TouchableOpacity>
+          </View>
+          
           <Text style={styles.scheduleDosage}>
             {item.dosageAmount} {item.dosageUnit} • {item.timesPerDay}x sehari
           </Text>
@@ -242,8 +301,26 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 12,
   },
+  scheduleHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 4,
+  },
+  scheduleHeaderLeft: {
+    flex: 1,
+  },
   scheduleName: { fontSize: 18, fontWeight: "700", marginBottom: 4 },
   scheduleType: { fontSize: 14, color: "#666", marginBottom: 4 },
+  deleteButton: {
+    padding: 8,
+    borderRadius: 6,
+    backgroundColor: "#FFEBEE",
+    marginLeft: 8,
+  },
+  deleteButtonDisabled: {
+    opacity: 0.6,
+  },
   scheduleDosage: { fontSize: 14, marginBottom: 4 },
   scheduleTime: { fontSize: 14, marginBottom: 4, color: "#007AFF" },
   scheduleAlarms: { flexDirection: "row", marginBottom: 8 },
