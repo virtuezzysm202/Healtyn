@@ -20,6 +20,7 @@ const { width } = Dimensions.get("window");
 interface MedicineSchedule {
   id: string;
   medicineName: string;
+  doctorName?: string;
   medicineType: string;
   disease: string;
   medicineForm: string;
@@ -68,11 +69,13 @@ export default function MedicineScreen() {
     }
   };
 
-  // Handle delete schedule with confirmation
+  // Handle delete schedule 
   const handleDeleteSchedule = (schedule: MedicineSchedule) => {
+    const doctorInfo = schedule.doctorName ? ` (diresepkan oleh Dr. ${schedule.doctorName})` : '';
+    
     Alert.alert(
       "Hapus Jadwal Obat",
-      `Apakah Anda yakin ingin menghapus jadwal obat "${schedule.medicineName}"? Tindakan ini tidak dapat dibatalkan.`,
+      `Apakah Anda yakin ingin menghapus jadwal obat "${schedule.medicineName}"${doctorInfo}? Tindakan ini tidak dapat dibatalkan.`,
       [
         {
           text: "Batal",
@@ -133,6 +136,11 @@ export default function MedicineScreen() {
               <Text style={styles.scheduleType}>
                 {item.medicineType} • {item.disease}
               </Text>
+              {item.doctorName && (
+              <Text style={styles.scheduleDoctorName}>
+                 Dr. {item.doctorName}
+              </Text>
+              )}
             </View>
             
             {/* Delete Button */}
@@ -320,6 +328,12 @@ const styles = StyleSheet.create({
   },
   deleteButtonDisabled: {
     opacity: 0.6,
+  },
+    scheduleDoctorName: { 
+    fontSize: 13, 
+    color: "#34C759", 
+    marginBottom: 4,
+    fontWeight: "500"
   },
   scheduleDosage: { fontSize: 14, marginBottom: 4 },
   scheduleTime: { fontSize: 14, marginBottom: 4, color: "#007AFF" },

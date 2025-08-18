@@ -19,6 +19,7 @@ export interface MedicineSchedule {
   startDate: string;    // ISO string
   endDate: string;      // ISO string
   medicineImage?: string;
+  doctorName?: string; 
 }
 
 export async function getAllSchedules(): Promise<MedicineSchedule[]> {

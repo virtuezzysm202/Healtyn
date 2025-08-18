@@ -3,7 +3,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import * as ImagePicker from "expo-image-picker";
 import * as Notifications from "expo-notifications";
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
+
 
 import {
   Alert,
@@ -50,6 +52,7 @@ interface MedicineSchedule {
   startDate: Date;
   endDate: Date;
   medicineImage?: string;
+  doctorName?: string;
 }
 
 interface CreateMedicineScheduleProps {
@@ -69,6 +72,11 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
   const [timesPerDay, setTimesPerDay] = useState(1);
   const [mustFinish, setMustFinish] = useState(false);
   const [startDate, setStartDate] = useState(new Date());
+  const [otherMedicineType, setOtherMedicineType] = useState("");
+  const [otherDisease, setOtherDisease] = useState("");
+  const [doctorName, setDoctorName] = useState("");
+  const router = useRouter();
+
   const [endDate, setEndDate] = useState(() => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 7); // Default 7 days from today
@@ -139,6 +147,7 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
     setMedicineImage(null);
     setAlarmTimes([new Date()]);
     setStartDate(new Date());
+    setDoctorName("");
   };
 
   useEffect(() => {
@@ -247,7 +256,13 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
   const saveMedicineSchedule = async () => {
     if (!medicineName.trim()) return Alert.alert("Error", "Nama obat wajib diisi!");
     if (!medicineType.trim()) return Alert.alert("Error", "Jenis obat wajib diisi!");
+    if (medicineType === "lainnya" && !otherMedicineType.trim()) {
+      return Alert.alert("Error", "Jenis obat lainnya wajib diisi!");
+    }
     if (!disease.trim()) return Alert.alert("Error", "Penyakit wajib diisi!");
+    if (disease === "lainnya" && !otherDisease.trim()) {
+      return Alert.alert("Error", "Penyakit lainnya wajib diisi!");
+    }
     if (!medicineForm.trim()) return Alert.alert("Error", "Bentuk obat wajib diisi!");
     if (!dosageAmount.trim()) return Alert.alert("Error", "Dosis wajib diisi!");
     if (!usageTime.trim()) return Alert.alert("Error", "Waktu minum/pakai wajib diisi!");
@@ -260,8 +275,8 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
     const newSchedule: MedicineSchedule = {
       id: Date.now().toString(),
       medicineName,
-      medicineType,
-      disease,
+      medicineType: medicineType === "lainnya" ? otherMedicineType : medicineType,
+      disease: disease === "lainnya" ? otherDisease : disease,
       medicineForm,
       dosageAmount,
       dosageUnit,
@@ -274,7 +289,9 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
       startDate: new Date(startDate),
       endDate: new Date(endDate),
       medicineImage: medicineImage || undefined,
+      doctorName: doctorName.trim() || undefined,
     };
+    
 
     try {
       const existingSchedules = await AsyncStorage.getItem("medicineSchedules");
@@ -288,7 +305,7 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
           text: "OK",
           onPress: () => {
             resetForm();
-            navigation.goBack();
+            router.back();
           },
         },
       ]);
@@ -304,24 +321,28 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
       Alert.alert("Izin Diperlukan", "Mohon aktifkan notifikasi untuk pengingat obat.");
       return;
     }
-
+  
     try {
       for (let i = 0; i < schedule.alarmTimes.length; i++) {
-        const time = schedule.alarmTimes[i];
+        const alarmTime = schedule.alarmTimes[i];
+        
         await Notifications.scheduleNotificationAsync({
           content: {
             title: "Waktu Minum Obat!",
             body: `Saatnya minum ${schedule.medicineName} - ${schedule.dosageAmount} ${schedule.dosageUnit}`,
             data: { medicineId: schedule.id },
           },
-          trigger: { date: time },
+          trigger: {
+            hour: alarmTime.getHours(),
+            minute: alarmTime.getMinutes(),
+            repeats: true,
+          },
         });
       }
     } catch (error) {
       console.error("Error scheduling notifications:", error);
     }
   };
-
   
   const renderDosageInput = () => {
     if (medicineForm === "tablet" || medicineForm === "kapsul") {
@@ -527,6 +548,7 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
   );
 
   return (
+    
     <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: "#F5F5F5" }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -547,22 +569,62 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
         </View>
 
         <View style={styles.section}>
-          <AdaptivePicker
+        <Text style={styles.sectionLabel}>Nama Dokter (Opsional)</Text>
+        <View style={styles.inputContainer}>
+        <Ionicons name="person" size={20} color="#007AFF" />
+        <TextInput
+            style={styles.input}
+            placeholder="Masukkan nama dokter yang meresepkan"
+            value={doctorName}
+            onChangeText={setDoctorName}
+            placeholderTextColor="#C7C7CC"
+            />
+          </View>
+        </View>
+        
+
+        <View style={styles.section}>
+        <AdaptivePicker
             label="Jenis Obat"
             selectedValue={medicineType}
             onValueChange={setMedicineType}
             items={medicineTypes}
           />
+            {medicineType === "lainnya" && (
+            <View style={styles.inputContainer}>
+            <Ionicons name="create" size={20} color="#007AFF" />
+            <TextInput
+                style={styles.input}
+                placeholder="Sebutkan jenis obat lainnya"
+                value={otherMedicineType}
+                onChangeText={setOtherMedicineType}
+                placeholderTextColor="#C7C7CC"
+          />
+          </View>
+          )}
         </View>
 
+
         <View style={styles.section}>
-          <AdaptivePicker
-            label="Penyakit"
-            selectedValue={disease}
-            onValueChange={setDisease}
-            items={diseases}
-          />
-        </View>
+            <AdaptivePicker
+              label="Penyakit"
+              selectedValue={disease}
+              onValueChange={setDisease}
+              items={diseases}
+            />
+            {disease === "lainnya" && (
+              <View style={styles.inputContainer}>
+              <Ionicons name="create" size={20} color="#007AFF" />
+              <TextInput
+                  style={styles.input}
+                  placeholder="Sebutkan penyakit lainnya"
+                  value={otherDisease}
+                  onChangeText={setOtherDisease}
+                  placeholderTextColor="#C7C7CC"
+            />
+            </View>
+            )}
+          </View>
 
         <View style={styles.section}>
           <AdaptivePicker
