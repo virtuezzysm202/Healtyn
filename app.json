@@ -11,7 +11,8 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSCameraUsageDescription": "Aplikasi ini membutuhkan akses kamera untuk memindai teks dari buku."
+        "NSCameraUsageDescription": "Aplikasi ini membutuhkan akses kamera untuk memindai teks dari buku.",
+        "NSPhotoLibraryUsageDescription": "Aplikasi ini membutuhkan akses galeri untuk memilih gambar yang akan dipindai."
       }
     },
     "android": {
@@ -21,8 +22,10 @@
       },
       "edgeToEdgeEnabled": true,
       "permissions": [
-        "CAMERA",
-        "CAMERA"
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_IMAGES"
       ],
       "package": "com.anonymous.lansiahelper"
     },
@@ -40,6 +43,13 @@
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Aplikasi memerlukan akses ke galeri untuk memilih gambar yang akan dipindai.",
+          "cameraPermission": "Aplikasi memerlukan akses ke kamera untuk mengambil foto dan memindai teks."
         }
       ]
     ],
