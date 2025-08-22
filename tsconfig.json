@@ -2,6 +2,10 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "module": "esnext",
     "paths": {
       "@/*": ["./*"]
     }
@@ -11,6 +15,6 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts",
-    "@types/**/*.d.ts"  
+    "@types/**/*.d.ts"
   ]
 }

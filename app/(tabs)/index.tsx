@@ -1,8 +1,9 @@
-// app/(tabs)/index.tsx
 import { Feather, FontAwesome5 } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
+import { useTranslation } from "../../hooks/useTranslation";
+
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -56,6 +57,7 @@ interface MedicineSchedule {
 
 export default function HomePage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [darkMode, setDarkMode] = useState(false);
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loadingWeather, setLoadingWeather] = useState(true);
@@ -72,12 +74,12 @@ export default function HomePage() {
   const toggleDarkMode = () => setDarkMode((v) => !v);
 
   const menuItems: MenuItem[] = [
-    { icon: 'medkit', label: 'Pengingat Obat', route: '/medicine' },
-    { icon: 'book', label: 'Pindai Buku', route: '/scan' },
-    { icon: 'user-md', label: 'Hubungi Dokter', route: '/call-doctor' },
-    { icon: 'users', label: 'Hubungi Keluarga', route: '/family' },
-    { icon: 'heartbeat', label: 'Kesehatan', route: '/health' },
-    { icon: 'music', label: 'Musik Relaksasi & Meditasi', route: '/relax-music' },
+    { icon: 'medkit', label: t('home.menu.medicineReminder'), route: '/medicine' },
+    { icon: 'book', label: t('home.menu.scanBook'), route: '/scan' },
+    { icon: 'user-md', label: t('home.menu.callDoctor'), route: '/call-doctor' },
+    { icon: 'users', label: t('home.menu.callFamily'), route: '/family' },
+    { icon: 'heartbeat', label: t('home.menu.health'), route: '/health' },
+    { icon: 'music', label: t('home.menu.relaxMusic'), route: '/relax-music' },
   ];
 
   const mapIconToEmoji = (icon?: string) => {
@@ -93,11 +95,11 @@ export default function HomePage() {
   };
 
   const getOutfitRecommendation = (temp: number) => {
-    if (temp > 30) return { icon: '🩳', text: 'Pakaian tipis & topi' };
-    if (temp > 25) return { icon: '👕', text: 'Kaos & celana panjang' };
-    if (temp > 20) return { icon: '👔', text: 'Kemeja & celana panjang' };
-    if (temp > 15) return { icon: '🧥', text: 'Jaket tipis' };
-    return { icon: '🧥', text: 'Jaket tebal & syal' };
+    if (temp > 30) return { icon: '🩳', text: t('home.weather.outfit.hot') };
+    if (temp > 25) return { icon: '👕', text: t('home.weather.outfit.warm') };
+    if (temp > 20) return { icon: '👔', text: t('home.weather.outfit.mild') };
+    if (temp > 15) return { icon: '🧥', text: t('home.weather.outfit.cool') };
+    return { icon: '🧥', text: t('home.weather.outfit.cold') };
   };
 
   // Get next medicine reminder
@@ -111,7 +113,7 @@ export default function HomePage() {
     let minTimeDiff = Infinity;
     
     for (const schedule of medicineSchedules) {
-      // Check if schedule is still active
+
       const endDate = new Date(schedule.endDate);
       if (endDate < now) continue;
       
@@ -119,9 +121,9 @@ export default function HomePage() {
         const alarm = new Date(alarmTime);
         const alarmMinutes = alarm.getHours() * 60 + alarm.getMinutes();
         
-        // Calculate time difference (handle next day)
+        
         let timeDiff = alarmMinutes - currentTime;
-        if (timeDiff < 0) timeDiff += 24 * 60; // Add 24 hours if it's tomorrow
+        if (timeDiff < 0) timeDiff += 24 * 60; 
         
         if (timeDiff < minTimeDiff) {
           minTimeDiff = timeDiff;
@@ -154,7 +156,7 @@ export default function HomePage() {
 
     loadMedicineSchedules();
     
-    // Refresh medicine schedules periodically
+    // Refresh medicine schedules
     const interval = setInterval(loadMedicineSchedules, 30000); // Every 30 seconds
     return () => clearInterval(interval);
   }, []);
@@ -190,7 +192,7 @@ export default function HomePage() {
 
     loadHealthData();
     
-    // Listen for changes (optional: you can add this if you want real-time updates)
+   
     const interval = setInterval(loadHealthData, 5000); // Check every 5 seconds
     return () => clearInterval(interval);
   }, []);
@@ -200,13 +202,13 @@ export default function HomePage() {
     (async () => {
       try {
         if (!API_KEY) {
-          setWeatherError('API key OpenWeather tidak ditemukan di .env');
+          setWeatherError(t('home.weather.apiError'));
           setLoadingWeather(false);
           return;
         }
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== 'granted') {
-          setWeatherError('Izin lokasi ditolak');
+          setWeatherError(t('home.weather.permissionError'));
           setLoadingWeather(false);
           return;
         }
@@ -221,7 +223,7 @@ export default function HomePage() {
         const data: WeatherData = await res.json();
         if (mounted) setWeather(data);
       } catch (err: any) {
-        setWeatherError(err.message ?? 'Gagal memuat cuaca');
+        setWeatherError(err.message ?? t('home.weather.generalError'));
       } finally {
         if (mounted) setLoadingWeather(false);
       }
@@ -236,15 +238,15 @@ export default function HomePage() {
     
     if (healthCondition === 'sick') {
       return {
-        title: '🤗 Semoga Cepat Sembuh!',
-        subtitle: 'Jangan lupa istirahat yang cukup ya',
+        title: t('home.greeting.sickTitle'),
+        subtitle: t('home.greeting.sickSubtitle'),
         bgColor: '#FFE5E5',
         textColor: '#D32F2F'
       };
     } else {
       return {
-        title: '😊 Tetap Jaga Kesehatan!',
-        subtitle: 'Hari yang indah untuk hidup sehat',
+        title: t('home.greeting.healthyTitle'),
+        subtitle: t('home.greeting.healthySubtitle'),
         bgColor: '#E8F5E8',
         textColor: '#2E7D32'
       };
@@ -260,10 +262,10 @@ export default function HomePage() {
       <View style={styles.header}>
         <View>
           <LansiaText style={[styles.appName, darkMode && styles.darkText]}>
-            Lansia Helper
+            {t('home.appName')}
           </LansiaText>
           <LansiaText style={[styles.appSubtitle, darkMode && styles.darkSubText]}>
-            Pendamping kesehatan harian
+            {t('home.appSubtitle')}
           </LansiaText>
         </View>
         <View style={styles.rightHeader}>
@@ -311,73 +313,75 @@ export default function HomePage() {
 
       {/* Medicine Reminder Card */}
       {!loadingMedicine && medicineSchedules.length > 0 && (
-  <View>
-    <LansiaText style={[styles.sectionTitle, darkMode && styles.darkText]}>
-      Pengingat Obat Hari Ini
-    </LansiaText>
+        <View>
+          <LansiaText style={[styles.sectionTitle, darkMode && styles.darkText]}>
+            {t('home.medicineReminder.title')}
+          </LansiaText>
 
-    {medicineSchedules
-      .filter((schedule) => {
-        const today = new Date();
-        const start = new Date(schedule.startDate);
-        const end = new Date(schedule.endDate);
+          {medicineSchedules
+            .filter((schedule) => {
+              const today = new Date();
+              const start = new Date(schedule.startDate);
+              const end = new Date(schedule.endDate);
 
-        // cek apakah hari ini dalam rentang start–end
-        const inDateRange = today >= start && today <= end;
+              // cek apakah hari ini dalam rentang start–end
+              const inDateRange = today >= start && today <= end;
 
-        // cek apakah masih ada alarm di hari ini
-        const hasTodayAlarm =
-          Array.isArray(schedule.alarmTimes) &&
-          schedule.alarmTimes.some((t) => {
-            const alarmDate = new Date(t);
-            return (
-              alarmDate.toDateString() === today.toDateString() // alarm di hari yang sama
-            );
-          });
+              // cek apakah masih ada alarm di hari ini
+              const hasTodayAlarm =
+                Array.isArray(schedule.alarmTimes) &&
+                schedule.alarmTimes.some((t) => {
+                  const alarmDate = new Date(t);
+                  return (
+                    alarmDate.toDateString() === today.toDateString() // alarm di hari yang sama
+                  );
+                });
 
-        return inDateRange && hasTodayAlarm;
-      })
-      .map((schedule) => (
-        <Pressable
-          key={schedule.id}
-          style={[
-            styles.medicineReminderCard,
-            darkMode && styles.darkMedicineReminderCard,
-          ]}
-          onPress={() => router.push("/medicine")}
-        >
-          <View style={styles.reminderHeader}>
-            <View
-              style={[styles.reminderIconContainer, { backgroundColor: "#007AFF" }]}
-            >
-              <LansiaText style={styles.reminderIcon}>💊</LansiaText>
-            </View>
-            <View style={styles.reminderContent}>
-              <LansiaText style={[styles.reminderTitle, darkMode && styles.darkText]}>
-                {schedule.medicineName}
-              </LansiaText>
-              <LansiaText style={[styles.reminderText, darkMode && styles.darkSubText]}>
-                {schedule.dosageAmount} {schedule.dosageUnit} •{" "}
-                {Array.isArray(schedule.alarmTimes) && schedule.alarmTimes.length > 0
-                  ? schedule.alarmTimes
-                      .map((t) =>
-                        new Date(t).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })
-                      )
-                      .join(", ")
-                  : "-"}
-              </LansiaText>
-            </View>
-            <View style={styles.reminderBadge}>
-              <LansiaText style={styles.reminderBadgeText}>Hari ini</LansiaText>
-            </View>
-          </View>
-        </Pressable>
-      ))}
-  </View>
-)}
+              return inDateRange && hasTodayAlarm;
+            })
+            .map((schedule) => (
+              <Pressable
+                key={schedule.id}
+                style={[
+                  styles.medicineReminderCard,
+                  darkMode && styles.darkMedicineReminderCard,
+                ]}
+                onPress={() => router.push("/medicine")}
+              >
+                <View style={styles.reminderHeader}>
+                  <View
+                    style={[styles.reminderIconContainer, { backgroundColor: "#007AFF" }]}
+                  >
+                    <LansiaText style={styles.reminderIcon}>💊</LansiaText>
+                  </View>
+                  <View style={styles.reminderContent}>
+                    <LansiaText style={[styles.reminderTitle, darkMode && styles.darkText]}>
+                      {schedule.medicineName}
+                    </LansiaText>
+                    <LansiaText style={[styles.reminderText, darkMode && styles.darkSubText]}>
+                      {schedule.dosageAmount} {schedule.dosageUnit} •{" "}
+                      {Array.isArray(schedule.alarmTimes) && schedule.alarmTimes.length > 0
+                        ? schedule.alarmTimes
+                            .map((t) =>
+                              new Date(t).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })
+                            )
+                            .join(", ")
+                        : "-"}
+                    </LansiaText>
+                  </View>
+                  <View style={styles.reminderBadge}>
+                    <LansiaText style={styles.reminderBadgeText}>
+                      {t('home.reminders.today')}
+                    </LansiaText>
+                  </View>
+                </View>
+              </Pressable>
+            ))}
+        </View>
+      )}
 
       {/* Weather Card - iOS Modern Design */}
       <View style={[styles.weatherCard, darkMode && styles.darkWeatherCard]}>
@@ -385,7 +389,7 @@ export default function HomePage() {
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="small" color="#007AFF" />
             <LansiaText style={[styles.loadingText, darkMode && styles.darkText]}>
-              Memuat cuaca...
+              {t('home.weather.loading')}
             </LansiaText>
           </View>
         ) : weather ? (
@@ -399,7 +403,7 @@ export default function HomePage() {
               </View>
               <View style={styles.weatherInfo}>
                 <LansiaText style={[styles.locationText, darkMode && styles.darkText]}>
-                  📍 {weather.name ?? 'Lokasi Anda'}
+                  📍 {weather.name ?? t('home.weather.yourLocation')}
                 </LansiaText>
                 <LansiaText style={[styles.temperatureText, darkMode && styles.darkText]}>
                   {Math.round(weather.main.temp)}°
@@ -420,7 +424,7 @@ export default function HomePage() {
             <View style={styles.recommendationContainer}>
               <View style={styles.recommendationHeader}>
                 <LansiaText style={[styles.recommendationTitle, darkMode && styles.darkText]}>
-                  Rekomendasi Pakaian
+                  {t('home.weather.recommendationTitle')}
                 </LansiaText>
               </View>
               <View style={styles.outfitRow}>
@@ -439,7 +443,7 @@ export default function HomePage() {
           <View style={styles.errorContainer}>
             <LansiaText style={styles.errorIcon}>⚠️</LansiaText>
             <LansiaText style={[styles.errorText, darkMode && styles.darkText]}>
-              {weatherError ?? 'Gagal memuat cuaca'}
+              {weatherError ?? t('home.weather.generalError')}
             </LansiaText>
           </View>
         )}
@@ -449,17 +453,17 @@ export default function HomePage() {
       {healthReminders.length > 0 && (
         <View>
           <LansiaText style={[styles.sectionTitle, darkMode && styles.darkText]}>
-            Pengingat Kesehatan
+            {t('home.healthReminders.title')}
           </LansiaText>
           {healthReminders.map((reminder) => (
             <View key={reminder.id} style={[styles.reminderCard, darkMode && styles.darkReminderCard]}>
               <View style={styles.reminderHeader}>
                 <View style={styles.reminderIconContainer}>
-                  <LansiaText style={styles.reminderIcon}>💊</LansiaText>
+                  <LansiaText style={styles.reminderIcon}>💡</LansiaText>
                 </View>
                 <View style={styles.reminderContent}>
                   <LansiaText style={[styles.reminderTitle, darkMode && styles.darkText]}>
-                    Tips Kesehatan
+                    {t('home.healthReminders.tip')}
                   </LansiaText>
                   <LansiaText style={[styles.reminderText, darkMode && styles.darkSubText]}>
                     {reminder.tip}
@@ -508,7 +512,7 @@ export default function HomePage() {
                   { fontWeight: '600', fontSize: 16 },
                 ]}
               >
-                Pengingat Hari Ini
+                {t('home.reminders.dailyReminder')}
               </LansiaText>
               <LansiaText
                 style={[
@@ -517,7 +521,7 @@ export default function HomePage() {
                   { fontSize: 13, marginTop: 2 },
                 ]}
               >
-                Belum ada pengingat. Tambahkan di halaman Kesehatan 
+                {t('home.reminders.noReminders')}
               </LansiaText>
             </View>
 
@@ -902,3 +906,4 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
 });
+

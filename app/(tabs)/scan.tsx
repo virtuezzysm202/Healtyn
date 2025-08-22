@@ -1,225 +1,163 @@
-import * as ImagePicker from 'expo-image-picker';
-import React, { useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  Button,
-  Image,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useEffect, useState } from 'react';
+import { Alert, FlatList, Linking, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import i18n from '../../app/utils/i18n';
+import LansiaText from '../../components/ui/LansiaText';
 
-// Import library OCR baru
-import TextRecognition from '@react-native-ml-kit/text-recognition';
+export default function CallDoctorPage() {
+  const emergencyNumbers = [
+    { id: '1', label: '🚑 Ambulans 118/119', phone: 'tel:118' },
+    { id: '2', label: 'PMI Pusat (021-7992325)', phone: 'tel:0217992325' },
+  ]
 
-type TextBlock = { text: string };
+  const [favDoctors, setFavDoctors] = useState<{id: string, name: string, phone: string}[]>([])
+  const [newName, setNewName] = useState('')
+  const [newPhone, setNewPhone] = useState('')
 
-export default function ScanScreen() {
-  const [image, setImage] = useState<string | null>(null);
-  const [textBlocks, setTextBlocks] = useState<TextBlock[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-
+  // Load saved favorite doctors
   useEffect(() => {
-    (async () => {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert(
-          'Permission Required',
-          'Aplikasi memerlukan akses ke galeri untuk memilih gambar.'
-        );
-      }
-    })();
-  }, []);
-
-  const runOCR = async (uri: string) => {
-    // Jalankan OCR dengan library baru
-    const result = await TextRecognition.recognize(uri);
-    console.log('OCR Result:', result);
-
-    return result;
-  };
-
-  const pickImage = async () => {
-    try {
-      setIsLoading(true);
-      setTextBlocks([]);
-
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        quality: 0.8,
-        allowsEditing: true,
-        aspect: [4, 3],
-      });
-
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        const uri = result.assets[0].uri;
-        setImage(uri);
-
-        const ocrResult = await runOCR(uri);
-        let extracted: TextBlock[] = [];
-
-        if (ocrResult?.text) {
-          extracted = [{ text: ocrResult.text }];
-        }
-
-        if (extracted.length === 0) {
-          Alert.alert('No Text Found', 'Tidak ada teks yang terdeteksi dalam gambar.');
-        } else {
-          setTextBlocks(extracted);
-        }
-      }
-    } catch (error: any) {
-      console.error('OCR Error:', error);
-      Alert.alert('Error', `Gagal memproses gambar: ${error.message}`);
-    } finally {
-      setIsLoading(false);
+    const loadFav = async () => {
+      const data = await AsyncStorage.getItem('favDoctors')
+      if (data) setFavDoctors(JSON.parse(data))
     }
-  };
+    loadFav()
+  }, [])
 
-  const takePhoto = async () => {
-    try {
-      const { status } = await ImagePicker.requestCameraPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission Required', 'Aplikasi memerlukan akses ke kamera.');
-        return;
-      }
+  const saveFavDoctors = async (list: any) => {
+    setFavDoctors(list)
+    await AsyncStorage.setItem('favDoctors', JSON.stringify(list))
+  }
 
-      setIsLoading(true);
-      setTextBlocks([]);
-
-      const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        quality: 0.8,
-        allowsEditing: true,
-        aspect: [4, 3],
-      });
-
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        const uri = result.assets[0].uri;
-        setImage(uri);
-
-        const ocrResult = await runOCR(uri);
-        let extracted: TextBlock[] = [];
-
-        if (ocrResult?.text) {
-          extracted = [{ text: ocrResult.text }];
-        }
-
-        if (extracted.length > 0) {
-          setTextBlocks(extracted);
-        }
-      }
-    } catch (error: any) {
-      console.error('Camera OCR Error:', error);
-      Alert.alert('Error', `Gagal mengambil foto: ${error.message}`);
-    } finally {
-      setIsLoading(false);
+  const addDoctor = () => {
+    if (!newName || !newPhone) {
+      Alert.alert(
+        i18n.translate("callDoctor.alertIncompleteTitle"),
+        i18n.translate("callDoctor.alertIncompleteMessage")
+      )
+      return
     }
-  };
+    const newDoc = { id: Date.now().toString(), name: newName, phone: `tel:${newPhone}` }
+    const updated = [...favDoctors, newDoc]
+    saveFavDoctors(updated)
+    setNewName('')
+    setNewPhone('')
+  }
+
+  const handleCall = (phone: string) => {
+    Linking.openURL(phone).catch(() => {
+      Alert.alert(
+        i18n.translate("callDoctor.callErrorTitle"),
+        i18n.translate("callDoctor.callErrorMessage")
+      )
+    })
+  }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.platformInfo}>
-        Platform: {Platform.OS} | OCR: Native (@react-native-ml-kit/text-recognition)
-      </Text>
+    <View style={styles.container}>
+      <LansiaText style={styles.title}>
+        {i18n.translate("callDoctor.title")}
+      </LansiaText>
+      <LansiaText style={styles.desc}>
+        {i18n.translate("callDoctor.subtitle")}
+      </LansiaText>
 
-      <View style={styles.buttonContainer}>
-        <Button
-          title={isLoading ? 'Memproses...' : 'Pilih Gambar'}
-          onPress={pickImage}
-          disabled={isLoading}
-        />
-        {Platform.OS !== 'web' && (
-          <View style={styles.buttonSpacer}>
-            <Button
-              title="Ambil Foto"
-              onPress={takePhoto}
-              disabled={isLoading}
-            />
-          </View>
+      {/* Emergency Numbers */}
+      {emergencyNumbers.map(item => (
+        <Pressable key={item.id} style={styles.callButton} onPress={() => handleCall(item.phone)}>
+          <LansiaText style={styles.callText}>{item.label}</LansiaText>
+        </Pressable>
+      ))}
+
+      <LansiaText style={[styles.title, { fontSize: 22, marginTop: 30 }]}>
+        {i18n.translate("callDoctor.favoriteTitle")}
+      </LansiaText>
+
+      {/* List of saved doctors */}
+      <FlatList
+        data={favDoctors}
+        keyExtractor={item => item.id}
+        renderItem={({ item }) => (
+          <Pressable style={styles.callButton} onPress={() => handleCall(item.phone)}>
+            <LansiaText style={styles.callText}>
+              {item.name} ({item.phone.replace('tel:', '')})
+            </LansiaText>
+          </Pressable>
         )}
-      </View>
+        ListEmptyComponent={
+          <LansiaText style={styles.desc}>
+            {i18n.translate("callDoctor.noFavorites")}
+          </LansiaText>
+        }
+      />
 
-      {image && (
-        <Image
-          source={{ uri: image }}
-          style={styles.imagePreview}
-          resizeMode="contain"
+      {/* Add new doctor */}
+      <View style={styles.inputContainer}>
+        <TextInput
+          placeholder={i18n.translate("callDoctor.inputName")}
+          value={newName}
+          onChangeText={setNewName}
+          style={styles.input}
         />
-      )}
-
-      {isLoading && (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="blue" />
-          <Text style={styles.loadingText}>Sedang membaca teks...</Text>
-        </View>
-      )}
-
-      {!isLoading && textBlocks.length > 0 && (
-        <View style={styles.textContainer}>
-          <Text style={styles.resultHeader}>Hasil OCR:</Text>
-          {textBlocks.map((block, i) => (
-            <View key={i} style={styles.textBlockContainer}>
-              <Text style={styles.blockText}>{block.text}</Text>
-            </View>
-          ))}
-        </View>
-      )}
-    </ScrollView>
-  );
+        <TextInput
+          placeholder={i18n.translate("callDoctor.inputPhone")}
+          value={newPhone}
+          onChangeText={setNewPhone}
+          keyboardType="phone-pad"
+          style={styles.input}
+        />
+        <Pressable style={[styles.callButton, { marginTop: 8 }]} onPress={addDoctor}>
+          <LansiaText style={styles.callText}>
+            + {i18n.translate("callDoctor.addDoctor")}
+          </LansiaText>
+        </Pressable>
+      </View>
+    </View>
+  )
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 20, flexGrow: 1 },
-  platformInfo: {
-    fontSize: 12,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 20,
-    fontStyle: 'italic',
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    gap: 10,
-    marginBottom: 20,
-  },
-  buttonSpacer: {
+  container: {
     flex: 1,
+    backgroundColor: '#FFF3E0',
+    padding: 24,
   },
-  imagePreview: {
-    width: '100%',
-    height: 300,
-    marginVertical: 20,
-    borderRadius: 8,
-    backgroundColor: '#f0f0f0',
-  },
-  loadingContainer: { alignItems: 'center', marginVertical: 20 },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: '#666',
+  title: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    color: '#002147',
+    marginBottom: 12,
     textAlign: 'center',
   },
-  textContainer: { marginTop: 20 },
-  resultHeader: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  textBlockContainer: {
-    backgroundColor: '#f9f9f9',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 8,
-    borderLeftWidth: 3,
-    borderLeftColor: '#007AFF',
-  },
-  blockText: {
+  desc: {
     fontSize: 16,
-    lineHeight: 24,
-    color: '#333',
+    textAlign: 'center',
+    marginBottom: 16,
+    color: '#1B2631',
+    lineHeight: 22,
   },
-});
+  callButton: {
+    backgroundColor: '#004B8D',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    marginVertical: 6,
+  },
+  callText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  inputContainer: {
+    marginTop: 16,
+  },
+  input: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 8,
+    fontSize: 16,
+  },
+})

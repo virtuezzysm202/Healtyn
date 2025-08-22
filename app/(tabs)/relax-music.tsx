@@ -4,6 +4,7 @@ import { AVPlaybackStatus, Audio } from 'expo-av';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import LansiaText from '../../components/ui/LansiaText';
+import i18n from '../utils/i18n';
 
 interface MusicItem {
   id: number;
@@ -17,20 +18,20 @@ export default function MusikScreen() {
   const [musicList, setMusicList] = useState<MusicItem[]>([
     {
       id: 1,
-      title: 'Suara Alam & Air Mengalir',
-      description: 'Kombinasi suara alam yang menenangkan dengan gemericik air',
+      title: i18n.translate("music.tracks.nature.title"),
+      description: i18n.translate("music.tracks.nature.desc"),
       uri: require('../../assets/audio/nature-sounds.mp3'),
     },
     {
       id: 2,
-      title: 'Musik Piano Lembut',
-      description: 'Melodi piano yang menenangkan untuk meditasi',
+      title: i18n.translate("music.tracks.piano.title"),
+      description: i18n.translate("music.tracks.piano.desc"),
       uri: require('../../assets/audio/piano-relaxing.mp3'),
     },
     {
       id: 3,
-      title: 'Suara Hujan & Petir Jauh',
-      description: 'Suara hujan yang tenang dengan petir lembut di kejauhan',
+      title: i18n.translate("music.tracks.rain.title"),
+      description: i18n.translate("music.tracks.rain.desc"),
       uri: require('../../assets/audio/rain-sounds.mp3'),
     },
   ]);
@@ -96,7 +97,10 @@ export default function MusikScreen() {
     } catch (error) {
       console.log('Error playing sound:', error);
       setIsLoading(false);
-      Alert.alert('Error', 'Tidak dapat memutar musik. Periksa file audio di folder assets.');
+      Alert.alert(
+        i18n.translate("music.errorTitle"),
+        i18n.translate("music.errorMessage")
+      );
     }
   };
 
@@ -107,7 +111,7 @@ export default function MusikScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      <LansiaText style={styles.title}>Musik Relaksasi</LansiaText>
+      <LansiaText style={styles.title}>{i18n.translate("music.title")}</LansiaText>
       {musicList.map((item) => (
         <MusicCard
           key={item.id}
@@ -131,7 +135,7 @@ function MusicCard({ item, isActive, isLoading, onPress, formatDuration }: any) 
           <LansiaText style={styles.musicTitle}>{item.title}</LansiaText>
           <LansiaText style={styles.musicDesc}>{item.description}</LansiaText>
           <LansiaText style={styles.musicDuration}>
-            Durasi: {item.duration ? formatDuration(item.duration) : '...'}
+            {i18n.translate("music.duration")}: {item.duration ? formatDuration(item.duration) : '...'}
           </LansiaText>
         </View>
         {isLoading ? (

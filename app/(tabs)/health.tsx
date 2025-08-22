@@ -1,29 +1,30 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import i18n from "../../app/utils/i18n";
 import LansiaText from "../../components/ui/LansiaText";
 
 interface CustomTip {
   id: string;
   tip: string;
-  showOnHome?: boolean; // Tambahan untuk menandai apakah ditampilkan di beranda
+  showOnHome?: boolean;
 }
 
 export default function HealthPage() {
   const healthyTips = [
-    { id: "h1", tip: "💧 Minum air putih minimal 8 gelas sehari", showOnHome: false },
-    { id: "h2", tip: "😷 Gunakan masker saat berada di luar rumah", showOnHome: false },
-    { id: "h3", tip: "🥗 Konsumsi makanan bergizi dan seimbang", showOnHome: false },
-    { id: "h4", tip: "🏃‍♂️ Lakukan olahraga ringan secara rutin", showOnHome: false },
-    { id: "h5", tip: "🛌 Cukup tidur 7–8 jam per hari", showOnHome: false },
+    { id: "h1", tip: i18n.translate("healthPage.healthy.tip1"), showOnHome: false },
+    { id: "h2", tip: i18n.translate("healthPage.healthy.tip2"), showOnHome: false },
+    { id: "h3", tip: i18n.translate("healthPage.healthy.tip3"), showOnHome: false },
+    { id: "h4", tip: i18n.translate("healthPage.healthy.tip4"), showOnHome: false },
+    { id: "h5", tip: i18n.translate("healthPage.healthy.tip5"), showOnHome: false },
   ];
 
   const sickTips = [
-    { id: "s1", tip: "💊 Jangan lupa minum obat sesuai anjuran", showOnHome: false },
-    { id: "s2", tip: "🛌 Istirahat cukup untuk mempercepat pemulihan", showOnHome: false },
-    { id: "s3", tip: "🍲 Konsumsi makanan bergizi agar tubuh lebih kuat", showOnHome: false },
-    { id: "s4", tip: "💧 Tetap minum cukup air putih", showOnHome: false },
-    { id: "s5", tip: "🤲 Semoga cepat sembuh!", showOnHome: false },
+    { id: "s1", tip: i18n.translate("healthPage.sick.tip1"), showOnHome: false },
+    { id: "s2", tip: i18n.translate("healthPage.sick.tip2"), showOnHome: false },
+    { id: "s3", tip: i18n.translate("healthPage.sick.tip3"), showOnHome: false },
+    { id: "s4", tip: i18n.translate("healthPage.sick.tip4"), showOnHome: false },
+    { id: "s5", tip: i18n.translate("healthPage.sick.tip5"), showOnHome: false },
   ];
 
   const [condition, setCondition] = useState<"healthy" | "sick" | null>(null);
@@ -83,6 +84,14 @@ export default function HealthPage() {
     }
   };
 
+  const deleteCustomTip = (tipId: string) => {
+    if (!condition) return;
+    setCustomTips((prev) => ({
+      ...prev,
+      [condition]: prev[condition].filter((tip) => tip.id !== tipId),
+    }));
+  };
+
   const toggleDefaultTipHome = (tipId: string) => {
     if (!condition) return;
     setDefaultTips((prev) => ({
@@ -109,19 +118,19 @@ export default function HealthPage() {
         {/* Pertanyaan kondisi */}
         {condition === null ? (
           <View>
-            <LansiaText style={styles.title}>Bagaimana kondisi Anda saat ini?</LansiaText>
+            <LansiaText style={styles.title}>{i18n.translate("healthPage.askCondition")}</LansiaText>
             <View style={styles.switchContainer}>
               <Pressable
                 style={[styles.typeButton, styles.typeActive]}
                 onPress={() => setCondition("healthy")}
               >
-                <LansiaText style={styles.typeText}>Sehat</LansiaText>
+                <LansiaText style={styles.typeText}>{i18n.translate("healthPage.healthyLabel")}</LansiaText>
               </Pressable>
               <Pressable
                 style={[styles.typeButton, styles.typeActive]}
                 onPress={() => setCondition("sick")}
               >
-                <LansiaText style={styles.typeText}>Sakit</LansiaText>
+                <LansiaText style={styles.typeText}>{i18n.translate("healthPage.sickLabel")}</LansiaText>
               </Pressable>
             </View>
           </View>
@@ -129,7 +138,9 @@ export default function HealthPage() {
           <>
             {/* Tips utama sesuai kondisi */}
             <LansiaText style={styles.title}>
-              Tips {condition === "healthy" ? "untuk Sehat" : "untuk Sakit"}
+              {condition === "healthy"
+                ? i18n.translate("healthPage.tipsHealthyTitle")
+                : i18n.translate("healthPage.tipsSickTitle")}
             </LansiaText>
             {defaultTips[condition].map((tip) => (
               <View key={tip.id} style={styles.tipCard}>
@@ -140,7 +151,9 @@ export default function HealthPage() {
                     onPress={() => toggleDefaultTipHome(tip.id)}
                   >
                     <LansiaText style={[styles.homeToggleText, tip.showOnHome && styles.homeToggleTextActive]}>
-                      {tip.showOnHome ? "✓ Beranda" : "Beranda"}
+                      {tip.showOnHome
+                        ? i18n.translate("healthPage.homeSelected")
+                        : i18n.translate("healthPage.home")}
                     </LansiaText>
                   </Pressable>
                 </View>
@@ -149,21 +162,37 @@ export default function HealthPage() {
 
             {/* Tombol ganti kondisi */}
             <Pressable style={styles.changeButton} onPress={() => setCondition(null)}>
-              <LansiaText style={styles.changeButtonText}>Ubah Kondisi</LansiaText>
+              <LansiaText style={styles.changeButtonText}>
+                {i18n.translate("healthPage.changeCondition")}
+              </LansiaText>
             </Pressable>
 
             {/* Daftar tips tambahan */}
-            <LansiaText style={styles.title}>Tips Tambahan</LansiaText>
+            <LansiaText style={styles.title}>{i18n.translate("healthPage.additionalTips")}</LansiaText>
             {customTips[condition].map((item) => (
               <View key={item.id} style={styles.scheduleCard}>
                 <View style={styles.tipContent}>
                   <LansiaText style={styles.scheduleText}>{item.tip}</LansiaText>
+
+                  {/* Tombol toggle home */}
                   <Pressable
                     style={[styles.homeToggle, item.showOnHome && styles.homeToggleActive]}
                     onPress={() => toggleCustomTipHome(item.id)}
                   >
                     <LansiaText style={[styles.homeToggleText, item.showOnHome && styles.homeToggleTextActive]}>
-                      {item.showOnHome ? "✓ Beranda" : "Beranda"}
+                      {item.showOnHome
+                        ? i18n.translate("healthPage.homeSelected")
+                        : i18n.translate("healthPage.home")}
+                    </LansiaText>
+                  </Pressable>
+
+                  {/* Tombol delete */}
+                  <Pressable
+                    style={styles.deleteButton}
+                    onPress={() => deleteCustomTip(item.id)}
+                  >
+                    <LansiaText style={styles.deleteButtonText}>
+                      {i18n.translate("healthPage.delete") || "Delete"}
                     </LansiaText>
                   </Pressable>
                 </View>
@@ -175,18 +204,18 @@ export default function HealthPage() {
               <View style={styles.inputContainer}>
                 <TextInput
                   style={styles.input}
-                  placeholder="Ketik tips tambahan..."
+                  placeholder={i18n.translate("healthPage.inputPlaceholder")}
                   value={newTip}
                   onChangeText={setNewTip}
                   autoFocus
                 />
                 <Pressable style={styles.button} onPress={addCustomTip}>
-                  <LansiaText style={styles.buttonText}>Simpan</LansiaText>
+                  <LansiaText style={styles.buttonText}>{i18n.translate("healthPage.save")}</LansiaText>
                 </Pressable>
               </View>
             ) : (
               <Pressable style={styles.addButton} onPress={() => setIsAdding(true)}>
-                <LansiaText style={styles.addButtonText}>+ Tambah Tips</LansiaText>
+                <LansiaText style={styles.addButtonText}>+ {i18n.translate("healthPage.addTip")}</LansiaText>
               </Pressable>
             )}
           </>
@@ -215,6 +244,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    gap: 8,
   },
   tipText: { fontSize: 16, color: "#333333", flex: 1, marginRight: 12 },
   scheduleCard: {
@@ -247,6 +277,19 @@ const styles = StyleSheet.create({
   },
   homeToggleTextActive: {
     color: "#FFFFFF",
+  },
+  deleteButton: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#FF3B30",
+    backgroundColor: "transparent",
+  },
+  deleteButtonText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#FF3B30",
   },
   inputContainer: {
     padding: 16,

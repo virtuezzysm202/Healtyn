@@ -5,6 +5,7 @@ import * as ImagePicker from "expo-image-picker";
 import * as Notifications from "expo-notifications";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
+import i18n from "../../app/utils/i18n";
 
 
 import {
@@ -59,6 +60,7 @@ interface CreateMedicineScheduleProps {
   navigation: any;
 }
 
+
 export default function CreateMedicineSchedule({ navigation }: CreateMedicineScheduleProps) {
   const [medicineName, setMedicineName] = useState("");
   const [medicineType, setMedicineType] = useState("");
@@ -89,45 +91,45 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
 
   const medicineTypes = [
-    { label: "Antibiotik", value: "antibiotik" },
-    { label: "Analgesik", value: "analgesik" },
-    { label: "Antiinflamasi", value: "antiinflamasi" },
-    { label: "Antasida", value: "antasada" },
-    { label: "Vitamin", value: "vitamin" },
-    { label: "Suplemen", value: "suplemen" },
-    { label: "Herbal", value: "herbal" },
-    { label: "Lainnya", value: "lainnya" },
+    { label: i18n.translate("createMedicine.medicineTypes.antibiotics"), value: "antibiotik" },
+    { label: i18n.translate("createMedicine.medicineTypes.analgesics"), value: "analgesik" },
+    { label: i18n.translate("createMedicine.medicineTypes.antiInflammatory"), value: "antiinflamasi" },
+    { label: i18n.translate("createMedicine.medicineTypes.antacids"), value: "antasada" },
+    { label: i18n.translate("createMedicine.medicineTypes.vitamins"), value: "vitamin" },
+    { label: i18n.translate("createMedicine.medicineTypes.supplements"), value: "suplemen" },
+    { label: i18n.translate("createMedicine.medicineTypes.herbal"), value: "herbal" },
+    { label: i18n.translate("createMedicine.medicineTypes.others"), value: "lainnya" },
   ];
 
   const diseases = [
-    { label: "Demam", value: "demam" },
-    { label: "Batuk", value: "batuk" },
-    { label: "Flu", value: "flu" },
-    { label: "Sakit Kepala", value: "sakit_kepala" },
-    { label: "Diare", value: "diare" },
-    { label: "Maag", value: "maag" },
-    { label: "Hipertensi", value: "hipertensi" },
-    { label: "Diabetes", value: "diabetes" },
-    { label: "Asma", value: "asma" },
-    { label: "Alergi", value: "alergi" },
-    { label: "Lainnya", value: "lainnya" },
+    { label: i18n.translate("createMedicine.diseases.fever"), value: "demam" },
+    { label: i18n.translate("createMedicine.diseases.cough"), value: "batuk" },
+    { label: i18n.translate("createMedicine.diseases.flu"), value: "flu" },
+    { label: i18n.translate("createMedicine.diseases.headache"), value: "sakit_kepala" },
+    { label: i18n.translate("createMedicine.diseases.diarrhea"), value: "diare" },
+    { label: i18n.translate("createMedicine.diseases.gastritis"), value: "maag" },
+    { label: i18n.translate("createMedicine.diseases.hypertension"), value: "hipertensi" },
+    { label: i18n.translate("createMedicine.diseases.diabetes"), value: "diabetes" },
+    { label: i18n.translate("createMedicine.diseases.asthma"), value: "asma" },
+    { label: i18n.translate("createMedicine.diseases.allergy"), value: "alergi" },
+    { label: i18n.translate("createMedicine.diseases.others"), value: "lainnya" },
   ];
 
   const medicineForms = [
-    { label: "Tablet", value: "tablet" },
-    { label: "Kapsul", value: "kapsul" },
-    { label: "Sirup", value: "sirup" },
-    { label: "Tetes", value: "tetes" },
-    { label: "Salep", value: "salep" },
-    { label: "Inhaler", value: "inhaler" },
-    { label: "Suntikan", value: "injection" },
-    { label: "Bubuk", value: "bubuk" },
+    { label: i18n.translate("createMedicine.medicineForms.tablet"), value: "tablet" },
+    { label: i18n.translate("createMedicine.medicineForms.capsule"), value: "kapsul" },
+    { label: i18n.translate("createMedicine.medicineForms.syrup"), value: "sirup" },
+    { label: i18n.translate("createMedicine.medicineForms.drops"), value: "tetes" },
+    { label: i18n.translate("createMedicine.medicineForms.ointment"), value: "salep" },
+    { label: i18n.translate("createMedicine.medicineForms.inhaler"), value: "inhaler" },
+    { label: i18n.translate("createMedicine.medicineForms.injection"), value: "injection" },
+    { label: i18n.translate("createMedicine.medicineForms.powder"), value: "bubuk" },
   ];
 
   const spoonSizes = [
-    { label: "Sendok Teh (5ml)", value: "sendok_teh" },
-    { label: "Sendok Makan (15ml)", value: "sendok_makan" },
-    { label: "Sendok Takar", value: "sendok_takar" },
+    { label: i18n.translate("createMedicine.spoonSizes.teaspoon"), value: "sendok_teh" },
+    { label: i18n.translate("createMedicine.spoonSizes.tablespoon"), value: "sendok_makan" },
+    { label: i18n.translate("createMedicine.spoonSizes.measuring"), value: "sendok_takar" },
   ];
 
   const resetForm = () => {

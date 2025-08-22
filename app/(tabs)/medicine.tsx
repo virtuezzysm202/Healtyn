@@ -14,6 +14,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useTranslation } from "../../hooks/useTranslation";
 
 const { width } = Dimensions.get("window");
 
@@ -39,6 +40,7 @@ interface MedicineSchedule {
 
 export default function MedicineScreen() {
   const router = useRouter();
+  const { t } = useTranslation(); // Menggunakan useTranslation
   const [savedSchedules, setSavedSchedules] = useState<MedicineSchedule[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -74,15 +76,15 @@ export default function MedicineScreen() {
     const doctorInfo = schedule.doctorName ? ` (diresepkan oleh Dr. ${schedule.doctorName})` : '';
     
     Alert.alert(
-      "Hapus Jadwal Obat",
-      `Apakah Anda yakin ingin menghapus jadwal obat "${schedule.medicineName}"${doctorInfo}? Tindakan ini tidak dapat dibatalkan.`,
+      t('medicine.deleteTitle'),
+      `${t('medicine.deleteMessage', { medicineName: schedule.medicineName, doctorInfo })}`,
       [
         {
-          text: "Batal",
+          text: t('common.cancel'),
           style: "cancel",
         },
         {
-          text: "Hapus",
+          text: t('common.delete'),
           style: "destructive",
           onPress: () => confirmDeleteSchedule(schedule.id),
         },
@@ -101,10 +103,10 @@ export default function MedicineScreen() {
         prevSchedules.filter(schedule => schedule.id !== scheduleId)
       );
       
-      Alert.alert("Berhasil", "Jadwal obat berhasil dihapus.");
+      Alert.alert(t('medicine.deleteSuccessTitle'), t('medicine.deleteSuccessMessage'));
     } catch (error) {
       console.error("Error deleting schedule:", error);
-      Alert.alert("Error", "Gagal menghapus jadwal obat. Silakan coba lagi.");
+      Alert.alert(t('medicine.deleteErrorTitle'), t('medicine.deleteErrorMessage'));
     } finally {
       setDeletingId(null);
     }
@@ -175,7 +177,7 @@ export default function MedicineScreen() {
           {item.mustFinish && (
             <View style={styles.mustFinishBadge}>
               <Ionicons name="checkmark-circle" size={14} color="#34C759" />
-              <Text style={styles.mustFinishText}>Harus dihabiskan</Text>
+              <Text style={styles.mustFinishText}>{t('medicine.mustFinish')}</Text>
             </View>
           )}
   
@@ -195,13 +197,13 @@ export default function MedicineScreen() {
       <View style={styles.emptyIconContainer}>
         <Ionicons name="medical-outline" size={80} color="#C7C7CC" />
       </View>
-      <Text style={styles.emptyStateTitle}>Belum Ada Jadwal Obat</Text>
+      <Text style={styles.emptyStateTitle}>{t('medicine.emptyStateTitle')}</Text>
       <Text style={styles.emptyStateSubtitle}>
-        Mulai buat jadwal obat pertama Anda untuk mendapatkan pengingat minum obat secara teratur
+        {t('medicine.emptyStateSubtitle')}
       </Text>
       <TouchableOpacity style={styles.createButtonLarge} onPress={navigateToCreateSchedule}>
         <Ionicons name="add-circle" size={24} color="#FFFFFF" />
-        <Text style={styles.createButtonLargeText}>Buat Jadwal Pertama</Text>
+        <Text style={styles.createButtonLargeText}>{t('medicine.createFirstSchedule')}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -219,8 +221,8 @@ export default function MedicineScreen() {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerContent}>
-          <Text style={styles.title}>Jadwal Obat</Text>
-          <Text style={styles.subtitle}>{savedSchedules.length} jadwal tersimpan</Text>
+          <Text style={styles.title}>{t('medicine.title')}</Text>
+          <Text style={styles.subtitle}>{savedSchedules.length} {t('medicine.savedSchedules')}</Text>
         </View>
 
         {/* Create Button - Always visible */}
@@ -239,19 +241,19 @@ export default function MedicineScreen() {
             <View style={styles.statsContainer}>
               <View style={styles.statCard}>
                 <Text style={styles.statNumber}>{savedSchedules.length}</Text>
-                <Text style={styles.statLabel}>Total Obat</Text>
+                <Text style={styles.statLabel}>{t('medicine.totalMedicine')}</Text>
               </View>
               <View style={styles.statCard}>
                 <Text style={styles.statNumber}>
                   {savedSchedules.filter((s) => s.mustFinish).length}
                 </Text>
-                <Text style={styles.statLabel}>Harus Habis</Text>
+                <Text style={styles.statLabel}>{t('medicine.mustFinishCount')}</Text>
               </View>
               <View style={styles.statCard}>
                 <Text style={styles.statNumber}>
                   {savedSchedules.reduce((total, s) => total + s.timesPerDay, 0)}
                 </Text>
-                <Text style={styles.statLabel}>Alarm/Hari</Text>
+                <Text style={styles.statLabel}>{t('medicine.alarmsPerDay')}</Text>
               </View>
             </View>
 
@@ -329,7 +331,7 @@ const styles = StyleSheet.create({
   deleteButtonDisabled: {
     opacity: 0.6,
   },
-    scheduleDoctorName: { 
+  scheduleDoctorName: { 
     fontSize: 13, 
     color: "#34C759", 
     marginBottom: 4,

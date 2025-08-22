@@ -1,0 +1,154 @@
+{
+    "display": {
+      "title": "Display Settings",
+      "language": "Language",
+      "languageDesc": "Choose app language",
+      "theme": "Theme",
+      "themeDesc": "Choose light or dark theme",
+      "indonesian": "Bahasa Indonesia",
+      "english": "English",
+      "lightTheme": "Light Theme",
+      "darkTheme": "Dark Theme",
+      "back": "Back"
+    },
+    "home": {
+      "appName": "Elderly Helper",
+      "appSubtitle": "Daily health companion",
+      "greeting": {
+        "healthyTitle": "Stay Healthy!",
+        "healthySubtitle": "Take care of your body every day",
+        "sickTitle": "🤗 Get Well Soon!",
+        "sickSubtitle": "Don't forget to rest well"
+      },
+      "weather": {
+        "loading": "Loading weather...",
+        "apiError": "OpenWeather API key not found in .env",
+        "permissionError": "Location permission denied",
+        "generalError": "Failed to load weather",
+        "yourLocation": "Your Location",
+        "outfit": {
+          "hot": "Wear light clothes & a hat",
+          "warm": "T-shirt & long pants",
+          "mild": "Shirt & long pants",
+          "cool": "Light jacket",
+          "cold": "Thick jacket & scarf"
+        },
+        "recommendationTitle": "Outfit Recommendation"
+      },
+      "healthReminders": {
+        "title": "Health Reminders",
+        "tip": "Health Tips"
+      },
+      "reminders": {
+        "today": "Today",
+        "noReminders": "No reminders yet. Add on the Health page",
+        "dailyReminder": "Today's Reminder"
+      },
+      "menu": {
+        "medicineReminder": "Medicine Reminder",
+        "scanBook": "Scan Book",
+        "callDoctor": "Call Doctor",
+        "callFamily": "Call Family",
+        "health": "Health",
+        "relaxMusic": "Relax Music"
+      }
+    },
+    "medicine": {
+      "title": "Medicine Schedule",
+      "savedSchedules": "saved schedules",
+      "deleteTitle": "Delete Medicine Schedule",
+      "deleteMessage": "Are you sure you want to delete the medicine schedule \"{{medicineName}}\"{{doctorInfo}}? This action cannot be undone.",
+      "deleteSuccessTitle": "Success",
+      "deleteSuccessMessage": "The medicine schedule has been deleted successfully.",
+      "deleteErrorTitle": "Error",
+      "deleteErrorMessage": "Failed to delete the medicine schedule. Please try again.",
+      "emptyStateTitle": "No Medicine Schedule Yet",
+      "emptyStateSubtitle": "Start by creating your first medicine schedule to receive regular reminders to take your medication",
+      "createFirstSchedule": "Create First Schedule",
+      "mustFinish": "Must be finished",
+      "totalMedicine": "Total Medicines",
+      "mustFinishCount": "Must Finish",
+      "alarmsPerDay": "Alarms/Day"
+    },
+    "scan": {
+      "permissionTitle": "Permission Required",
+      "permissionGallery": "The app needs access to the gallery to select images.",
+      "permissionCamera": "The app needs access to the camera.",
+      "pickImage": "Pick Image",
+      "takePhoto": "Take Photo",
+      "processing": "Processing...",
+      "readingText": "Reading text...",
+      "resultHeader": "OCR Result:",
+      "noTextTitle": "No Text Found",
+      "noTextMessage": "No text detected in the image.",
+      "errorTitle": "Error",
+      "errorMessage": "Failed to process image:"
+    },
+    "callDoctor": {
+      "title": "Call Doctor / Emergency",
+      "subtitle": "Choose an emergency number or call your favorite doctor.",
+      "favoriteTitle": "Favorite Doctors",
+      "noFavorites": "No favorite doctors yet",
+      "inputName": "Doctor's Name",
+      "inputPhone": "Phone Number",
+      "addDoctor": "Add Doctor",
+      "alertIncompleteTitle": "Incomplete Data",
+      "alertIncompleteMessage": "Please enter doctor's name and phone number",
+      "callErrorTitle": "Call Failed",
+      "callErrorMessage": "Check your phone connection."
+    },
+    "healthPage": {
+      "askCondition": "How are you feeling today?",
+      "healthyLabel": "Healthy",
+      "sickLabel": "Sick",
+      "tipsHealthyTitle": "Tips for Staying Healthy",
+      "tipsSickTitle": "Tips for Recovery",
+      "changeCondition": "Change Condition",
+      "additionalTips": "Additional Tips",
+      "addTip": "Add Tip",
+      "save": "Save",
+      "inputPlaceholder": "Type additional tip...",
+      "home": "Home",
+      "homeSelected": "✓ Home",
+      "delete": "Delete",
+      "healthy": {
+        "tip1": "💧 Drink at least 8 glasses of water a day",
+        "tip2": "😷 Wear a mask when going outside",
+        "tip3": "🥗 Eat nutritious and balanced meals",
+        "tip4": "🏃‍♂️ Do light exercise regularly",
+        "tip5": "🛌 Get 7–8 hours of sleep daily"
+      },
+      "sick": {
+        "tip1": "💊 Don't forget to take your medicine as prescribed",
+        "tip2": "🛌 Rest well to speed up recovery",
+        "tip3": "🍲 Eat nutritious food to stay strong",
+        "tip4": "💧 Keep drinking enough water",
+        "tip5": "🤲 Wishing you a speedy recovery!"
+      }
+    },
+    "music": {
+      "title": "Relaxation Music",
+      "duration": "Duration",
+      "errorTitle": "Error",
+      "errorMessage": "Unable to play music. Please check audio files in assets folder.",
+      "tracks": {
+        "nature": {
+          "title": "Nature Sounds & Flowing Water",
+          "desc": "A calming mix of nature sounds with flowing water"
+        },
+        "piano": {
+          "title": "Soft Piano Music",
+          "desc": "Soothing piano melodies for meditation"
+        },
+        "rain": {
+          "title": "Rain & Distant Thunder",
+          "desc": "Relaxing rain sounds with gentle distant thunder"
+        }
+      }
+    },
+    "common": {
+      "cancel": "Cancel",
+      "delete": "Delete"
+    }
+  }
+  

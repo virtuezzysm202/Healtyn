@@ -1,7 +1,13 @@
-// app/_layout.tsx
-import { Slot } from 'expo-router'
-import { Tabs } from 'expo-router/tabs'
+import { Stack } from 'expo-router';
+import { SettingsProvider } from './contexts/SettingsContext';
 
 export default function RootLayout() {
-  return <Slot />
+  return (
+    <SettingsProvider>
+      <Stack>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="+not-found" />
+      </Stack>
+    </SettingsProvider>
+  );
 }
