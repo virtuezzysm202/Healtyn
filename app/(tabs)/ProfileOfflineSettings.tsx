@@ -2,6 +2,7 @@ import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   Alert,
+  Animated,
   ScrollView,
   StyleSheet,
   Text,
@@ -19,11 +20,16 @@ const translations = {
     age: "Usia",
     address: "Alamat",
     save: "Simpan",
-    saved: "Tersimpan!",
+    edit: "Edit",
+    cancel: "Batal",
+    saved: "Profil berhasil disimpan!",
+    updated: "Profil berhasil diperbarui!",
     namePlaceholder: "Masukkan nama Anda",
     agePlaceholder: "Masukkan usia Anda",
     addressPlaceholder: "Masukkan alamat lengkap Anda",
     back: "Kembali",
+    emptyProfile: "Belum ada data profil",
+    fillProfile: "Silakan isi profil Anda",
   },
   en: {
     title: "Offline Profile",
@@ -31,11 +37,16 @@ const translations = {
     age: "Age",
     address: "Address",
     save: "Save",
-    saved: "Saved!",
+    edit: "Edit",
+    cancel: "Cancel",
+    saved: "Profile saved successfully!",
+    updated: "Profile updated successfully!",
     namePlaceholder: "Enter your name",
     agePlaceholder: "Enter your age",
     addressPlaceholder: "Enter your full address",
     back: "Back",
+    emptyProfile: "No profile data yet",
+    fillProfile: "Please fill your profile",
   },
 };
 
@@ -44,28 +55,34 @@ export default function ProfileOfflineSettings() {
   const t = translations[language];
   const router = useRouter();
 
-  // State untuk form
+  // State form
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
   const [address, setAddress] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [hasProfile, setHasProfile] = useState(false);
+  const [fadeAnim] = useState(new Animated.Value(1));
 
-  // Load data saat komponen mount
+  // Load data
   useEffect(() => {
     loadProfileData();
   }, []);
 
   const loadProfileData = async () => {
     try {
-      // Implementasi load dari storage
-      // Contoh menggunakan AsyncStorage atau storage lainnya
-      // const savedName = await AsyncStorage.getItem('offline_name');
-      // const savedAge = await AsyncStorage.getItem('offline_age');
-      // const savedAddress = await AsyncStorage.getItem('offline_address');
+   
+      const demoProfile = {
+        name: "John Doe",
+        age: "25",
+        address: "Jl. Contoh No. 123, Jakarta"
+      };
       
-      // setName(savedName || '');
-      // setAge(savedAge || '');
-      // setAddress(savedAddress || '');
+      setName(demoProfile.name);
+      setAge(demoProfile.age);
+      setAddress(demoProfile.address);
+      setHasProfile(true);
+      
     } catch (error) {
       console.error("Error loading profile data:", error);
     }
@@ -73,25 +90,43 @@ export default function ProfileOfflineSettings() {
 
   const saveProfile = async () => {
     if (!name.trim()) {
-      Alert.alert("Error", "Nama tidak boleh kosong");
+      Alert.alert("Error", language === 'id' ? "Nama tidak boleh kosong" : "Name cannot be empty");
       return;
     }
 
     setIsSaving(true);
     
+    // Animate button
+    Animated.sequence([
+      Animated.timing(fadeAnim, { duration: 200, toValue: 0.7, useNativeDriver: true }),
+      Animated.timing(fadeAnim, { duration: 200, toValue: 1, useNativeDriver: true }),
+    ]).start();
+    
     try {
-      // Implementasi save ke storage
-      // await AsyncStorage.setItem('offline_name', name);
-      // await AsyncStorage.setItem('offline_age', age);
-      // await AsyncStorage.setItem('offline_address', address);
+  
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      Alert.alert("Sukses", t.saved);
+      const message = hasProfile ? t.updated : t.saved;
+      Alert.alert("Sukses", message);
+      
+      setHasProfile(true);
+      setIsEditing(false);
+      
     } catch (error) {
       console.error("Error saving profile:", error);
-      Alert.alert("Error", "Gagal menyimpan profil");
+      Alert.alert("Error", language === 'id' ? "Gagal menyimpan profil" : "Failed to save profile");
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    loadProfileData(); // Reset to saved data
   };
 
   const goBack = () => {
@@ -107,60 +142,108 @@ export default function ProfileOfflineSettings() {
     }
   };
 
-  return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <View style={styles.content}>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={goBack} style={styles.backButton}>
-            <Text style={styles.backButtonText}>‹ {t.back}</Text>
-          </TouchableOpacity>
-          <Text style={styles.title}>{t.title}</Text>
+  const renderViewMode = () => (
+    <View style={styles.profileCard}>
+      <View style={styles.profileHeader}>
+        <View style={styles.avatarContainer}>
+          <Text style={styles.avatarText}>
+            {name ? name.charAt(0).toUpperCase() : "?"}
+          </Text>
         </View>
+        <View style={styles.profileInfo}>
+          <Text style={styles.profileName}>{name || t.emptyProfile}</Text>
+          {!name && <Text style={styles.profileSubtext}>{t.fillProfile}</Text>}
+        </View>
+      </View>
 
-        {/* Form */}
-        <View style={styles.form}>
-          {/* Name Input */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>{t.name}</Text>
-            <TextInput
-              style={styles.input}
-              value={name}
-              onChangeText={setName}
-              placeholder={t.namePlaceholder}
-              placeholderTextColor="#9ca3af"
-            />
-          </View>
+      {(name || age || address) && (
+        <View style={styles.profileDetails}>
+          {name && (
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>{t.name}</Text>
+              <Text style={styles.detailValue}>{name}</Text>
+            </View>
+          )}
+          
+          {age && (
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>{t.age}</Text>
+              <Text style={styles.detailValue}>{age} tahun</Text>
+            </View>
+          )}
+          
+          {address && (
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>{t.address}</Text>
+              <Text style={styles.detailValue}>{address}</Text>
+            </View>
+          )}
+        </View>
+      )}
 
-          {/* Age Input */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>{t.age}</Text>
-            <TextInput
-              style={styles.input}
-              value={age}
-              onChangeText={setAge}
-              placeholder={t.agePlaceholder}
-              placeholderTextColor="#9ca3af"
-              keyboardType="numeric"
-            />
-          </View>
+      <TouchableOpacity
+        style={styles.editButton}
+        onPress={handleEdit}
+        activeOpacity={0.8}
+      >
+        <Text style={styles.editButtonText}>✏️ {t.edit}</Text>
+      </TouchableOpacity>
+    </View>
+  );
 
-          {/* Address Input */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>{t.address}</Text>
-            <TextInput
-              style={[styles.input, styles.textArea]}
-              value={address}
-              onChangeText={setAddress}
-              placeholder={t.addressPlaceholder}
-              placeholderTextColor="#9ca3af"
-              multiline={true}
-              numberOfLines={3}
-              textAlignVertical="top"
-            />
-          </View>
+  const renderEditMode = () => (
+    <View style={styles.form}>
+      {/* Name Input */}
+      <View style={styles.inputGroup}>
+        <Text style={styles.label}>{t.name} *</Text>
+        <TextInput
+          style={[styles.input, !name.trim() && styles.inputError]}
+          value={name}
+          onChangeText={setName}
+          placeholder={t.namePlaceholder}
+          placeholderTextColor="#9ca3af"
+        />
+      </View>
 
-          {/* Save Button */}
+      {/* Age Input */}
+      <View style={styles.inputGroup}>
+        <Text style={styles.label}>{t.age}</Text>
+        <TextInput
+          style={styles.input}
+          value={age}
+          onChangeText={setAge}
+          placeholder={t.agePlaceholder}
+          placeholderTextColor="#9ca3af"
+          keyboardType="numeric"
+        />
+      </View>
+
+      {/* Address Input */}
+      <View style={styles.inputGroup}>
+        <Text style={styles.label}>{t.address}</Text>
+        <TextInput
+          style={[styles.input, styles.textArea]}
+          value={address}
+          onChangeText={setAddress}
+          placeholder={t.addressPlaceholder}
+          placeholderTextColor="#9ca3af"
+          multiline={true}
+          numberOfLines={3}
+          textAlignVertical="top"
+        />
+      </View>
+
+      {/* Action Buttons */}
+      <View style={styles.buttonRow}>
+        <TouchableOpacity
+          style={styles.cancelButton}
+          onPress={handleCancel}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.cancelButtonText}>{t.cancel}</Text>
+        </TouchableOpacity>
+
+        <Animated.View style={{ opacity: fadeAnim }}>
           <TouchableOpacity
             style={[styles.saveButton, isSaving && styles.saveButtonDisabled]}
             onPress={saveProfile}
@@ -168,10 +251,30 @@ export default function ProfileOfflineSettings() {
             activeOpacity={0.8}
           >
             <Text style={styles.saveButtonText}>
-              {isSaving ? "Menyimpan..." : t.save}
+              {isSaving ? "💾 Menyimpan..." : `💾 ${t.save}`}
             </Text>
           </TouchableOpacity>
+        </Animated.View>
+      </View>
+    </View>
+  );
+
+  return (
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <View style={styles.content}>
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={goBack} style={styles.backButton}>
+            <Text style={styles.backButtonText}>← {t.back}</Text>
+          </TouchableOpacity>
+          <Text style={styles.title}>{t.title}</Text>
+          <Text style={styles.subtitle}>
+            {isEditing ? "Mode Edit" : "Mode Tampil"}
+          </Text>
         </View>
+
+        {/* Content */}
+        {!hasProfile || isEditing ? renderEditMode() : renderViewMode()}
       </View>
     </ScrollView>
   );
@@ -180,75 +283,191 @@ export default function ProfileOfflineSettings() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "#f0f2f5",
   },
   content: {
     padding: 20,
   },
   header: {
     marginBottom: 32,
+    alignItems: "center",
   },
   backButton: {
     alignSelf: "flex-start",
     marginBottom: 16,
     paddingVertical: 8,
-    paddingHorizontal: 4,
+    paddingHorizontal: 12,
+    backgroundColor: "#ffffff",
+    borderRadius: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   backButtonText: {
-    fontSize: 18,
+    fontSize: 16,
     color: "#3b82f6",
-    fontWeight: "500",
+    fontWeight: "600",
   },
   title: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: "#1a1a1a",
+    fontSize: 32,
+    fontWeight: "800",
+    color: "#1a202c",
     textAlign: "center",
+    marginBottom: 4,
   },
+  subtitle: {
+    fontSize: 14,
+    color: "#718096",
+    fontWeight: "500",
+  },
+  
+  // Profile Card Styles
+  profileCard: {
+    backgroundColor: "#ffffff",
+    borderRadius: 20,
+    padding: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  profileHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  avatarContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: "#3b82f6",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 16,
+  },
+  avatarText: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#ffffff",
+  },
+  profileInfo: {
+    flex: 1,
+  },
+  profileName: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#1a202c",
+    marginBottom: 2,
+  },
+  profileSubtext: {
+    fontSize: 14,
+    color: "#718096",
+    fontStyle: "italic",
+  },
+  profileDetails: {
+    marginBottom: 24,
+  },
+  detailRow: {
+    flexDirection: "row",
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#e2e8f0",
+  },
+  detailLabel: {
+    width: 80,
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#4a5568",
+  },
+  detailValue: {
+    flex: 1,
+    fontSize: 16,
+    color: "#1a202c",
+    fontWeight: "500",
+  },
+  editButton: {
+    backgroundColor: "#3b82f6",
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    alignItems: "center",
+    shadowColor: "#3b82f6",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  editButtonText: {
+    color: "#ffffff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  
+  // Form Styles
   form: {
-    gap: 20,
+    backgroundColor: "#ffffff",
+    borderRadius: 20,
+    padding: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 6,
   },
   inputGroup: {
-    marginBottom: 4,
+    marginBottom: 20,
   },
   label: {
     fontSize: 16,
-    fontWeight: "600",
-    color: "#374151",
+    fontWeight: "700",
+    color: "#2d3748",
     marginBottom: 8,
   },
   input: {
-    backgroundColor: "#ffffff",
+    backgroundColor: "#f7fafc",
     borderRadius: 12,
     padding: 16,
     fontSize: 16,
-    color: "#1a1a1a",
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    color: "#1a202c",
+    borderWidth: 2,
+    borderColor: "#e2e8f0",
+  },
+  inputError: {
+    borderColor: "#e53e3e",
+    backgroundColor: "#fed7d7",
   },
   textArea: {
     height: 80,
     paddingTop: 16,
   },
-  saveButton: {
-    backgroundColor: "#3b82f6",
-    borderRadius: 12,
-    padding: 16,
-    alignItems: "center",
+  buttonRow: {
+    flexDirection: "row",
     marginTop: 12,
-    shadowColor: "#3b82f6",
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
+    gap: 12,
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: "#e2e8f0",
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: "center",
+  },
+  cancelButtonText: {
+    color: "#4a5568",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  saveButton: {
+    flex: 2,
+    backgroundColor: "#10b981",
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: "center",
+    shadowColor: "#10b981",
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 4,
@@ -260,6 +479,6 @@ const styles = StyleSheet.create({
   saveButtonText: {
     color: "#ffffff",
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "700",
   },
 });

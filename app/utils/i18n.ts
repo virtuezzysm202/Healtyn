@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as RNLocalize from "react-native-localize";
+import * as Localization from "expo-localization";
 import en from "../locales/en.json";
 import id from "../locales/id.json";
 
@@ -25,8 +25,8 @@ class EfficientI18n {
       if (savedLanguage && this.isValidLanguage(savedLanguage)) {
         this.currentLanguage = savedLanguage;
       } else {
-        const locales = RNLocalize.getLocales();
-        const systemLanguage = locales[0]?.languageCode as Language;
+        // Menggunakan expo-localization API
+        const systemLanguage = Localization.getLocales()[0]?.languageCode as Language;
         if (this.isValidLanguage(systemLanguage)) {
           this.currentLanguage = systemLanguage;
         }
