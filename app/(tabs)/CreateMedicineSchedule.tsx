@@ -19,7 +19,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import AdaptivePicker from "../../components/AdaptivePicker";
 
@@ -189,7 +189,10 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
       if (selectedDate >= startDate) {
         setEndDate(selectedDate);
       } else {
-        Alert.alert("Error", "Tanggal selesai tidak boleh sebelum tanggal mulai!");
+        Alert.alert(
+          i18n.translate("createMedicine.alerts.error"), 
+          i18n.translate("createMedicine.alerts.endDateError")
+        );
       }
     }
   };
@@ -212,7 +215,10 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
   const pickImage = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permissionResult.granted) {
-      Alert.alert("Izin Diperlukan", "Mohon izinkan akses galeri untuk menambah foto obat.");
+      Alert.alert(
+        i18n.translate("createMedicine.alerts.permissionRequired"), 
+        i18n.translate("createMedicine.alerts.galleryPermission")
+      );
       return;
     }
 
@@ -226,7 +232,10 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
   const openCamera = async () => {
     const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
     if (!permissionResult.granted) {
-      Alert.alert("Izin Diperlukan", "Mohon izinkan akses kamera untuk mengambil foto obat.");
+      Alert.alert(
+        i18n.translate("createMedicine.alerts.permissionRequired"), 
+        i18n.translate("createMedicine.alerts.galleryPermission")
+      );
       return;
     }
 
@@ -256,23 +265,23 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
   };
 
   const saveMedicineSchedule = async () => {
-    if (!medicineName.trim()) return Alert.alert("Error", "Nama obat wajib diisi!");
-    if (!medicineType.trim()) return Alert.alert("Error", "Jenis obat wajib diisi!");
-    if (medicineType === "lainnya" && !otherMedicineType.trim()) {
-      return Alert.alert("Error", "Jenis obat lainnya wajib diisi!");
-    }
-    if (!disease.trim()) return Alert.alert("Error", "Penyakit wajib diisi!");
-    if (disease === "lainnya" && !otherDisease.trim()) {
-      return Alert.alert("Error", "Penyakit lainnya wajib diisi!");
-    }
-    if (!medicineForm.trim()) return Alert.alert("Error", "Bentuk obat wajib diisi!");
-    if (!dosageAmount.trim()) return Alert.alert("Error", "Dosis wajib diisi!");
-    if (!usageTime.trim()) return Alert.alert("Error", "Waktu minum/pakai wajib diisi!");
-    if (endDate <= startDate) {
-      return Alert.alert("Error", "Tanggal selesai harus setelah tanggal mulai!");
-
-    }
+    const errorTitle = i18n.translate("createMedicine.alerts.error");
     
+    if (!medicineName.trim()) return Alert.alert(errorTitle, i18n.translate("createMedicine.alerts.validationErrors.medicineNameRequired"));
+    if (!medicineType.trim()) return Alert.alert(errorTitle, i18n.translate("createMedicine.alerts.validationErrors.medicineTypeRequired"));
+    if (medicineType === "lainnya" && !otherMedicineType.trim()) {
+      return Alert.alert(errorTitle, i18n.translate("createMedicine.alerts.validationErrors.otherMedicineTypeRequired"));
+    }
+    if (!disease.trim()) return Alert.alert(errorTitle, i18n.translate("createMedicine.alerts.validationErrors.diseaseRequired"));
+    if (disease === "lainnya" && !otherDisease.trim()) {
+      return Alert.alert(errorTitle, i18n.translate("createMedicine.alerts.validationErrors.otherDiseaseRequired"));
+    }
+    if (!medicineForm.trim()) return Alert.alert(errorTitle, i18n.translate("createMedicine.alerts.validationErrors.medicineFormRequired"));
+    if (!dosageAmount.trim()) return Alert.alert(errorTitle, i18n.translate("createMedicine.alerts.validationErrors.dosageRequired"));
+    if (!usageTime.trim()) return Alert.alert(errorTitle, i18n.translate("createMedicine.alerts.validationErrors.usageTimeRequired"));
+    if (endDate <= startDate) {
+      return Alert.alert(errorTitle, i18n.translate("createMedicine.alerts.validationErrors.endDateAfterStart"));
+    }
 
     const newSchedule: MedicineSchedule = {
       id: Date.now().toString(),
@@ -302,9 +311,9 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
       await AsyncStorage.setItem("medicineSchedules", JSON.stringify(schedules));
       await scheduleNotifications(newSchedule);
 
-      Alert.alert("Berhasil", "Jadwal obat berhasil disimpan!", [
+      Alert.alert(i18n.translate("createMedicine.alerts.success"), i18n.translate("createMedicine.alerts.successMessage"), [
         {
-          text: "OK",
+          text: i18n.translate("createMedicine.common.ok"),
           onPress: () => {
             resetForm();
             router.back();
@@ -313,14 +322,17 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
       ]);
     } catch (error) {
       console.error(error);
-      Alert.alert("Error", "Gagal menyimpan jadwal obat");
-    }
+      Alert.alert(i18n.translate("createMedicine.alerts.error"), i18n.translate("createMedicine.alerts.saveError"));
+}
   };
 
   const scheduleNotifications = async (schedule: MedicineSchedule) => {
     const { status } = await Notifications.requestPermissionsAsync();
     if (status !== "granted") {
-      Alert.alert("Izin Diperlukan", "Mohon aktifkan notifikasi untuk pengingat obat.");
+      Alert.alert(
+        i18n.translate("createMedicine.alerts.permissionRequired"), 
+        i18n.translate("createMedicine.alerts.notificationPermission")
+      );
       return;
     }
   
@@ -330,11 +342,16 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
         
         await Notifications.scheduleNotificationAsync({
           content: {
-            title: "Waktu Minum Obat!",
-            body: `Saatnya minum ${schedule.medicineName} - ${schedule.dosageAmount} ${schedule.dosageUnit}`,
+            title: i18n.translate("createMedicine.notifications.title"),
+            body: i18n.translate("createMedicine.notifications.body", {
+              medicineName: schedule.medicineName,
+              dosage: schedule.dosageAmount,
+              unit: schedule.dosageUnit
+            }),
             data: { medicineId: schedule.id },
           },
           trigger: {
+            type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
             hour: alarmTime.getHours(),
             minute: alarmTime.getMinutes(),
             repeats: true,
@@ -350,12 +367,12 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
     if (medicineForm === "tablet" || medicineForm === "kapsul") {
       return (
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Dosis Sekali Minum</Text>
+          <Text style={styles.sectionLabel}>{i18n.translate("createMedicine.dosage.tabletCapsule.label")}</Text>
           <View style={styles.inputContainer}>
             <Ionicons name="medical" size={20} color="#007AFF" />
             <TextInput
               style={styles.input}
-              placeholder="Masukkan jumlah (contoh: 1, 0.5, 2)"
+              placeholder={i18n.translate("createMedicine.dosage.tabletCapsule.placeholder")}
               keyboardType="numeric"
               value={dosageAmount}
               onChangeText={(text) => {
@@ -371,7 +388,7 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
     } else if (medicineForm === "sirup" || medicineForm === "tetes") {
       return (
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Dosis Sekali Minum</Text>
+          <Text style={styles.sectionLabel}>{i18n.translate("createMedicine.dosage.tabletCapsule.label")}</Text>
           <View style={styles.dosageContainer}>
             <View style={styles.inputContainer}>
               <Ionicons name="water" size={20} color="#007AFF" />
@@ -387,7 +404,7 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
 
             <View style={styles.pickerWrapper}>
               <AdaptivePicker
-                label="Pilih Ukuran"
+                label={i18n.translate("createMedicine.spoonSizes.label")}
                 selectedValue={spoonSize}
                 onValueChange={(value) => {
                   setSpoonSize(value);
@@ -402,11 +419,11 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
               <Ionicons name="flask" size={20} color="#007AFF" />
               <TextInput
                 style={styles.input}
-                placeholder="Atau masukkan dalam ml (opsional)"
+                placeholder={i18n.translate("createMedicine.dosage.syrupDrops.mlPlaceholder")}
                 keyboardType="numeric"
                 placeholderTextColor="#C7C7CC"
               />
-              <Text style={styles.unitText}>ml</Text>
+              <Text style={styles.unitText}>{i18n.translate("createMedicine.common.ml")}</Text>
             </View>
           </View>
         </View>
@@ -435,7 +452,7 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
 
   const renderTimesPerDaySelector = () => (
     <View style={styles.section}>
-      <Text style={styles.sectionLabel}>Frekuensi Per Hari</Text>
+      <Text style={styles.sectionLabel}>{i18n.translate("createMedicine.frequency.label")}</Text>
       <View style={styles.frequencyContainer}>
         {[1, 2, 3, 4, 5, 6].map((times) => (
           <TouchableOpacity
@@ -462,7 +479,7 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
 
   const renderAlarmTimes = () => (
     <View style={styles.section}>
-      <Text style={styles.sectionLabel}>Waktu Pengingat ({timesPerDay}x sehari)</Text>
+      <Text style={styles.sectionLabel}>{i18n.translate("createMedicine.alarmTimes.label", { count: timesPerDay.toString() })}</Text>
       {alarmTimes.slice(0, timesPerDay).map((time, index) => (
         <View key={index} style={styles.alarmTimeContainer}>
           <View style={styles.timeDisplayContainer}>
@@ -473,7 +490,9 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
               <Text style={styles.timeText}>
                 {time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
               </Text>
-              <Text style={styles.timeSubtext}>Pengingat ke-{index + 1}</Text>
+              <Text style={styles.timeSubtext}>
+  {i18n.translate("createMedicine.alarmTimes.reminderNumber", { number: (index + 1).toString() })}
+</Text>
             </View>
           </View>
         </View>
@@ -484,7 +503,7 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
   const renderDatePickerSection = () => (
     <>
       <View style={styles.section}>
-        <Text style={styles.sectionLabel}>Tanggal Mulai Konsumsi</Text>
+        <Text style={styles.sectionLabel}>{i18n.translate("createMedicine.dates.startDate.label")}</Text>
         <TouchableOpacity
           style={styles.datePickerContainer}
           onPress={() => setShowStartDatePicker(true)}
@@ -492,14 +511,15 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
           <Ionicons name="calendar" size={20} color="#007AFF" />
           <View style={styles.dateTextContainer}>
             <Text style={styles.dateText}>{formatDate(startDate)}</Text>
-            <Text style={styles.dateSubtext}>Ketuk untuk mengubah</Text>
+            <Text style={styles.dateSubtext}>{i18n.translate("createMedicine.dates.startDate.tapToChange")}</Text>
+            {/* HAPUS duplikasi text yang kedua */}
           </View>
           <Ionicons name="chevron-forward" size={20} color="#C7C7CC" />
         </TouchableOpacity>
       </View>
   
       <View style={styles.section}>
-        <Text style={styles.sectionLabel}>Tanggal Selesai Konsumsi</Text>
+        <Text style={styles.sectionLabel}>{i18n.translate("createMedicine.dates.endDate.label")}</Text>
         <TouchableOpacity
           style={styles.datePickerContainer}
           onPress={() => setShowEndDatePicker(true)}
@@ -507,7 +527,7 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
           <Ionicons name="calendar" size={20} color="#007AFF" />
           <View style={styles.dateTextContainer}>
             <Text style={styles.dateText}>{formatDate(endDate)}</Text>
-            <Text style={styles.dateSubtext}>Ketuk untuk mengubah</Text>
+            <Text style={styles.dateSubtext}>{i18n.translate("createMedicine.dates.endDate.tapToChange")}</Text>
           </View>
           <Ionicons name="chevron-forward" size={20} color="#C7C7CC" />
         </TouchableOpacity>
@@ -517,7 +537,7 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
         <View style={styles.durationContainer}>
           <Ionicons name="time" size={20} color="#28a745" />
           <Text style={styles.durationText}>
-            Durasi konsumsi: {calculateDuration()} hari
+            {i18n.translate("createMedicine.dates.duration", { days: calculateDuration().toString() })}
           </Text>
         </View>
       </View>
@@ -548,7 +568,6 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
       )}
     </>
   );
-
   return (
     
     <KeyboardAvoidingView
@@ -557,12 +576,12 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
     >
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Nama Obat</Text>
+        <Text style={styles.sectionLabel}>{i18n.translate("createMedicine.medicineName.label")}</Text>
           <View style={styles.inputContainer}>
             <Ionicons name="medkit" size={20} color="#007AFF" />
             <TextInput
               style={styles.input}
-              placeholder="Masukkan nama obat"
+              placeholder={i18n.translate("createMedicine.medicineName.placeholder")}
               value={medicineName}
               onChangeText={setMedicineName}
               placeholderTextColor="#C7C7CC"
@@ -571,12 +590,12 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
         </View>
 
         <View style={styles.section}>
-        <Text style={styles.sectionLabel}>Nama Dokter (Opsional)</Text>
+        <Text style={styles.sectionLabel}>{i18n.translate("createMedicine.doctorName.label")}</Text>
         <View style={styles.inputContainer}>
         <Ionicons name="person" size={20} color="#007AFF" />
         <TextInput
             style={styles.input}
-            placeholder="Masukkan nama dokter yang meresepkan"
+            placeholder={i18n.translate("createMedicine.doctorName.placeholder")}
             value={doctorName}
             onChangeText={setDoctorName}
             placeholderTextColor="#C7C7CC"
@@ -587,7 +606,7 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
 
         <View style={styles.section}>
         <AdaptivePicker
-            label="Jenis Obat"
+            label={i18n.translate("createMedicine.medicineTypes.label")}
             selectedValue={medicineType}
             onValueChange={setMedicineType}
             items={medicineTypes}
@@ -597,7 +616,7 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
             <Ionicons name="create" size={20} color="#007AFF" />
             <TextInput
                 style={styles.input}
-                placeholder="Sebutkan jenis obat lainnya"
+                placeholder={i18n.translate("createMedicine.medicineTypes.otherPlaceholder")}
                 value={otherMedicineType}
                 onChangeText={setOtherMedicineType}
                 placeholderTextColor="#C7C7CC"
@@ -609,7 +628,7 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
 
         <View style={styles.section}>
             <AdaptivePicker
-              label="Penyakit"
+              label={i18n.translate("createMedicine.diseases.label")}
               selectedValue={disease}
               onValueChange={setDisease}
               items={diseases}
@@ -619,7 +638,7 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
               <Ionicons name="create" size={20} color="#007AFF" />
               <TextInput
                   style={styles.input}
-                  placeholder="Sebutkan penyakit lainnya"
+                  placeholder={i18n.translate("createMedicine.diseases.otherPlaceholder")}
                   value={otherDisease}
                   onChangeText={setOtherDisease}
                   placeholderTextColor="#C7C7CC"
@@ -630,7 +649,7 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
 
         <View style={styles.section}>
           <AdaptivePicker
-            label="Bentuk Obat"
+            label={i18n.translate("createMedicine.medicineForms.label")}
             selectedValue={medicineForm}
             onValueChange={setMedicineForm}
             items={medicineForms}
@@ -640,12 +659,12 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
         {renderDosageInput()}
 
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Waktu Minum/Pakai</Text>
+        <Text style={styles.sectionLabel}>{i18n.translate("createMedicine.usageTime.label")}</Text>
           <View style={styles.inputContainer}>
             <Ionicons name="time" size={20} color="#007AFF" />
             <TextInput
               style={styles.input}
-              placeholder="Contoh: Setelah makan, sebelum tidur"
+              placeholder={i18n.translate("createMedicine.usageTime.placeholder")}
               value={usageTime}
               onChangeText={setUsageTime}
               placeholderTextColor="#C7C7CC"
@@ -665,18 +684,18 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
           </TouchableOpacity>
           {medicineImage && (
             <View style={{ marginTop: 10, alignItems: "center" }}>
-              <Text style={{ color: "#333" }}>Foto sudah dipilih</Text>
+              <Text style={{ color: "#333" }}>{i18n.translate("createMedicine.photo.selected")}</Text>
             </View>
           )}
         </View>
 
         <View style={styles.section}>
-  <Text style={styles.sectionLabel}>Catatan</Text>
+        <Text style={styles.sectionLabel}>{i18n.translate("createMedicine.notes.label")}</Text>
   <View style={styles.inputContainer}>
     <Ionicons name="create" size={20} color="#007AFF" />
     <TextInput
       style={styles.input}
-      placeholder="Tambahkan catatan untuk obat ini"
+      placeholder={i18n.translate("createMedicine.notes.placeholder")}
       value={notes}
       onChangeText={setNotes}
       placeholderTextColor="#C7C7CC"
@@ -687,7 +706,7 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
 
 <View style={styles.section}>
   <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-    <Text style={styles.sectionLabel}>Perlu dihabiskan?</Text>
+  <Text style={styles.sectionLabel}>{i18n.translate("createMedicine.mustFinish.label")}</Text>
     <Switch
       value={mustFinish}
       onValueChange={setMustFinish}
@@ -699,7 +718,7 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
 
         <View style={styles.section}>
           <TouchableOpacity style={styles.buttonSuccess} onPress={saveMedicineSchedule}>
-            <Text style={styles.buttonPrimaryText}>Simpan Jadwal Obat</Text>
+          <Text style={styles.buttonPrimaryText}>{i18n.translate("createMedicine.saveButton")}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
