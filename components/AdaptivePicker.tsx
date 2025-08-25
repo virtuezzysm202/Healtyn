@@ -1,6 +1,7 @@
 import { Picker } from "@react-native-picker/picker";
 import React from "react";
 import { Platform, StyleSheet, Text, View } from "react-native";
+import i18n from "../app/utils/i18n";
 
 type PickerItem = {
   label: string;
@@ -25,12 +26,12 @@ export default function AdaptivePicker({ selectedValue, onValueChange, items, la
         )}
         <select
           id="adaptive-picker"
-          title={label || "Select an option"}
+          title={label || i18n.translate("common.select")}
           value={selectedValue}
           onChange={(e) => onValueChange(e.target.value)}
           style={styles.webSelect as React.CSSProperties}
         >
-          <option value="">Pilih...</option>
+          <option value="">{i18n.translate("common.select")}</option>
           {items.map((item) => (
             <option key={item.value} value={item.value}>
               {item.label}
@@ -50,7 +51,7 @@ export default function AdaptivePicker({ selectedValue, onValueChange, items, la
         onValueChange={(value) => onValueChange(value)}
         style={styles.nativePicker}
       >
-        <Picker.Item label="Pilih..." value="" />
+        <Picker.Item label={i18n.translate("common.select")} value="" />
         {items.map((item) => (
           <Picker.Item key={item.value} label={item.label} value={item.value} />
         ))}

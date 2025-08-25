@@ -54,7 +54,7 @@ export default function DisplaySettings() {
                 isDark && styles.backButtonTextDark,
               ]}
             >
-              ‹ {t("common.back")}
+              ‹ {t("display.back")}
             </Text>
           </TouchableOpacity>
           <Text style={[styles.title, isDark && styles.titleDark]}>

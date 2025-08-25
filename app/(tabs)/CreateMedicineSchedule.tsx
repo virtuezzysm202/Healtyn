@@ -221,12 +221,16 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
       );
       return;
     }
-
-    Alert.alert("Pilih Foto Obat", "Pilih sumber foto obat", [
-      { text: "Kamera", onPress: openCamera },
-      { text: "Galeri", onPress: openGallery },
-      { text: "Batal", style: "cancel" },
-    ]);
+  
+    Alert.alert(
+      i18n.translate("createMedicine.photo.selectTitle"), 
+      i18n.translate("createMedicine.photo.selectMessage"), 
+      [
+        { text: i18n.translate("createMedicine.photo.camera"), onPress: openCamera },
+        { text: i18n.translate("createMedicine.photo.gallery"), onPress: openGallery },
+        { text: i18n.translate("common.cancel"), style: "cancel" },
+      ]
+    );
   };
 
   const openCamera = async () => {
@@ -431,12 +435,14 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
     } else {
       return (
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Dosis Sekali Pakai</Text>
+            <Text style={styles.sectionLabel}>
+    {i18n.translate("createMedicine.dosage.singleUse")}
+  </Text>
           <View style={styles.inputContainer}>
             <Ionicons name="medical" size={20} color="#007AFF" />
             <TextInput
               style={styles.input}
-              placeholder="Masukkan dosis (contoh: 1 tube, secukupnya)"
+              placeholder={i18n.translate("createMedicine.dosage.general.placeholder")}
               value={dosageAmount}
               onChangeText={(text) => {
                 setDosageAmount(text);
@@ -679,9 +685,9 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
         {renderDatePickerSection()}
 
         <View style={styles.section}>
-          <TouchableOpacity style={styles.buttonPrimary} onPress={pickImage}>
-            <Text style={styles.buttonPrimaryText}>Pilih Foto Obat</Text>
-          </TouchableOpacity>
+        <TouchableOpacity style={styles.buttonPrimary} onPress={pickImage}>
+  <Text style={styles.buttonPrimaryText}>{i18n.translate("createMedicine.photo.selectButton")}</Text>
+</TouchableOpacity>
           {medicineImage && (
             <View style={{ marginTop: 10, alignItems: "center" }}>
               <Text style={{ color: "#333" }}>{i18n.translate("createMedicine.photo.selected")}</Text>

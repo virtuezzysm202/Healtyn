@@ -56,6 +56,10 @@ interface MedicineSchedule {
 }
 
 export default function HomePage() {
+
+
+  
+
   const router = useRouter();
   const { t } = useTranslation();
   const [darkMode, setDarkMode] = useState(false);
