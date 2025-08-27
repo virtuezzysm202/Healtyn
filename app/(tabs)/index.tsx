@@ -11,6 +11,7 @@ import {
   ScrollView,
   StyleSheet,
   Switch,
+  TextInput,
   View,
 } from 'react-native';
 import LansiaText from '../../components/ui/LansiaText';
@@ -18,16 +19,26 @@ import { getAllSchedules } from '../services/medicineStorage';
 
 const API_KEY = process.env.EXPO_PUBLIC_WEATHER_API_KEY ?? '';
 
+// ===== Types =====
 type WeatherData = {
   weather: { icon: string; description: string }[];
-  main: { temp: number };
+  main: { temp: number; humidity?: number };
+  wind?: { speed: number };
   name?: string;
 };
+
+type AppRoute =
+  | '/medicine'
+  | '/scan'
+  | '/call-doctor'
+  | '/family'
+  | '/health'
+  | '/relax-music';
 
 type MenuItem = {
   icon: string;
   label: string;
-  route: string;
+  route: AppRoute;
 };
 
 interface HealthTip {
@@ -55,28 +66,44 @@ interface MedicineSchedule {
   medicineImage?: string;
 }
 
+type GeoLocation = {
+  name: string;
+  lat: number;
+  lon: number;
+  state?: string;
+  country?: string;
+};
+
 export default function HomePage() {
-
-
-  
-
   const router = useRouter();
   const { t } = useTranslation();
+
+  // ===== UI / App State =====
   const [darkMode, setDarkMode] = useState(false);
+
+  // ===== Weather State =====
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loadingWeather, setLoadingWeather] = useState(true);
   const [weatherError, setWeatherError] = useState<string | null>(null);
-  
-  // State untuk health data
+
+  // Lokasi: tersimpan, dipilih, dan hasil pencarian
+  const [savedLocations, setSavedLocations] = useState<GeoLocation[]>([]);
+  const [selectedLocation, setSelectedLocation] = useState<GeoLocation | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<GeoLocation[]>([]);
+
+  // ===== Health State =====
   const [healthCondition, setHealthCondition] = useState<"healthy" | "sick" | null>(null);
   const [healthReminders, setHealthReminders] = useState<HealthTip[]>([]);
-  
-  // State untuk medicine reminders
+
+  // ===== Medicine State =====
   const [medicineSchedules, setMedicineSchedules] = useState<MedicineSchedule[]>([]);
   const [loadingMedicine, setLoadingMedicine] = useState(true);
 
   const toggleDarkMode = () => setDarkMode((v) => !v);
 
+  // Menu dengan route bertipe aman (menghindari TS2345 saat router.push)
   const menuItems: MenuItem[] = [
     { icon: 'medkit', label: t('home.menu.medicineReminder'), route: '/medicine' },
     { icon: 'book', label: t('home.menu.scanBook'), route: '/scan' },
@@ -86,6 +113,7 @@ export default function HomePage() {
     { icon: 'music', label: t('home.menu.relaxMusic'), route: '/relax-music' },
   ];
 
+  // ===== Helpers =====
   const mapIconToEmoji = (icon?: string) => {
     if (!icon) return '🌤';
     if (icon.startsWith('01')) return '☀️';
@@ -106,43 +134,168 @@ export default function HomePage() {
     return { icon: '🧥', text: t('home.weather.outfit.cold') };
   };
 
-  // Get next medicine reminder
+  // Normalisasi lokasi dari hasil geocoding (lat/lon) atau GPS (coords)
+  const normalizeLocation = (location: any): GeoLocation | null => {
+    if (location?.lat != null && location?.lon != null) {
+      // OpenWeather Direct Geocoding result
+      return {
+        name: location.name ?? `${location.lat},${location.lon}`,
+        lat: Number(location.lat),
+        lon: Number(location.lon),
+        state: location.state,
+        country: location.country,
+      };
+    }
+    if (location?.coords) {
+      // Expo Location result - akan di-update dengan nama kota nanti
+      return {
+        name: 'Getting location...', // temporary name
+        lat: Number(location.coords.latitude),
+        lon: Number(location.coords.longitude),
+      };
+    }
+    return null;
+  };
+
+  const getCityNameFromCoords = async (lat: number, lon: number): Promise<string> => {
+    try {
+      const response = await fetch(
+        `https://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=1&appid=${API_KEY}`
+      );
+      const data = await response.json();
+      if (data && data.length > 0) {
+        return data[0].name || `${lat},${lon}`;
+      }
+      return `${lat},${lon}`;
+    } catch (error) {
+      console.error('Error getting city name:', error);
+      return `${lat},${lon}`;
+    }
+  };
+
+  // ===== Weather: API calls =====
+  const fetchWeather = async (loc: GeoLocation) => {
+    try {
+      if (!API_KEY) {
+        throw new Error(t('home.weather.apiError'));
+      }
+      setLoadingWeather(true);
+      const url = `https://api.openweathermap.org/data/2.5/weather?lat=${loc.lat}&lon=${loc.lon}&appid=${API_KEY}&units=metric&lang=id`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`Gagal fetch weather: ${res.status}`);
+      const data: WeatherData = await res.json();
+      setWeather(data);
+      setWeatherError(null);
+    } catch (err: any) {
+      setWeatherError(err?.message ?? t('home.weather.generalError'));
+    } finally {
+      setLoadingWeather(false);
+    }
+  };
+
+  const selectLocationForWeather = async (location: any) => {
+    const normalized = normalizeLocation(location);
+    if (!normalized) return;
+    
+    setSelectedLocation(normalized);
+    await fetchWeather(normalized);
+    
+    // Simpan lokasi yang dipilih ke saved locations
+    await addLocation(normalized);
+    
+    // Simpan sebagai lokasi terakhir dipilih
+    await AsyncStorage.setItem('lastSelectedLocation', JSON.stringify(normalized));
+    
+    setIsSearching(false);
+    setSearchQuery('');
+    setSearchResults([]);
+  };
+
+  const searchLocation = async (query: string) => {
+    if (!query?.trim()) return;
+    try {
+      const res = await fetch(
+        `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(
+          query.trim()
+        )}&limit=5&appid=${API_KEY}`
+      );
+      const data = (await res.json()) as any[];
+      const mapped: GeoLocation[] = data.map((d) => ({
+        name: d.name,
+        lat: d.lat,
+        lon: d.lon,
+        state: d.state,
+        country: d.country,
+      }));
+      setSearchResults(mapped);
+    } catch (error) {
+      console.error('Error searching location:', error);
+    }
+  };
+
+  // Tambah lokasi ke daftar tersimpan (hindari duplikat lat/lon)
+  const addLocation = async (location: GeoLocation) => {
+    const exists = savedLocations.some(
+      (l) => l.lat === location.lat && l.lon === location.lon
+    );
+    if (exists) return;
+    const updated = [...savedLocations, location];
+    setSavedLocations(updated);
+    await AsyncStorage.setItem('savedLocations', JSON.stringify(updated));
+  };
+
+  // Hapus lokasi dari daftar tersimpan
+  const deleteLocation = async (location: GeoLocation) => {
+    const updated = savedLocations.filter(
+      (l) => !(l.lat === location.lat && l.lon === location.lon)
+    );
+    setSavedLocations(updated);
+    await AsyncStorage.setItem('savedLocations', JSON.stringify(updated));
+  };
+
+  // ===== Medicine Reminder =====
   const getNextMedicineReminder = () => {
     if (medicineSchedules.length === 0) return null;
-    
+
     const now = new Date();
     const currentTime = now.getHours() * 60 + now.getMinutes();
-    
-    let nextReminder = null;
-    let minTimeDiff = Infinity;
-    
-    for (const schedule of medicineSchedules) {
 
+    let nextReminder: {
+      medicine: string;
+      time: string;
+      dosage: string;
+      isToday: boolean;
+    } | null = null;
+
+    let minTimeDiff = Infinity;
+
+    for (const schedule of medicineSchedules) {
       const endDate = new Date(schedule.endDate);
       if (endDate < now) continue;
-      
+
       for (const alarmTime of schedule.alarmTimes) {
         const alarm = new Date(alarmTime);
         const alarmMinutes = alarm.getHours() * 60 + alarm.getMinutes();
-        
-        
+
         let timeDiff = alarmMinutes - currentTime;
-        if (timeDiff < 0) timeDiff += 24 * 60; 
-        
+        if (timeDiff < 0) timeDiff += 24 * 60;
+
         if (timeDiff < minTimeDiff) {
           minTimeDiff = timeDiff;
           nextReminder = {
             medicine: schedule.medicineName,
             time: alarm.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             dosage: `${schedule.dosageAmount} ${schedule.dosageUnit}`,
-            isToday: timeDiff < 24 * 60
+            isToday: timeDiff < 24 * 60,
           };
         }
       }
     }
-    
+
     return nextReminder;
   };
+
+  // ===== Effects =====
 
   // Load medicine schedules
   useEffect(() => {
@@ -159,34 +312,29 @@ export default function HomePage() {
     };
 
     loadMedicineSchedules();
-    
-    // Refresh medicine schedules
-    const interval = setInterval(loadMedicineSchedules, 30000); // Every 30 seconds
+    const interval = setInterval(loadMedicineSchedules, 30000); // refresh tiap 30 detik
     return () => clearInterval(interval);
   }, []);
 
-  // Load health data
+  // Load health data (condition + reminders)
   useEffect(() => {
     const loadHealthData = async () => {
       try {
-        const savedCondition = await AsyncStorage.getItem("healthCondition");
+        const savedCondition = await AsyncStorage.getItem('healthCondition');
         if (savedCondition) {
-          setHealthCondition(savedCondition as "healthy" | "sick");
+          setHealthCondition(savedCondition as 'healthy' | 'sick');
         }
 
-        // Load default tips
-        const savedDefaultTips = await AsyncStorage.getItem("defaultHealthTips");
+        const savedDefaultTips = await AsyncStorage.getItem('defaultHealthTips');
         const defaultTips = savedDefaultTips ? JSON.parse(savedDefaultTips) : { healthy: [], sick: [] };
-        
-        // Load custom tips
-        const savedCustomTips = await AsyncStorage.getItem("customTipsByCondition");
+
+        const savedCustomTips = await AsyncStorage.getItem('customTipsByCondition');
         const customTips = savedCustomTips ? JSON.parse(savedCustomTips) : { healthy: [], sick: [] };
 
         if (savedCondition) {
-          const condition = savedCondition as "healthy" | "sick";
+          const condition = savedCondition as 'healthy' | 'sick';
           const defaultReminders = defaultTips[condition]?.filter((tip: HealthTip) => tip.showOnHome) || [];
           const customReminders = customTips[condition]?.filter((tip: HealthTip) => tip.showOnHome) || [];
-          
           setHealthReminders([...defaultReminders, ...customReminders]);
         }
       } catch (error) {
@@ -195,66 +343,90 @@ export default function HomePage() {
     };
 
     loadHealthData();
-    
-   
-    const interval = setInterval(loadHealthData, 5000); // Check every 5 seconds
+    const interval = setInterval(loadHealthData, 5000); // cek tiap 5 detik
     return () => clearInterval(interval);
   }, []);
 
+  // Load lokasi tersimpan saat start
   useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        if (!API_KEY) {
-          setWeatherError(t('home.weather.apiError'));
-          setLoadingWeather(false);
-          return;
-        }
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') {
-          setWeatherError(t('home.weather.permissionError'));
-          setLoadingWeather(false);
-          return;
-        }
-        const location = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.Low,
-        });
-        const { latitude, longitude } = location.coords;
-        const res = await fetch(
-          `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${API_KEY}&units=metric&lang=id`
-        );
-        if (!res.ok) throw new Error(`Fetch gagal: ${res.status}`);
-        const data: WeatherData = await res.json();
-        if (mounted) setWeather(data);
-      } catch (err: any) {
-        setWeatherError(err.message ?? t('home.weather.generalError'));
-      } finally {
-        if (mounted) setLoadingWeather(false);
-      }
-    })();
-    return () => {
-      mounted = false;
+    const loadLocations = async () => {
+      const saved = await AsyncStorage.getItem('savedLocations');
+      if (saved) setSavedLocations(JSON.parse(saved));
     };
+    loadLocations();
   }, []);
 
+// Ambil cuaca dari lokasi terakhir dipilih atau GPS
+useEffect(() => {
+  let mounted = true;
+
+  (async () => {
+    try {
+      if (!API_KEY) {
+        setWeatherError(t('home.weather.apiError'));
+        setLoadingWeather(false);
+        return;
+      }
+
+      // Cek lokasi terakhir yang dipilih
+      const lastSelected = await AsyncStorage.getItem('lastSelectedLocation');
+      if (lastSelected && mounted) {
+        const savedLocation = JSON.parse(lastSelected);
+        setSelectedLocation(savedLocation);
+        await fetchWeather(savedLocation);
+        return;
+      }
+
+      // Jika tidak ada lokasi tersimpan, gunakan GPS
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setWeatherError(t('home.weather.permissionError'));
+        setLoadingWeather(false);
+        return;
+      }
+      
+      const deviceLoc = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Low,
+      });
+      const normalized = normalizeLocation(deviceLoc);
+      if (mounted && normalized) {
+        setSelectedLocation(normalized);
+        await fetchWeather(normalized);
+        
+        // Get actual city name untuk GPS location
+        const cityName = await getCityNameFromCoords(normalized.lat, normalized.lon);
+        const updatedLocation = { ...normalized, name: cityName };
+        setSelectedLocation(updatedLocation);
+      }
+    } catch (err: any) {
+      setWeatherError(err?.message ?? t('home.weather.generalError'));
+    } finally {
+      if (mounted) setLoadingWeather(false);
+    }
+  })();
+
+  return () => {
+    mounted = false;
+  };
+}, []);
+  // ===== Greeting =====
   const getGreetingMessage = () => {
     if (!healthCondition) return null;
-    
+
     if (healthCondition === 'sick') {
       return {
         title: t('home.greeting.sickTitle'),
         subtitle: t('home.greeting.sickSubtitle'),
         bgColor: '#FFE5E5',
-        textColor: '#D32F2F'
-      };
-    } else {
-      return {
-        title: t('home.greeting.healthyTitle'),
-        subtitle: t('home.greeting.healthySubtitle'),
-        bgColor: '#E8F5E8',
-        textColor: '#2E7D32'
+        textColor: '#D32F2F',
       };
     }
+    return {
+      title: t('home.greeting.healthyTitle'),
+      subtitle: t('home.greeting.healthySubtitle'),
+      bgColor: '#E8F5E8',
+      textColor: '#2E7D32',
+    };
   };
 
   const greeting = getGreetingMessage();
@@ -387,71 +559,166 @@ export default function HomePage() {
         </View>
       )}
 
-      {/* Weather Card - iOS Modern Design */}
-      <View style={[styles.weatherCard, darkMode && styles.darkWeatherCard]}>
-        {loadingWeather ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="small" color="#007AFF" />
-            <LansiaText style={[styles.loadingText, darkMode && styles.darkText]}>
-              {t('home.weather.loading')}
-            </LansiaText>
-          </View>
-        ) : weather ? (
-          <>
-            {/* Main Weather Info */}
-            <View style={styles.weatherHeader}>
-              <View style={styles.weatherIconContainer}>
-                <LansiaText style={styles.weatherEmoji}>
-                  {mapIconToEmoji(weather.weather[0]?.icon)}
-                </LansiaText>
-              </View>
-              <View style={styles.weatherInfo}>
-                <LansiaText style={[styles.locationText, darkMode && styles.darkText]}>
-                  📍 {weather.name ?? t('home.weather.yourLocation')}
-                </LansiaText>
-                <LansiaText style={[styles.temperatureText, darkMode && styles.darkText]}>
-                  {Math.round(weather.main.temp)}°
-                </LansiaText>
-                <LansiaText style={[styles.weatherDescription, darkMode && styles.darkSubText]}>
-                  {weather.weather[0]?.description?.replace(
-                    /^\w/,
-                    (c) => c.toUpperCase()
-                  )}
-                </LansiaText>
-              </View>
-            </View>
-
-            {/* Divider */}
-            <View style={[styles.divider, darkMode && styles.darkDivider]} />
-
-            {/* Outfit Recommendation */}
-            <View style={styles.recommendationContainer}>
-              <View style={styles.recommendationHeader}>
-                <LansiaText style={[styles.recommendationTitle, darkMode && styles.darkText]}>
-                  {t('home.weather.recommendationTitle')}
-                </LansiaText>
-              </View>
-              <View style={styles.outfitRow}>
-                <View style={styles.outfitIconContainer}>
-                  <LansiaText style={styles.outfitIcon}>
-                    {getOutfitRecommendation(weather.main.temp).icon}
-                  </LansiaText>
-                </View>
-                <LansiaText style={[styles.outfitText, darkMode && styles.darkSubText]}>
-                  {getOutfitRecommendation(weather.main.temp).text}
-                </LansiaText>
-              </View>
-            </View>
-          </>
-        ) : (
-          <View style={styles.errorContainer}>
-            <LansiaText style={styles.errorIcon}>⚠️</LansiaText>
-            <LansiaText style={[styles.errorText, darkMode && styles.darkText]}>
-              {weatherError ?? t('home.weather.generalError')}
-            </LansiaText>
-          </View>
-        )}
+     {/* Weather Card - iOS Modern Design */}
+<View style={[styles.weatherCard, darkMode && styles.darkWeatherCard]}>
+  {loadingWeather ? (
+    <View style={styles.loadingContainer}>
+      <ActivityIndicator size="small" color="#007AFF" />
+      <LansiaText style={[styles.loadingText, darkMode && styles.darkText]}>
+        {t("home.weather.loading")}
+      </LansiaText>
+    </View>
+  ) : weather ? (
+    <>
+      {/* Main Weather Info */}
+      <View style={styles.weatherHeader}>
+        <View style={styles.weatherIconContainer}>
+          <LansiaText style={styles.weatherEmoji}>
+            {mapIconToEmoji(weather.weather[0]?.icon)}
+          </LansiaText>
+        </View>
+        <View style={styles.weatherInfo}>
+          <LansiaText style={[styles.locationText, darkMode && styles.darkText]}>
+          📍 {selectedLocation?.name ?? weather.name ?? t("home.weather.yourLocation")}
+          </LansiaText>
+          <LansiaText style={[styles.temperatureText, darkMode && styles.darkText]}>
+            {Math.round(weather.main.temp)}°
+          </LansiaText>
+          <LansiaText style={[styles.weatherDescription, darkMode && styles.darkSubText]}>
+            {weather.weather[0]?.description?.replace(/^\w/, (c) => c.toUpperCase())}
+          </LansiaText>
+        </View>
       </View>
+
+      {/* Divider */}
+      <View style={[styles.divider, darkMode && styles.darkDivider]} />
+
+      {/* Outfit Recommendation */}
+      <View style={styles.recommendationContainer}>
+        <View style={styles.recommendationHeader}>
+          <LansiaText style={[styles.recommendationTitle, darkMode && styles.darkText]}>
+            {t("home.weather.recommendationTitle")}
+          </LansiaText>
+        </View>
+        <View style={styles.outfitRow}>
+          <View style={styles.outfitIconContainer}>
+            <LansiaText style={styles.outfitIcon}>
+              {getOutfitRecommendation(weather.main.temp).icon}
+            </LansiaText>
+          </View>
+          <LansiaText style={[styles.outfitText, darkMode && styles.darkSubText]}>
+            {getOutfitRecommendation(weather.main.temp).text}
+          </LansiaText>
+        </View>
+      </View>
+    </>
+  ) : (
+    <View style={styles.errorContainer}>
+      <LansiaText style={styles.errorIcon}>⚠️</LansiaText>
+      <LansiaText style={[styles.errorText, darkMode && styles.darkText]}>
+        {weatherError ?? t("home.weather.generalError")}
+      </LansiaText>
+    </View>
+  )}
+</View>
+
+{/* Search & Saved Locations */}
+<View>
+  {/* Search Box */}
+  {isSearching && (
+    <View style={styles.searchContainer}>
+      <TextInput
+        style={[styles.searchInput, darkMode && styles.darkInput]}
+        placeholder={t("home.weather.searchPlaceholder")}
+        placeholderTextColor={darkMode ? "#8E8E93" : "#C7C7CC"}
+        value={searchQuery}
+        onChangeText={(text) => {
+          setSearchQuery(text);
+          searchLocation(text); // fungsi backend
+        }}
+      />
+      {searchResults.map((loc, idx) => (
+        <Pressable
+          key={idx}
+          style={styles.searchResult}
+          onPress={() => selectLocationForWeather(loc)}
+        >
+          <LansiaText style={[styles.searchResultText, darkMode && styles.darkText]}>
+            {loc.name}, {loc.country}
+          </LansiaText>
+        </Pressable>
+      ))}
+    </View>
+  )}
+
+  {/* Saved Locations */}
+  {savedLocations.length > 0 && (
+    <View style={styles.savedContainer}>
+      <LansiaText style={[styles.savedTitle, darkMode && styles.darkText]}>
+        {t("home.weather.savedLocations")}
+      </LansiaText>
+      {savedLocations.map((loc, idx) => (
+        <View key={idx} style={styles.savedRow}>
+          <Pressable onPress={() => selectLocationForWeather(loc)}>
+            <LansiaText style={[styles.savedText, darkMode && styles.darkText]}>
+              📍 {loc.name}, {loc.country}
+            </LansiaText>
+          </Pressable>
+          <Pressable onPress={() => deleteLocation(loc)}>
+            <LansiaText style={styles.deleteText}>❌</LansiaText>
+          </Pressable>
+        </View>
+      ))}
+    </View>
+  )}
+
+  {/* Button to Toggle Search */}
+  <Pressable
+    style={styles.searchToggle}
+    onPress={() => setIsSearching(!isSearching)}
+  >
+    <LansiaText style={styles.searchToggleText}>
+      {isSearching ? t("home.weather.closeSearch") : t("home.weather.addLocation")}
+    </LansiaText>
+  </Pressable>
+
+  {/* Button untuk kembali ke GPS location */}
+  <Pressable
+  style={[styles.gpsButton, darkMode && styles.darkGpsButton]}
+  onPress={async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') return;
+      
+      const deviceLoc = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Low,
+      });
+      const normalized = normalizeLocation(deviceLoc);
+      if (normalized) {
+        // Set temporary location first
+        setSelectedLocation(normalized);
+        await fetchWeather(normalized);
+        
+        // Get actual city name
+        const cityName = await getCityNameFromCoords(normalized.lat, normalized.lon);
+        const updatedLocation = { ...normalized, name: cityName };
+        
+        setSelectedLocation(updatedLocation);
+        await AsyncStorage.removeItem('lastSelectedLocation');
+      }
+    } catch (error) {
+      console.error('Error getting current location:', error);
+    }
+  }}
+>
+  <LansiaText style={[styles.gpsButtonText, darkMode && styles.darkText]}>
+    📍 {t("home.weather.useCurrentLocation")}
+  </LansiaText>
+</Pressable>
+</View>
+
+
+
 
       {/* Health Reminder Cards */}
       {healthReminders.length > 0 && (
@@ -909,5 +1176,74 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 18,
   },
+  searchContainer: {
+    backgroundColor: "#F2F2F7",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 16,
+  },
+  searchInput: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 8,
+    padding: 10,
+    fontSize: 16,
+    marginBottom: 8,
+  },
+  darkInput: {
+    backgroundColor: "#2C2C2E",
+    color: "#FFFFFF",
+  },
+  searchResult: {
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E5EA",
+  },
+  searchResultText: {
+    fontSize: 16,
+    color: "#1D1D1F",
+  },
+  savedContainer: {
+    marginTop: 12,
+  },
+  savedTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 8,
+  },
+  savedRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 6,
+  },
+  savedText: {
+    fontSize: 15,
+  },
+  deleteText: {
+    fontSize: 14,
+    color: "#FF3B30",
+  },
+  searchToggle: {
+    marginTop: 12,
+    alignSelf: "flex-start",
+    padding: 8,
+  },
+  searchToggleText: {
+    color: "#007AFF",
+    fontWeight: "500",
+  },gpsButton: {
+    backgroundColor: '#007AFF',
+    borderRadius: 12,
+    padding: 12,
+    marginTop: 8,
+    alignItems: 'center',
+  },
+  darkGpsButton: {
+    backgroundColor: '#0A84FF',
+  },
+  gpsButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
+    fontSize: 16,
+  },
 });
-

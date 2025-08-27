@@ -95,13 +95,18 @@ export default function MedicineScreen() {
   // Actually delete the schedule
   const confirmDeleteSchedule = async (scheduleId: string) => {
     try {
+      console.log('Attempting to delete schedule:', scheduleId);
       setDeletingId(scheduleId);
-      await deleteSchedule(scheduleId); // Panggil function delete dari storage
+      
+      await deleteSchedule(scheduleId);
+      console.log('Schedule deleted successfully');
       
       // Update local state
-      setSavedSchedules(prevSchedules => 
-        prevSchedules.filter(schedule => schedule.id !== scheduleId)
-      );
+      setSavedSchedules(prevSchedules => {
+        const filtered = prevSchedules.filter(schedule => schedule.id !== scheduleId);
+        console.log('Updated schedules count:', filtered.length);
+        return filtered;
+      });
       
       Alert.alert(t('medicine.deleteSuccessTitle'), t('medicine.deleteSuccessMessage'));
     } catch (error) {

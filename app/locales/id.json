@@ -26,6 +26,11 @@
       "permissionError": "Izin lokasi ditolak",
       "generalError": "Gagal memuat cuaca",
       "yourLocation": "Lokasi Anda",
+      "searchPlaceholder": "Cari kota atau lokasi...",
+      "savedLocations": "Lokasi Tersimpan",
+      "addLocation": "Tambah Lokasi",
+      "closeSearch": "Tutup Pencarian",
+      "useCurrentLocation": "Gunakan Lokasi Saat Ini",
       "outfit": {
         "hot": "Pakaian tipis & topi",
         "warm": "Kaos & celana panjang",

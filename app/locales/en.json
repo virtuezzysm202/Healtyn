@@ -26,6 +26,11 @@
       "permissionError": "Location permission denied",
       "generalError": "Failed to load weather",
       "yourLocation": "Your Location",
+      "searchPlaceholder": "Search city or location...",
+      "savedLocations": "Saved Locations",
+      "addLocation": "Add Location",
+      "closeSearch": "Close Search",
+      "useCurrentLocation": "Use Current Location",
       "outfit": {
         "hot": "Wear light clothes & a hat",
         "warm": "T-shirt & long pants",

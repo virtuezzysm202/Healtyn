@@ -57,16 +57,17 @@ export async function updateSchedule(updatedSchedule: MedicineSchedule) {
   }
 }
 
-export async function deleteSchedule(id: string) {
+export const deleteSchedule = async (scheduleId: string) => {
   try {
-    const schedules = await getAllSchedules();
-    const filtered = schedules.filter(s => s.id !== id);
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
+    const existingSchedules = await getAllSchedules();
+    const updatedSchedules = existingSchedules.filter(schedule => schedule.id !== scheduleId);
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedSchedules)); // Gunakan STORAGE_KEY
+    return true;
   } catch (error) {
     console.error('Error deleting schedule:', error);
     throw error;
   }
-}
+};
 
 // Utility functions tambahan yang berguna
 
