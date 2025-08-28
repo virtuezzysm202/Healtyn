@@ -14,6 +14,9 @@
   "home": {
     "appName": "Elderly Helper",
     "appSubtitle": "Daily health companion",
+    "medicineReminder": {
+      "title": "Medicine Reminders"
+    },
     "greeting": {
       "healthyTitle": "Stay Healthy!",
       "healthySubtitle": "Take care of your body every day",

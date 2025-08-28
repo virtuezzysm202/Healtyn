@@ -11,26 +11,10 @@ interface CustomTip {
 }
 
 export default function HealthPage() {
-  const healthyTips = [
-    { id: "h1", tip: i18n.translate("healthPage.healthy.tip1"), showOnHome: false },
-    { id: "h2", tip: i18n.translate("healthPage.healthy.tip2"), showOnHome: false },
-    { id: "h3", tip: i18n.translate("healthPage.healthy.tip3"), showOnHome: false },
-    { id: "h4", tip: i18n.translate("healthPage.healthy.tip4"), showOnHome: false },
-    { id: "h5", tip: i18n.translate("healthPage.healthy.tip5"), showOnHome: false },
-  ];
-
-  const sickTips = [
-    { id: "s1", tip: i18n.translate("healthPage.sick.tip1"), showOnHome: false },
-    { id: "s2", tip: i18n.translate("healthPage.sick.tip2"), showOnHome: false },
-    { id: "s3", tip: i18n.translate("healthPage.sick.tip3"), showOnHome: false },
-    { id: "s4", tip: i18n.translate("healthPage.sick.tip4"), showOnHome: false },
-    { id: "s5", tip: i18n.translate("healthPage.sick.tip5"), showOnHome: false },
-  ];
-
   const [condition, setCondition] = useState<"healthy" | "sick" | null>(null);
-  const [defaultTips, setDefaultTips] = useState<{ healthy: typeof healthyTips; sick: typeof sickTips }>({
-    healthy: healthyTips,
-    sick: sickTips,
+  const [defaultTips, setDefaultTips] = useState<{ healthy: any[]; sick: any[] }>({
+    healthy: [],
+    sick: [],
   });
   const [customTips, setCustomTips] = useState<{ healthy: CustomTip[]; sick: CustomTip[] }>({
     healthy: [],
@@ -40,18 +24,62 @@ export default function HealthPage() {
   const [newTip, setNewTip] = useState("");
   const [isAdding, setIsAdding] = useState(false);
 
-  // Load data dari AsyncStorage
+  // Function untuk generate tips dengan translasi terbaru
+  const generateDefaultTips = () => {
+    const healthyTips = [
+      { id: "h1", tip: i18n.translate("healthPage.healthy.tip1"), showOnHome: false },
+      { id: "h2", tip: i18n.translate("healthPage.healthy.tip2"), showOnHome: false },
+      { id: "h3", tip: i18n.translate("healthPage.healthy.tip3"), showOnHome: false },
+      { id: "h4", tip: i18n.translate("healthPage.healthy.tip4"), showOnHome: false },
+      { id: "h5", tip: i18n.translate("healthPage.healthy.tip5"), showOnHome: false },
+    ];
+
+    const sickTips = [
+      { id: "s1", tip: i18n.translate("healthPage.sick.tip1"), showOnHome: false },
+      { id: "s2", tip: i18n.translate("healthPage.sick.tip2"), showOnHome: false },
+      { id: "s3", tip: i18n.translate("healthPage.sick.tip3"), showOnHome: false },
+      { id: "s4", tip: i18n.translate("healthPage.sick.tip4"), showOnHome: false },
+      { id: "s5", tip: i18n.translate("healthPage.sick.tip5"), showOnHome: false },
+    ];
+
+    return { healthy: healthyTips, sick: sickTips };
+  };
+
+  // Load data dari AsyncStorage dan generate tips
   useEffect(() => {
     (async () => {
+      // Load custom tips
       const saved = await AsyncStorage.getItem("customTipsByCondition");
       if (saved) setCustomTips(JSON.parse(saved));
 
+      // Load saved condition
       const savedCondition = await AsyncStorage.getItem("healthCondition");
       if (savedCondition) setCondition(savedCondition as "healthy" | "sick");
 
+      // Load atau generate default tips
       const savedDefaultTips = await AsyncStorage.getItem("defaultHealthTips");
-      if (savedDefaultTips) setDefaultTips(JSON.parse(savedDefaultTips));
+      if (savedDefaultTips) {
+        setDefaultTips(JSON.parse(savedDefaultTips));
+      } else {
+        // Generate tips baru jika belum ada yang tersimpan
+        const freshTips = generateDefaultTips();
+        setDefaultTips(freshTips);
+        await AsyncStorage.setItem("defaultHealthTips", JSON.stringify(freshTips));
+      }
     })();
+  }, []);
+
+  // Update tips translation ketika komponen mount (untuk memastikan translasi terbaru)
+  useEffect(() => {
+    const updateTipsTranslation = async () => {
+      const freshTips = generateDefaultTips();
+      setDefaultTips(freshTips);
+      await AsyncStorage.setItem("defaultHealthTips", JSON.stringify(freshTips));
+    };
+    
+    // Delay sedikit untuk memastikan i18n sudah siap
+    const timer = setTimeout(updateTipsTranslation, 100);
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {

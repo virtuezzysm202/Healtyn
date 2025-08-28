@@ -1,4 +1,5 @@
 import { Tabs } from 'expo-router';
+import { Heart, Home, Pill, Settings } from 'lucide-react-native';
 import { Text, View } from 'react-native';
 import { useSettings } from '../contexts/SettingsContext';
 
@@ -56,12 +57,11 @@ export default function TabLayout() {
         options={{
           title: t.home,
           tabBarIcon: ({ color, focused }) => (
-            <Text style={{ 
-              fontSize: 24, 
-              opacity: focused ? 1 : 0.6 
-            }}>
-              🏠
-            </Text>
+            <Home 
+              size={24}
+              color={color}
+              style={{ opacity: focused ? 1 : 0.6 }}
+            />
           ),
           headerShown: false,
         }}
@@ -71,12 +71,11 @@ export default function TabLayout() {
         options={{
           title: t.health,
           tabBarIcon: ({ color, focused }) => (
-            <Text style={{ 
-              fontSize: 24, 
-              opacity: focused ? 1 : 0.6 
-            }}>
-              🏥
-            </Text>
+            <Heart 
+              size={24}
+              color={color}
+              style={{ opacity: focused ? 1 : 0.6 }}
+            />
           ),
           headerShown: false,
         }}
@@ -86,12 +85,11 @@ export default function TabLayout() {
         options={{
           title: t.medicine,
           tabBarIcon: ({ color, focused }) => (
-            <Text style={{ 
-              fontSize: 24, 
-              opacity: focused ? 1 : 0.6 
-            }}>
-              💊
-            </Text>
+            <Pill 
+              size={24}
+              color={color}
+              style={{ opacity: focused ? 1 : 0.6 }}
+            />
           ),
           headerShown: false,
         }}
@@ -101,12 +99,11 @@ export default function TabLayout() {
         options={{
           title: t.settings,
           tabBarIcon: ({ color, focused }) => (
-            <Text style={{ 
-              fontSize: 24, 
-              opacity: focused ? 1 : 0.6 
-            }}>
-              ⚙️
-            </Text>
+            <Settings 
+              size={24}
+              color={color}
+              style={{ opacity: focused ? 1 : 0.6 }}
+            />
           ),
           headerShown: false,
         }}
