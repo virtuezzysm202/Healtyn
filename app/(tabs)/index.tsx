@@ -15,7 +15,7 @@ import {
   View,
 } from 'react-native';
 import LansiaText from '../../components/ui/LansiaText';
-import { getAllSchedules } from '../services/medicineStorage';
+import { getAllSchedules } from '../../services/medicineStorage';
 
 const API_KEY = process.env.EXPO_PUBLIC_WEATHER_API_KEY ?? '';
 
@@ -29,7 +29,7 @@ type WeatherData = {
 
 type AppRoute =
   | '/medicine'
-  | '/scan'
+  | '/health-check'
   | '/call-doctor'
   | '/family'
   | '/health'
@@ -103,10 +103,10 @@ export default function HomePage() {
 
   const toggleDarkMode = () => setDarkMode((v) => !v);
 
-  // Menu dengan route bertipe aman (menghindari TS2345 saat router.push)
+
   const menuItems: MenuItem[] = [
     { icon: 'medkit', label: t('home.menu.medicineReminder'), route: '/medicine' },
-    { icon: 'book', label: t('home.menu.scanBook'), route: '/scan' },
+    { icon: 'stethoscope', label: t('home.menu.health-check'), route: '/health-check' },
     { icon: 'user-md', label: t('home.menu.callDoctor'), route: '/call-doctor' },
     { icon: 'users', label: t('home.menu.callFamily'), route: '/family' },
     { icon: 'heartbeat', label: t('home.menu.health'), route: '/health' },

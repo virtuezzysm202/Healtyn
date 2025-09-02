@@ -1,11 +1,12 @@
-import { Stack } from 'expo-router';
-import { SettingsProvider } from './contexts/SettingsContext';
+import { Stack } from "expo-router";
+import { SettingsProvider } from "../contexts/SettingsContext";
 
 export default function RootLayout() {
   return (
     <SettingsProvider>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack screenOptions={{ headerShown: false }}>
+        {/* Hanya render tab layout, bukan index langsung */}
+        <Stack.Screen name="(tabs)" />
         <Stack.Screen name="+not-found" />
       </Stack>
     </SettingsProvider>

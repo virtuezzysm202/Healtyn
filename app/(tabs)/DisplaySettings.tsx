@@ -7,8 +7,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useSettings } from "../../contexts/SettingsContext";
 import { useTranslation } from "../../hooks/useTranslation";
-import { useSettings } from "../contexts/SettingsContext";
 
 export default function DisplaySettings() {
   const { theme, setLanguage, setTheme } = useSettings();

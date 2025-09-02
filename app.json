@@ -8,6 +8,7 @@
     "scheme": "lansiahelper",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "entryPoint": "node_modules/expo-router/entry",
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
@@ -51,7 +52,8 @@
           "photosPermission": "Aplikasi memerlukan akses ke galeri untuk memilih gambar yang akan dipindai.",
           "cameraPermission": "Aplikasi memerlukan akses ke kamera untuk mengambil foto dan memindai teks."
         }
-      ]
+      ],
+      "expo-audio"
     ],
     "experiments": {
       "typedRoutes": true

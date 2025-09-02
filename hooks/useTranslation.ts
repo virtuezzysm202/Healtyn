@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import i18n from '../app/utils/i18n';
+import i18n from '../utils/i18n';
 
 type Language = 'id' | 'en'; // ✅ hanya indo & english
 

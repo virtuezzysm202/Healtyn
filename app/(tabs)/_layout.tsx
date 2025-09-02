@@ -1,34 +1,14 @@
+// app/TabLayout.tsx
 import { Tabs } from 'expo-router';
-import { Heart, Home, Pill, Settings } from 'lucide-react-native';
-import { Text, View } from 'react-native';
-import { useSettings } from '../contexts/SettingsContext';
+import React from 'react';
+import { Text } from 'react-native';
+import { useSettings } from '../../contexts/SettingsContext';
 
-// Translations untuk tab titles
+// Tab titles (translations)
 const tabTranslations = {
-  id: {
-    home: "Beranda",
-    health: "Kesehatan", 
-    medicine: "Obat",
-    settings: "Pengaturan"
-  },
-  en: {
-    home: "Home",
-    health: "Health",
-    medicine: "Medicine", 
-    settings: "Settings"
-  }
+  id: { home: "Beranda", health: "Kesehatan", medicine: "Obat", settings: "Pengaturan" },
+  en: { home: "Home", health: "Health", medicine: "Medicine", settings: "Settings" }
 };
-
-// Simple icon component for tabs
-function TabIcon({ emoji, color }: { emoji: string; color: string }) {
-  return (
-    <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-      <Text style={{ fontSize: 24, color: 'transparent', textShadowColor: color, textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 0 }}>
-        {emoji}
-      </Text>
-    </View>
-  );
-}
 
 export default function TabLayout() {
   const { theme, language } = useSettings();
@@ -52,31 +32,22 @@ export default function TabLayout() {
         headerTintColor: isDark ? '#ffffff' : '#1a1a1a',
       }}
     >
+      {/* Main Home Tab */}
       <Tabs.Screen
         name="index"
         options={{
           title: t.home,
-          tabBarIcon: ({ color, focused }) => (
-            <Home 
-              size={24}
-              color={color}
-              style={{ opacity: focused ? 1 : 0.6 }}
-            />
-          ),
+          tabBarIcon: () => <Text style={{ fontSize: 24 }}>🏠</Text>,
           headerShown: false,
         }}
       />
+
+      {/* Additional Tabs (optional, start with simple icon first) */}
       <Tabs.Screen
         name="health"
         options={{
           title: t.health,
-          tabBarIcon: ({ color, focused }) => (
-            <Heart 
-              size={24}
-              color={color}
-              style={{ opacity: focused ? 1 : 0.6 }}
-            />
-          ),
+          tabBarIcon: () => <Text style={{ fontSize: 24 }}>❤️</Text>,
           headerShown: false,
         }}
       />
@@ -84,13 +55,7 @@ export default function TabLayout() {
         name="medicine"
         options={{
           title: t.medicine,
-          tabBarIcon: ({ color, focused }) => (
-            <Pill 
-              size={24}
-              color={color}
-              style={{ opacity: focused ? 1 : 0.6 }}
-            />
-          ),
+          tabBarIcon: () => <Text style={{ fontSize: 24 }}>💊</Text>,
           headerShown: false,
         }}
       />
@@ -98,87 +63,30 @@ export default function TabLayout() {
         name="settings"
         options={{
           title: t.settings,
-          tabBarIcon: ({ color, focused }) => (
-            <Settings 
-              size={24}
-              color={color}
-              style={{ opacity: focused ? 1 : 0.6 }}
-            />
-          ),
+          tabBarIcon: () => <Text style={{ fontSize: 24 }}>⚙️</Text>,
           headerShown: false,
         }}
       />
-      {/* Hidden screens - tidak muncul di tab bar */}
-      <Tabs.Screen
-        name="ProfileOfflineSettings"
-        options={{
-          href: null, // Hide from tabs
-          headerShown: false,
-        }}
-      />
-      <Tabs.Screen
-        name="DisplaySettings"
-        options={{
-          href: null, // Hide from tabs
-          headerShown: false,
-        }}
-      />
-      <Tabs.Screen
-        name="profile-online"
-        options={{
-          href: null, // Hide from tabs
-          headerShown: false,
-        }}
-      />
-      <Tabs.Screen
-        name="AuthScreen"
-        options={{
-          href: null, // Hide from tabs
-          headerShown: false,
-        }}
-      />
-      <Tabs.Screen
-        name="AccountSettings"
-        options={{
-          href: null, // Hide from tabs
-          headerShown: false,
-        }}
-      />
-      <Tabs.Screen
-        name="CreateMedicineSchedule"
-        options={{
-          href: null, // Hide from tabs
-          headerShown: false,
-        }}
-      />
-      <Tabs.Screen
-        name="call-doctor"
-        options={{
-          href: null, // Hide from tabs
-          headerShown: false,
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          href: null, // Hide from tabs
-          headerShown: false,
-        }}
-      />
-      <Tabs.Screen
-        name="relax-music"
-        options={{
-          href: null, // Hide from tabs
-          headerShown: false,
-        }}
-      />
-      <Tabs.Screen
-        name="scan"
-        options={{
-          href: null, // Hide from tabs
-          headerShown: false,
-        }}
-      />
+
+      {/* Hidden screens */}
+      {[
+        "ProfileOfflineSettings",
+        "profile-online",
+        "DisplaySettings",
+        "AuthScreen",
+        "AccountSettings",
+        "CreateMedicineSchedule",
+        "call-doctor",
+        "explore",
+        "relax-music",
+        "health-check",
+      ].map((name) => (
+        <Tabs.Screen
+          key={name}
+          name={name}
+          options={{ href: null, headerShown: false }}
+        />
+      ))}
     </Tabs>
   );
 }

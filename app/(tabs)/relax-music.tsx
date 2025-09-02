@@ -1,11 +1,10 @@
 // app/(tabs)/musik.tsx
 import { Feather } from '@expo/vector-icons';
-import { AVPlaybackStatus, Audio } from 'expo-av';
+import { Audio, AVPlaybackStatus } from 'expo-av';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import LansiaText from '../../components/ui/LansiaText';
-import i18n from '../utils/i18n';
-
+import i18n from "../../utils/i18n";
 interface MusicItem {
   id: number;
   title: string;
@@ -62,10 +61,14 @@ export default function MusikScreen() {
 
       // jika lagu sama diklik saat sedang main → stop
       if (currentTrack?.id === musicItem.id && isPlaying) {
+        await sound?.unloadAsync();
+        setSound(null);
         setCurrentTrack(null);
+        setIsPlaying(false);
         setIsLoading(false);
         return;
       }
+      
 
       const { sound: newSound } = await Audio.Sound.createAsync(
         musicItem.uri,

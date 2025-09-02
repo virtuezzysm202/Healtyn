@@ -1,7 +1,8 @@
 import { Picker } from "@react-native-picker/picker";
 import React from "react";
 import { Platform, StyleSheet, Text, View } from "react-native";
-import i18n from "../app/utils/i18n";
+import i18n from "../utils/i18n";
+
 
 type PickerItem = {
   label: string;

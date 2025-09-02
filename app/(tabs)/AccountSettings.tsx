@@ -1,13 +1,13 @@
 import React from "react";
 import {
-    Alert,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { useSettings } from "../../app/contexts/SettingsContext";
+import { useSettings } from "../../contexts/SettingsContext";
 
 // Translation object
 const translations = {

@@ -5,7 +5,7 @@ import * as ImagePicker from "expo-image-picker";
 import * as Notifications from "expo-notifications";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import i18n from "../../app/utils/i18n";
+import i18n from "../../utils/i18n";
 
 
 import {

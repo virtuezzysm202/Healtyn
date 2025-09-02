@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
-import { deleteSchedule, getAllSchedules } from '../../app/services/medicineStorage';
+import { deleteSchedule, getAllSchedules } from '../../services/medicineStorage';
 
 import {
   ActivityIndicator,

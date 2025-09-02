@@ -1,8 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
-import i18n from "../../app/utils/i18n";
 import LansiaText from "../../components/ui/LansiaText";
+import i18n from "../../utils/i18n";
 
 interface CustomTip {
   id: string;
