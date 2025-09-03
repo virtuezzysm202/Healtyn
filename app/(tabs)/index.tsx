@@ -559,7 +559,8 @@ useEffect(() => {
         </View>
       )}
 
-     {/* Weather Card - iOS Modern Design */}
+ 
+{/* Weather Card  */}
 <View style={[styles.weatherCard, darkMode && styles.darkWeatherCard]}>
   {loadingWeather ? (
     <View style={styles.loadingContainer}>
@@ -611,6 +612,105 @@ useEffect(() => {
           </LansiaText>
         </View>
       </View>
+
+      {/* Divider */}
+      <View style={[styles.divider, darkMode && styles.darkDivider]} />
+
+      {/* Search & Location Controls - INSIDE WEATHER CARD */}
+      <View>
+        {/* Search Box */}
+        {isSearching && (
+          <View style={styles.searchContainer}>
+            <TextInput
+              style={[styles.searchInput, darkMode && styles.darkInput]}
+              placeholder={t("home.weather.searchPlaceholder")}
+              placeholderTextColor={darkMode ? "#8E8E93" : "#C7C7CC"}
+              value={searchQuery}
+              onChangeText={(text) => {
+                setSearchQuery(text);
+                searchLocation(text);
+              }}
+            />
+            {searchResults.map((loc, idx) => (
+              <Pressable
+                key={idx}
+                style={styles.searchResult}
+                onPress={() => selectLocationForWeather(loc)}
+              >
+                <LansiaText style={[styles.searchResultText, darkMode && styles.darkText]}>
+                  {loc.name}, {loc.country}
+                </LansiaText>
+              </Pressable>
+            ))}
+          </View>
+        )}
+
+        {/* Saved Locations */}
+        {savedLocations.length > 0 && (
+          <View style={styles.savedContainer}>
+            <LansiaText style={[styles.savedTitle, darkMode && styles.darkText]}>
+              {t("home.weather.savedLocations")}
+            </LansiaText>
+            {savedLocations.map((loc, idx) => (
+              <View key={idx} style={styles.savedRow}>
+                <Pressable onPress={() => selectLocationForWeather(loc)}>
+                  <LansiaText style={[styles.savedText, darkMode && styles.darkText]}>
+                    📍 {loc.name}, {loc.country}
+                  </LansiaText>
+                </Pressable>
+                <Pressable onPress={() => deleteLocation(loc)}>
+                  <LansiaText style={styles.deleteText}>❌</LansiaText>
+                </Pressable>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* Button Row */}
+        <View style={styles.buttonRow}>
+          {/* Button to Toggle Search */}
+          <Pressable
+            style={[styles.locationButton, darkMode && styles.darkLocationButton]}
+            onPress={() => setIsSearching(!isSearching)}
+          >
+            <LansiaText style={[styles.locationButtonText, darkMode && styles.darkText]}>
+              {isSearching ? t("home.weather.closeSearch") : t("home.weather.addLocation")}
+            </LansiaText>
+          </Pressable>
+
+          {/* Button GPS location */}
+          <Pressable
+            style={[styles.gpsButtonSmall, darkMode && styles.darkGpsButtonSmall]}
+            onPress={async () => {
+              try {
+                const { status } = await Location.requestForegroundPermissionsAsync();
+                if (status !== 'granted') return;
+                
+                const deviceLoc = await Location.getCurrentPositionAsync({
+                  accuracy: Location.Accuracy.Low,
+                });
+                const normalized = normalizeLocation(deviceLoc);
+                if (normalized) {
+                  setSelectedLocation(normalized);
+                  await fetchWeather(normalized);
+                  
+                  const cityName = await getCityNameFromCoords(normalized.lat, normalized.lon);
+                  const updatedLocation = { ...normalized, name: cityName };
+                  
+                  setSelectedLocation(updatedLocation);
+                  await AsyncStorage.removeItem('lastSelectedLocation');
+                }
+              } catch (error) {
+                console.error('Error getting current location:', error);
+              }
+            }}
+          >
+            <LansiaText style={[styles.gpsButtonSmallText]}>
+              📍 {t("home.weather.useCurrentLocation")}
+            </LansiaText>
+          </Pressable>
+        </View>
+      </View>
     </>
   ) : (
     <View style={styles.errorContainer}>
@@ -621,104 +721,6 @@ useEffect(() => {
     </View>
   )}
 </View>
-
-{/* Search & Saved Locations */}
-<View>
-  {/* Search Box */}
-  {isSearching && (
-    <View style={styles.searchContainer}>
-      <TextInput
-        style={[styles.searchInput, darkMode && styles.darkInput]}
-        placeholder={t("home.weather.searchPlaceholder")}
-        placeholderTextColor={darkMode ? "#8E8E93" : "#C7C7CC"}
-        value={searchQuery}
-        onChangeText={(text) => {
-          setSearchQuery(text);
-          searchLocation(text); // fungsi backend
-        }}
-      />
-      {searchResults.map((loc, idx) => (
-        <Pressable
-          key={idx}
-          style={styles.searchResult}
-          onPress={() => selectLocationForWeather(loc)}
-        >
-          <LansiaText style={[styles.searchResultText, darkMode && styles.darkText]}>
-            {loc.name}, {loc.country}
-          </LansiaText>
-        </Pressable>
-      ))}
-    </View>
-  )}
-
-  {/* Saved Locations */}
-  {savedLocations.length > 0 && (
-    <View style={styles.savedContainer}>
-      <LansiaText style={[styles.savedTitle, darkMode && styles.darkText]}>
-        {t("home.weather.savedLocations")}
-      </LansiaText>
-      {savedLocations.map((loc, idx) => (
-        <View key={idx} style={styles.savedRow}>
-          <Pressable onPress={() => selectLocationForWeather(loc)}>
-            <LansiaText style={[styles.savedText, darkMode && styles.darkText]}>
-              📍 {loc.name}, {loc.country}
-            </LansiaText>
-          </Pressable>
-          <Pressable onPress={() => deleteLocation(loc)}>
-            <LansiaText style={styles.deleteText}>❌</LansiaText>
-          </Pressable>
-        </View>
-      ))}
-    </View>
-  )}
-
-  {/* Button to Toggle Search */}
-  <Pressable
-    style={styles.searchToggle}
-    onPress={() => setIsSearching(!isSearching)}
-  >
-    <LansiaText style={styles.searchToggleText}>
-      {isSearching ? t("home.weather.closeSearch") : t("home.weather.addLocation")}
-    </LansiaText>
-  </Pressable>
-
-  {/* Button untuk kembali ke GPS location */}
-  <Pressable
-  style={[styles.gpsButton, darkMode && styles.darkGpsButton]}
-  onPress={async () => {
-    try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') return;
-      
-      const deviceLoc = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Low,
-      });
-      const normalized = normalizeLocation(deviceLoc);
-      if (normalized) {
-        // Set temporary location first
-        setSelectedLocation(normalized);
-        await fetchWeather(normalized);
-        
-        // Get actual city name
-        const cityName = await getCityNameFromCoords(normalized.lat, normalized.lon);
-        const updatedLocation = { ...normalized, name: cityName };
-        
-        setSelectedLocation(updatedLocation);
-        await AsyncStorage.removeItem('lastSelectedLocation');
-      }
-    } catch (error) {
-      console.error('Error getting current location:', error);
-    }
-  }}
->
-  <LansiaText style={[styles.gpsButtonText, darkMode && styles.darkText]}>
-    📍 {t("home.weather.useCurrentLocation")}
-  </LansiaText>
-</Pressable>
-</View>
-
-
-
 
       {/* Health Reminder Cards */}
       {healthReminders.length > 0 && (
@@ -852,6 +854,7 @@ const styles = StyleSheet.create({
   darkContainer: {
     backgroundColor: '#000000',
   },
+
   header: {
     marginBottom: 24,
     flexDirection: 'row',
@@ -879,6 +882,7 @@ const styles = StyleSheet.create({
   darkProfileButton: {
     backgroundColor: '#1C1C1E',
   },
+
   appName: {
     fontSize: 28,
     fontWeight: '700',
@@ -902,7 +906,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
 
-  // Greeting Card Styles
+  // Greeting Card 
   greetingCard: {
     borderRadius: 16,
     padding: 16,
@@ -923,7 +927,7 @@ const styles = StyleSheet.create({
     fontWeight: '400',
   },
 
-  // Medicine Reminder Card Styles
+  //  Medicine Reminder Card 
   medicineReminderCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
@@ -948,7 +952,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
 
-  // Section Title
+  // Section Title 
   sectionTitle: {
     fontSize: 20,
     fontWeight: '700',
@@ -957,7 +961,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
 
-  // Weather Card Styles
+  // Weather Card 
   weatherCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
@@ -1026,6 +1030,8 @@ const styles = StyleSheet.create({
   darkDivider: {
     backgroundColor: '#38383A',
   },
+
+  //  Recommendation 
   recommendationContainer: {
     marginTop: 4,
   },
@@ -1058,6 +1064,8 @@ const styles = StyleSheet.create({
     color: '#8E8E93',
     fontWeight: '500',
   },
+
+  // Error State 
   errorContainer: {
     alignItems: 'center',
     paddingVertical: 20,
@@ -1072,7 +1080,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
-  // Reminder Card Styles
+  //  Reminder Card
   reminderCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
@@ -1129,7 +1137,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
 
-  // Menu Grid Styles
+  //  Menu Grid 
   menuContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -1176,6 +1184,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 18,
   },
+
+  // Search 
   searchContainer: {
     backgroundColor: "#F2F2F7",
     borderRadius: 12,
@@ -1231,7 +1241,10 @@ const styles = StyleSheet.create({
   searchToggleText: {
     color: "#007AFF",
     fontWeight: "500",
-  },gpsButton: {
+  },
+
+  // GPS & Location Buttons 
+  gpsButton: {
     backgroundColor: '#007AFF',
     borderRadius: 12,
     padding: 12,
@@ -1245,5 +1258,42 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: '600',
     fontSize: 16,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 12,
+    gap: 8,
+  },
+  locationButton: {
+    flex: 1,
+    backgroundColor: '#F2F2F7',
+    borderRadius: 8,
+    padding: 10,
+    alignItems: 'center',
+  },
+  darkLocationButton: {
+    backgroundColor: '#2C2C2E',
+  },
+  locationButtonText: {
+    color: '#007AFF',
+    fontWeight: '500',
+    fontSize: 14,
+  },
+  gpsButtonSmall: {
+    flex: 1,
+    backgroundColor: '#007AFF',
+    borderRadius: 8,
+    padding: 10,
+    alignItems: 'center',
+  },
+  darkGpsButtonSmall: {
+    backgroundColor: '#0A84FF',
+  },
+  gpsButtonSmallText: {
+    color: '#FFFFFF',
+    fontWeight: '500',
+    fontSize: 13,
+    textAlign: 'center',
   },
 });
