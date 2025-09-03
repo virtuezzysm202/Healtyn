@@ -261,18 +261,18 @@
     "homeSelected": "✓ Home",
     "delete": "Delete",
     "healthy": {
-      "tip1": "💧 Drink at least 8 glasses of water a day",
-      "tip2": "😷 Wear a mask when going outside",
-      "tip3": "🥗 Eat nutritious and balanced meals",
-      "tip4": "🏃‍♂️ Do light exercise regularly",
-      "tip5": "🛌 Get 7–8 hours of sleep daily"
+      "tip1": "Drink at least 8 glasses of water a day",
+      "tip2": "Wear a mask when going outside",
+      "tip3": "Eat nutritious and balanced meals",
+      "tip4": "Do light exercise regularly",
+      "tip5": "Get 7–8 hours of sleep daily"
     },
     "sick": {
-      "tip1": "💊 Don't forget to take your medicine as prescribed",
-      "tip2": "🛌 Rest well to speed up recovery",
-      "tip3": "🍲 Eat nutritious food to stay strong",
-      "tip4": "💧 Keep drinking enough water",
-      "tip5": "🤲 Wishing you a speedy recovery!"
+      "tip1": "Don't forget to take your medicine as prescribed",
+      "tip2": "Rest well to speed up recovery",
+      "tip3": "Eat nutritious food to stay strong",
+      "tip4": "Keep drinking enough water",
+      "tip5": "Wishing you a speedy recovery!"
     }
   },
   "music": {

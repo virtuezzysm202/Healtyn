@@ -1,8 +1,9 @@
-import { Feather, FontAwesome5 } from '@expo/vector-icons';
+import { Feather, FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import { useTranslation } from "../../hooks/useTranslation";
+
 
 import { useEffect, useState } from 'react';
 import {
@@ -45,6 +46,9 @@ interface HealthTip {
   id: string;
   tip: string;
   showOnHome?: boolean;
+  iconType?: 'FontAwesome5' | 'MaterialCommunityIcons';
+  iconName?: string;
+  iconColor?: string;
 }
 
 interface MedicineSchedule {
@@ -721,32 +725,50 @@ useEffect(() => {
     </View>
   )}
 </View>
-
-      {/* Health Reminder Cards */}
-      {healthReminders.length > 0 && (
-        <View>
-          <LansiaText style={[styles.sectionTitle, darkMode && styles.darkText]}>
-            {t('home.healthReminders.title')}
-          </LansiaText>
-          {healthReminders.map((reminder) => (
-            <View key={reminder.id} style={[styles.reminderCard, darkMode && styles.darkReminderCard]}>
-              <View style={styles.reminderHeader}>
-                <View style={styles.reminderIconContainer}>
-                  <LansiaText style={styles.reminderIcon}>💡</LansiaText>
-                </View>
-                <View style={styles.reminderContent}>
-                  <LansiaText style={[styles.reminderTitle, darkMode && styles.darkText]}>
-                    {t('home.healthReminders.tip')}
-                  </LansiaText>
-                  <LansiaText style={[styles.reminderText, darkMode && styles.darkSubText]}>
-                    {reminder.tip}
-                  </LansiaText>
-                </View>
-              </View>
-            </View>
-          ))}
+{/* Health Reminder Cards */}
+{healthReminders.length > 0 && (
+  <View>
+    <LansiaText style={[styles.sectionTitle, darkMode && styles.darkText]}>
+      {t('home.healthReminders.title')}
+    </LansiaText>
+    {healthReminders.map((reminder) => (
+      <View key={reminder.id} style={[styles.reminderCard, darkMode && styles.darkReminderCard]}>
+        <View style={styles.reminderHeader}>
+          <View style={[
+            styles.reminderIconContainer,
+            { backgroundColor: darkMode ? '#444' : '#F2F2F7' } 
+          ]}>
+            {/* Render icon  */}
+            {reminder.iconType === 'FontAwesome5' && reminder.iconName ? (
+              <FontAwesome5 
+                name={reminder.iconName} 
+                size={20} 
+                color={darkMode ? '#FFFFFF' : (reminder.iconColor || '#007AFF')} 
+              />
+            ) : reminder.iconType === 'MaterialCommunityIcons' && reminder.iconName ? (
+              <MaterialCommunityIcons 
+                name={reminder.iconName} 
+                size={20} 
+                color={darkMode ? '#FFFFFF' : (reminder.iconColor || '#007AFF')} 
+              />
+            ) : (
+              <LansiaText style={styles.reminderIcon}>💡</LansiaText>
+            )}
+          </View>
+          <View style={styles.reminderContent}>
+            {/* <LansiaText style={[styles.reminderTitle, darkMode && styles.darkText]}>
+              {t('home.healthReminders.tip')}
+            </LansiaText> */}
+            <LansiaText style={[styles.reminderText, darkMode && styles.darkSubText]}>
+              {reminder.tip}
+            </LansiaText>
+          </View>
         </View>
-      )}
+      </View>
+    ))}
+  </View>
+)}
+
 
       {/* Default Daily Reminder Card jika tidak ada health reminders dan tidak ada medicine reminder */}
       {healthReminders.length === 0 && !nextMedicineReminder && !loadingMedicine && (
@@ -899,7 +921,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   darkSubText: {
-    color: '#8E8E93',
+    color: '#DDDDDD',
   },
   smallLabel: {
     fontSize: 16,
@@ -1122,7 +1144,7 @@ const styles = StyleSheet.create({
   },
   reminderText: {
     fontSize: 14,
-    color: '#8E8E93',
+    color: '#333333',
     fontWeight: '400',
   },
   reminderBadge: {

@@ -1,3 +1,4 @@
+import { FontAwesome5, MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
@@ -8,6 +9,15 @@ interface CustomTip {
   id: string;
   tip: string;
   showOnHome?: boolean;
+}
+
+interface DefaultTip {
+  id: string;
+  tip: string;
+  iconType: 'FontAwesome5' | 'MaterialCommunityIcons';
+  iconName: string;
+  iconColor: string;
+  showOnHome: boolean;
 }
 
 export default function HealthPage() {
@@ -21,29 +31,101 @@ export default function HealthPage() {
     sick: [],
   });
 
+
   const [newTip, setNewTip] = useState("");
   const [isAdding, setIsAdding] = useState(false);
 
-  // Function untuk generate tips dengan translasi terbaru
-  const generateDefaultTips = () => {
-    const healthyTips = [
-      { id: "h1", tip: i18n.translate("healthPage.healthy.tip1"), showOnHome: false },
-      { id: "h2", tip: i18n.translate("healthPage.healthy.tip2"), showOnHome: false },
-      { id: "h3", tip: i18n.translate("healthPage.healthy.tip3"), showOnHome: false },
-      { id: "h4", tip: i18n.translate("healthPage.healthy.tip4"), showOnHome: false },
-      { id: "h5", tip: i18n.translate("healthPage.healthy.tip5"), showOnHome: false },
-    ];
+  // Function tips 
+const generateDefaultTips = () => {
+  const healthyTips = [
+    {
+      id: "h1",
+      tip: i18n.translate("healthPage.healthy.tip1"),
+      iconType: 'FontAwesome5',
+      iconName: 'tint',
+      iconColor: '#5AC8FA', 
+      showOnHome: false,
+    },
+    {
+      id: "h2",
+      tip: i18n.translate("healthPage.healthy.tip2"),
+      iconType: 'FontAwesome5',
+      iconName: 'head-side-mask',
+      iconColor: '#0A84FF', 
+      showOnHome: false,
+    },
+    {
+      id: "h3",
+      tip: i18n.translate("healthPage.healthy.tip3"),
+      iconType: 'MaterialCommunityIcons',
+      iconName: 'food-apple',
+      iconColor: '#FF3B30', 
+      showOnHome: false,
+    },
+    {
+      id: "h4",
+      tip: i18n.translate("healthPage.healthy.tip4"),
+      iconType: 'FontAwesome5',
+      iconName: 'running',
+      iconColor: '#32D74B', 
+      showOnHome: false,
+    },
+    {
+      id: "h5",
+      tip: i18n.translate("healthPage.healthy.tip5"),
+      iconType: 'FontAwesome5',
+      iconName: 'moon',
+      iconColor: '#0A84FF', 
+      showOnHome: false,
+    },
+  ];
 
-    const sickTips = [
-      { id: "s1", tip: i18n.translate("healthPage.sick.tip1"), showOnHome: false },
-      { id: "s2", tip: i18n.translate("healthPage.sick.tip2"), showOnHome: false },
-      { id: "s3", tip: i18n.translate("healthPage.sick.tip3"), showOnHome: false },
-      { id: "s4", tip: i18n.translate("healthPage.sick.tip4"), showOnHome: false },
-      { id: "s5", tip: i18n.translate("healthPage.sick.tip5"), showOnHome: false },
-    ];
+  const sickTips = [
+    {
+      id: "s1",
+      tip: i18n.translate("healthPage.sick.tip1"),
+      iconType: 'FontAwesome5',
+      iconName: 'pills',
+      iconColor: '#5AC8FA', 
+      showOnHome: false,
+    },
+    {
+      id: "s2",
+      tip: i18n.translate("healthPage.sick.tip2"),
+      iconType: 'FontAwesome5',
+      iconName: 'bed',
+      iconColor: '#AF52DE', 
+      showOnHome: false,
+    },
+    {
+      id: "s3",
+      tip: i18n.translate("healthPage.sick.tip3"),
+      iconType: 'MaterialCommunityIcons',
+      iconName: 'silverware-fork-knife',
+      iconColor: '#FF2D55', 
+      showOnHome: false,
+    },
+    {
+      id: "s4",
+      tip: i18n.translate("healthPage.sick.tip4"),
+      iconType: 'FontAwesome5',
+      iconName: 'tint',
+      iconColor: '#0A84FF', 
+      showOnHome: false,
+    },
+    {
+      id: "s5",
+      tip: i18n.translate("healthPage.sick.tip5"),
+      iconType: 'FontAwesome5',
+      iconName: 'hands-helping',
+      iconColor: '#30D158', 
+      showOnHome: false,
+    },
+  ];
 
-    return { healthy: healthyTips, sick: sickTips };
-  };
+  return { healthy: healthyTips, sick: sickTips };
+};
+
 
   // Load data dari AsyncStorage dan generate tips
   useEffect(() => {
@@ -143,7 +225,7 @@ export default function HealthPage() {
   return (
     <View style={styles.wrapper}>
       <ScrollView style={styles.container}>
-        {/* Pertanyaan kondisi */}
+        {/* Condition Question */}
         {condition === null ? (
           <View>
             <LansiaText style={styles.title}>{i18n.translate("healthPage.askCondition")}</LansiaText>
@@ -164,29 +246,42 @@ export default function HealthPage() {
           </View>
         ) : (
           <>
-            {/* Tips utama sesuai kondisi */}
+            {/* Tips  */}
             <LansiaText style={styles.title}>
               {condition === "healthy"
                 ? i18n.translate("healthPage.tipsHealthyTitle")
                 : i18n.translate("healthPage.tipsSickTitle")}
             </LansiaText>
             {defaultTips[condition].map((tip) => (
-              <View key={tip.id} style={styles.tipCard}>
-                <View style={styles.tipContent}>
-                  <LansiaText style={styles.tipText}>{tip.tip}</LansiaText>
-                  <Pressable
-                    style={[styles.homeToggle, tip.showOnHome && styles.homeToggleActive]}
-                    onPress={() => toggleDefaultTipHome(tip.id)}
-                  >
-                    <LansiaText style={[styles.homeToggleText, tip.showOnHome && styles.homeToggleTextActive]}>
-                      {tip.showOnHome
-                        ? i18n.translate("healthPage.homeSelected")
-                        : i18n.translate("healthPage.home")}
-                    </LansiaText>
-                  </Pressable>
-                </View>
-              </View>
-            ))}
+  <View key={tip.id} style={styles.tipCard}>
+    <View style={styles.tipContent}>
+      {/* Render ikon berdasarkan metadata */}
+      {tip.iconType === 'FontAwesome5' ? (
+        <FontAwesome5 name={tip.iconName as any} size={20} color={tip.iconColor} />
+      ) : (
+        <MaterialCommunityIcons name={tip.iconName as any} size={20} color={tip.iconColor} />
+      )}
+      <LansiaText style={styles.tipText}>{tip.tip}</LansiaText>
+      
+      {/* Toggle home */}
+      <Pressable
+        style={[styles.homeToggle, tip.showOnHome && styles.homeToggleActive]}
+        onPress={() => toggleDefaultTipHome(tip.id)}
+      >
+        <LansiaText
+          style={[
+            styles.homeToggleText,
+            tip.showOnHome && styles.homeToggleTextActive,
+          ]}
+        >
+          {tip.showOnHome
+            ? i18n.translate("healthPage.homeSelected")
+            : i18n.translate("healthPage.home")}
+        </LansiaText>
+      </Pressable>
+    </View>
+  </View>
+))}
 
             {/* Tombol ganti kondisi */}
             <Pressable style={styles.changeButton} onPress={() => setCondition(null)}>

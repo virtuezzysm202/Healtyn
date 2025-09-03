@@ -261,18 +261,18 @@
     "homeSelected": "✓ Beranda",
     "delete": "Hapus",
     "healthy": {
-      "tip1": "💧 Minum air putih minimal 8 gelas sehari",
-      "tip2": "😷 Gunakan masker saat berada di luar rumah",
-      "tip3": "🥗 Konsumsi makanan bergizi dan seimbang",
-      "tip4": "🏃‍♂️ Lakukan olahraga ringan secara rutin",
-      "tip5": "🛌 Cukup tidur 7–8 jam per hari"
+      "tip1": "Minum air putih minimal 8 gelas sehari",
+      "tip2": "Gunakan masker saat berada di luar rumah",
+      "tip3": "Konsumsi makanan bergizi dan seimbang",
+      "tip4": "Lakukan olahraga ringan secara rutin",
+      "tip5": "Cukup tidur 7–8 jam per hari"
     },
     "sick": {
-      "tip1": "💊 Jangan lupa minum obat sesuai anjuran",
-      "tip2": "🛌 Istirahat cukup untuk mempercepat pemulihan",
-      "tip3": "🍲 Konsumsi makanan bergizi agar tubuh lebih kuat",
-      "tip4": "💧 Tetap minum cukup air putih",
-      "tip5": "🤲 Semoga cepat sembuh!"
+      "tip1": "Jangan lupa minum obat sesuai anjuran",
+      "tip2": "Istirahat cukup untuk mempercepat pemulihan",
+      "tip3": "Konsumsi makanan bergizi agar tubuh lebih kuat",
+      "tip4": "Tetap minum cukup air putih",
+      "tip5": "Semoga cepat sembuh!"
     }
   },
   "music": {
