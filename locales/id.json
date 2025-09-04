@@ -6,26 +6,26 @@
     "theme": "Tema",
     "themeDesc": "Pilih tema terang atau gelap",
     "indonesian": "Bahasa Indonesia",
-    "english": "Bahasa Inggris",
+    "english": "English",
     "lightTheme": "Tema Terang",
     "darkTheme": "Tema Gelap",
     "back": "Kembali"
   },
   "home": {
-    "appName": "Lansia Helper",
+    "appName": "Pembantu Lansia",
     "appSubtitle": "Pendamping kesehatan harian",
     "medicineReminder": {
       "title": "Pengingat Obat"
     },
     "greeting": {
       "healthyTitle": "Tetap Sehat!",
-      "healthySubtitle": "Jaga tubuhmu setiap hari",
+      "healthySubtitle": "Jaga tubuh Anda setiap hari",
       "sickTitle": "🤗 Semoga Cepat Sembuh!",
-      "sickSubtitle": "Jangan lupa istirahat yang cukup ya"
+      "sickSubtitle": "Jangan lupa istirahat yang cukup"
     },
     "weather": {
       "loading": "Memuat cuaca...",
-      "apiError": "API key OpenWeather tidak ditemukan di .env",
+      "apiError": "Kunci API OpenWeather tidak ditemukan di .env",
       "permissionError": "Izin lokasi ditolak",
       "generalError": "Gagal memuat cuaca",
       "yourLocation": "Lokasi Anda",
@@ -35,7 +35,7 @@
       "closeSearch": "Tutup Pencarian",
       "useCurrentLocation": "Gunakan Lokasi Saat Ini",
       "outfit": {
-        "hot": "Pakaian tipis & topi",
+        "hot": "Pakai pakaian ringan & topi",
         "warm": "Kaos & celana panjang",
         "mild": "Kemeja & celana panjang",
         "cool": "Jaket tipis",
@@ -48,7 +48,7 @@
       "tip": "Tips Kesehatan"
     },
     "reminders": {
-      "today": "Hari ini",
+      "today": "Hari Ini",
       "noReminders": "Belum ada pengingat. Tambahkan di halaman Kesehatan",
       "dailyReminder": "Pengingat Hari Ini"
     },
@@ -56,9 +56,87 @@
       "medicineReminder": "Pengingat Obat",
       "scanBook": "Pindai Buku",
       "callDoctor": "Panggil Dokter",
+      "health-check": "Cek Kesehatan",
       "callFamily": "Panggil Keluarga",
       "health": "Kesehatan",
       "relaxMusic": "Musik Relaksasi"
+    }
+  },
+  "health": {
+    "title": "Health Calculator",
+    "weight": "Berat Badan (kg)",
+    "height": "Tinggi Badan (cm)",
+    "age": "Usia (years)",
+    "calculate": "Hitung",
+    "bmi": "BMI",
+    "waterIntake": "Asupan Air Harian",
+    "invalidInput": "Masukkan berat dan tinggi yang valid",
+    "bmiCategories": {
+      "underweight": "Kurus",
+      "normal": "Normal",
+      "overweight": "Kelebihan Berat",
+      "obese": "Obesitas"
+    },
+    "units": {
+      "kg": "kg",
+      "cm": "cm",
+      "years": "years",
+      "ml": "ml",
+      "glasses": "gelas",
+      "bpm": "BPM",
+      "celsius": "°C",
+      "mgdl": "mg/dL"
+    },
+    "day": "hari",
+    "placeholders": {
+      "weight": "Masukkan berat badan",
+      "height": "Masukkan tinggi badan",
+      "age": "Masukkan usia",
+      "heartRate": "Misal: 72",
+      "temperature": "Misal: 36.5",
+      "bloodSugar": "Misal: 100"
+    },
+    "tabs": {
+      "calculator": "Kalkulator",
+      "symptoms": "Gejala",
+      "vitals": "Tanda Vital"
+    },
+    "symptoms": {
+      "title": "Pelacak Gejala",
+      "add": "Tambah Gejala",
+      "empty": "Belum ada gejala yang dicatat",
+      "emptySub": "Catat gejala harian untuk memantau kesehatan",
+      "name": "Nama Gejala",
+      "severity": "Tingkat Keparahan (1-5)",
+      "mild": "Ringan",
+      "severe": "Parah",
+      "notes": "Catatan (Opsional)",
+      "placeholders": {
+        "symptomName": "Misal: Sakit Kepala, Lelah, Nyeri Sendi",
+        "symptomNotes": "Detail tambahan tentang gejala..."
+      },
+      "save": "Simpan",
+      "nameRequired": "Masukkan nama gejala"
+    },
+    "vitals": {
+      "title": "Pemantau Tanda Vital",
+      "bloodPressure": "Tekanan Darah",
+      "systolic": "Sistolik",
+      "diastolic": "Diastolik",
+      "heartRate": "Detak Jantung",
+      "temperature": "Suhu Tubuh",
+      "bloodSugar": "Gula Darah",
+      "status": {
+        "normal": "Normal",
+        "high": "Tinggi",
+        "low": "Rendah",
+        "unknown": "Tidak Diketahui"
+      },
+      "placeholders": {
+        "heartRate": "Misal: 72",
+        "temperature": "Misal: 36.5",
+        "bloodSugar": "Misal: 100"
+      }
     }
   },
   "medicine": {
@@ -71,7 +149,7 @@
     "deleteErrorTitle": "Error",
     "deleteErrorMessage": "Gagal menghapus jadwal obat. Silakan coba lagi.",
     "emptyStateTitle": "Belum Ada Jadwal Obat",
-    "emptyStateSubtitle": "Mulai buat jadwal obat pertama Anda untuk mendapatkan pengingat minum obat secara teratur",
+    "emptyStateSubtitle": "Mulai dengan membuat jadwal obat pertama Anda untuk menerima pengingat rutin minum obat",
     "createFirstSchedule": "Buat Jadwal Pertama",
     "mustFinish": "Harus dihabiskan",
     "totalMedicine": "Total Obat",
@@ -127,18 +205,18 @@
     },
     "dosage": {
       "tabletCapsule": {
-        "label": "Dosis Sekali Pakai",
-        "placeholder": "Jumlah (contoh: 1, 2, 0.5)"
+        "label": "Dosis per Penggunaan",
+        "placeholder": "Jumlah (misalnya: 1, 2, 0.5)"
       },
       "syrupDrops": {
         "mlPlaceholder": "Volume dalam ml (opsional)"
       },
       "other": {
-        "label": "Dosis Sekali Pakai",
-        "placeholder": "Masukkan dosis (contoh: 1 tube, secukupnya)"
+        "label": "Dosis per Penggunaan",
+        "placeholder": "Masukkan dosis (misalnya: 1 tube, sesuai kebutuhan)"
       },
       "general": {
-        "placeholder": "Masukkan dosis (contoh: 1 tube, secukupnya)"
+        "placeholder": "Masukkan dosis (misalnya: 1 tube, sesuai kebutuhan)"
       },
       "singleUse": "Dosis Sekali Pakai"
     },
@@ -149,23 +227,23 @@
       "measuring": "Sendok Takar"
     },
     "usageTime": {
-      "label": "Waktu Konsumsi",
-      "placeholder": "contoh: sesudah makan, sebelum tidur"
+      "label": "Waktu Penggunaan",
+      "placeholder": "misalnya: setelah makan, sebelum tidur"
     },
     "frequency": {
-      "label": "Frekuensi per Hari"
+      "label": "Kali per Hari"
     },
     "alarmTimes": {
       "label": "Waktu Pengingat ({{count}} kali per hari)",
-      "reminderNumber": "Pengingat ke-{{number}}"
+      "reminderNumber": "Pengingat {{number}}"
     },
     "dates": {
       "startDate": {
-        "label": "Tanggal Mulai Konsumsi",
+        "label": "Tanggal Mulai",
         "tapToChange": "Ketuk untuk mengubah"
       },
       "endDate": {
-        "label": "Tanggal Selesai Konsumsi",
+        "label": "Tanggal Selesai",
         "tapToChange": "Ketuk untuk mengubah"
       },
       "duration": "Durasi: {{days}} hari"
@@ -178,35 +256,35 @@
       "camera": "Kamera",
       "gallery": "Galeri",
       "cancel": "Batal",
-      "selected": "✓ Foto terpilih"
+      "selected": "✓ Foto dipilih"
     },
     "notes": {
       "label": "Catatan",
       "placeholder": "Catatan tambahan (opsional)"
     },
     "mustFinish": {
-      "label": "Harus dihabiskan"
+      "label": "Harus dihabiskan sepenuhnya"
     },
     "saveButton": "Simpan Jadwal Obat",
     "alerts": {
-      "error": "Kesalahan",
+      "error": "Error",
       "success": "Berhasil",
       "successMessage": "Jadwal obat berhasil disimpan!",
       "saveError": "Gagal menyimpan jadwal obat",
       "permissionRequired": "Izin Diperlukan",
-      "galleryPermission": "Izin mengakses galeri diperlukan",
-      "cameraPermission": "Izin mengakses kamera diperlukan",
+      "galleryPermission": "Izin akses galeri diperlukan",
+      "cameraPermission": "Izin akses kamera diperlukan",
       "notificationPermission": "Izin notifikasi diperlukan untuk mengingatkan Anda",
       "endDateError": "Tanggal selesai tidak boleh lebih awal dari tanggal mulai",
       "validationErrors": {
-        "medicineNameRequired": "Nama obat harus diisi",
-        "medicineTypeRequired": "Jenis obat harus dipilih",
-        "otherMedicineTypeRequired": "Mohon sebutkan jenis obat lainnya",
-        "diseaseRequired": "Penyakit/kondisi harus dipilih",
-        "otherDiseaseRequired": "Mohon sebutkan penyakit/kondisi lainnya",
-        "medicineFormRequired": "Bentuk obat harus dipilih",
-        "dosageRequired": "Dosis harus diisi",
-        "usageTimeRequired": "Waktu konsumsi harus diisi",
+        "medicineNameRequired": "Nama obat diperlukan",
+        "medicineTypeRequired": "Jenis obat diperlukan",
+        "otherMedicineTypeRequired": "Mohon spesifikasikan jenis obat lainnya",
+        "diseaseRequired": "Penyakit/kondisi diperlukan",
+        "otherDiseaseRequired": "Mohon spesifikasikan penyakit/kondisi lainnya",
+        "medicineFormRequired": "Bentuk obat diperlukan",
+        "dosageRequired": "Dosis diperlukan",
+        "usageTimeRequired": "Waktu penggunaan diperlukan",
         "endDateAfterStart": "Tanggal selesai harus setelah tanggal mulai"
       }
     },
@@ -221,37 +299,37 @@
   },
   "scan": {
     "permissionTitle": "Izin Diperlukan",
-    "permissionGallery": "Aplikasi memerlukan akses ke galeri untuk memilih gambar.",
-    "permissionCamera": "Aplikasi memerlukan akses ke kamera.",
+    "permissionGallery": "Aplikasi perlu akses ke galeri untuk memilih gambar.",
+    "permissionCamera": "Aplikasi perlu akses ke kamera.",
     "pickImage": "Pilih Gambar",
     "takePhoto": "Ambil Foto",
     "processing": "Memproses...",
-    "readingText": "Sedang membaca teks...",
+    "readingText": "Membaca teks...",
     "resultHeader": "Hasil OCR:",
-    "noTextTitle": "Tidak Ada Teks",
-    "noTextMessage": "Tidak ada teks yang terdeteksi dalam gambar.",
-    "errorTitle": "Kesalahan",
+    "noTextTitle": "Tidak Ada Teks Ditemukan",
+    "noTextMessage": "Tidak ada teks terdeteksi dalam gambar.",
+    "errorTitle": "Error",
     "errorMessage": "Gagal memproses gambar:"
   },
   "callDoctor": {
-    "title": "Hubungi Dokter / Darurat",
-    "subtitle": "Pilih nomor darurat atau panggil dokter favorit Anda.",
+    "title": "Panggil Dokter / Darurat",
+    "subtitle": "Pilih nomor darurat atau hubungi dokter favorit Anda.",
     "favoriteTitle": "Dokter Favorit",
     "noFavorites": "Belum ada dokter favorit",
     "inputName": "Nama Dokter",
     "inputPhone": "Nomor Telepon",
     "addDoctor": "Tambah Dokter",
     "alertIncompleteTitle": "Data Tidak Lengkap",
-    "alertIncompleteMessage": "Masukkan nama dokter dan nomor telepon",
+    "alertIncompleteMessage": "Mohon masukkan nama dokter dan nomor telepon",
     "callErrorTitle": "Panggilan Gagal",
-    "callErrorMessage": "Periksa sambungan telepon Anda."
+    "callErrorMessage": "Periksa koneksi telepon Anda."
   },
   "healthPage": {
-    "askCondition": "Bagaimana kondisi Anda saat ini?",
+    "askCondition": "Bagaimana perasaan Anda hari ini?",
     "healthyLabel": "Sehat",
     "sickLabel": "Sakit",
-    "tipsHealthyTitle": "Tips untuk Tetap Sehat",
-    "tipsSickTitle": "Tips untuk Pemulihan",
+    "tipsHealthyTitle": "Tips Tetap Sehat",
+    "tipsSickTitle": "Tips Pemulihan",
     "changeCondition": "Ubah Kondisi",
     "additionalTips": "Tips Tambahan",
     "addTip": "Tambah Tips",
@@ -262,43 +340,49 @@
     "delete": "Hapus",
     "healthy": {
       "tip1": "Minum air putih minimal 8 gelas sehari",
-      "tip2": "Gunakan masker saat berada di luar rumah",
-      "tip3": "Konsumsi makanan bergizi dan seimbang",
-      "tip4": "Lakukan olahraga ringan secara rutin",
-      "tip5": "Cukup tidur 7–8 jam per hari"
+      "tip2": "Pakai masker saat bepergian keluar",
+      "tip3": "Makan makanan bergizi dan seimbang",
+      "tip4": "Lakukan olahraga ringan secara teratur",
+      "tip5": "Tidur 7–8 jam setiap hari"
     },
     "sick": {
       "tip1": "Jangan lupa minum obat sesuai anjuran",
-      "tip2": "Istirahat cukup untuk mempercepat pemulihan",
-      "tip3": "Konsumsi makanan bergizi agar tubuh lebih kuat",
-      "tip4": "Tetap minum cukup air putih",
-      "tip5": "Semoga cepat sembuh!"
+      "tip2": "Istirahat yang cukup untuk mempercepat pemulihan",
+      "tip3": "Makan makanan bergizi agar tetap kuat",
+      "tip4": "Tetap minum air putih yang cukup",
+      "tip5": "Semoga lekas sembuh!"
     }
   },
   "music": {
     "title": "Musik Relaksasi",
     "duration": "Durasi",
     "errorTitle": "Error",
-    "errorMessage": "Tidak dapat memutar musik. Periksa file audio di folder assets.",
+    "errorMessage": "Tidak dapat memutar musik. Mohon periksa file audio di folder assets.",
     "tracks": {
       "nature": {
         "title": "Suara Alam & Air Mengalir",
-        "desc": "Kombinasi suara alam yang menenangkan dengan gemericik air"
+        "desc": "Campuran menenangkan suara alam dengan air mengalir"
       },
       "piano": {
         "title": "Musik Piano Lembut",
         "desc": "Melodi piano yang menenangkan untuk meditasi"
       },
       "rain": {
-        "title": "Suara Hujan & Petir Jauh",
-        "desc": "Suara hujan yang tenang dengan petir lembut di kejauhan"
+        "title": "Hujan & Guntur Jauh",
+        "desc": "Suara hujan yang menenangkan dengan guntur lembut di kejauhan"
       }
     }
   },
+  "error": "Error",
   "common": {
     "cancel": "Batal",
     "delete": "Hapus",
     "select": "Pilih",
-    "back": "Kembali"
+    "back": "Kembali",
+    "save": "Simpan",
+    "ok": "OK",
+    "close": "Tutup",
+    "yes": "Ya",
+    "no": "Tidak"
   }
 }

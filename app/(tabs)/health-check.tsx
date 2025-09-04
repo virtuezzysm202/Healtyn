@@ -1,6 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import React, { useState } from 'react';
-import { Alert, Modal, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import LansiaText from '../../components/ui/LansiaText';
 import { useTranslation } from '../../hooks/useTranslation';
 
@@ -55,21 +55,20 @@ export default function HealthCalculatorScreen() {
     const bmi = w / (h * h);
     setBmiResult(parseFloat(bmi.toFixed(1)));
 
-    // Water intake: simple formula 35 ml per kg bodyweight
     const water = w * 35; // ml
     setWaterResult(Math.round(water));
   };
 
   const getBMICategory = (bmi: number) => {
-    if (bmi < 18.5) return { category: 'Underweight', color: '#FF9500' };
-    if (bmi < 25) return { category: 'Normal', color: '#34C759' };
-    if (bmi < 30) return { category: 'Overweight', color: '#FF9500' };
-    return { category: 'Obese', color: '#FF3B30' };
+    if (bmi < 18.5) return { category: t('health.bmiCategories.underweight'), color: '#FF9500' };
+    if (bmi < 25) return { category: t('health.bmiCategories.normal'), color: '#34C759' };
+    if (bmi < 30) return { category: t('health.bmiCategories.overweight'), color: '#FF9500' };
+    return { category: t('health.bmiCategories.obese'), color: '#FF3B30' };
   };
 
   const addSymptom = () => {
     if (!newSymptom.name.trim()) {
-      Alert.alert('Error', 'Please enter symptom name');
+      Alert.alert(t('error'), t('health.symptoms.nameRequired'));
       return;
     }
 
@@ -97,37 +96,34 @@ export default function HealthCalculatorScreen() {
 
   const getVitalStatus = (type: string, value: string) => {
     const val = parseFloat(value);
-    if (!val) return { status: 'Unknown', color: '#8E8E93' };
+    if (!val) return { status: t('health.vitals.status.unknown'), color: '#8E8E93' };
 
     switch (type) {
       case 'heartRate':
-        if (val < 60) return { status: 'Low', color: '#FF9500' };
-        if (val > 100) return { status: 'High', color: '#FF3B30' };
-        return { status: 'Normal', color: '#34C759' };
-      
+        if (val < 60) return { status: t('health.vitals.status.low'), color: '#FF9500' };
+        if (val > 100) return { status: t('health.vitals.status.high'), color: '#FF3B30' };
+        return { status: t('health.vitals.status.normal'), color: '#34C759' };
       case 'temperature':
-        if (val < 36.1) return { status: 'Low', color: '#007AFF' };
-        if (val > 37.2) return { status: 'High', color: '#FF3B30' };
-        return { status: 'Normal', color: '#34C759' };
-      
+        if (val < 36.1) return { status: t('health.vitals.status.low'), color: '#007AFF' };
+        if (val > 37.2) return { status: t('health.vitals.status.high'), color: '#FF3B30' };
+        return { status: t('health.vitals.status.normal'), color: '#34C759' };
       case 'bloodSugar':
-        if (val < 70) return { status: 'Low', color: '#FF3B30' };
-        if (val > 140) return { status: 'High', color: '#FF3B30' };
-        return { status: 'Normal', color: '#34C759' };
-      
+        if (val < 70) return { status: t('health.vitals.status.low'), color: '#FF3B30' };
+        if (val > 140) return { status: t('health.vitals.status.high'), color: '#FF3B30' };
+        return { status: t('health.vitals.status.normal'), color: '#34C759' };
       default:
-        return { status: 'Unknown', color: '#8E8E93' };
+        return { status: t('health.vitals.status.unknown'), color: '#8E8E93' };
     }
   };
 
-  const renderTabButton = (tab: typeof activeTab, icon: string, label: string) => (
+  const renderTabButton = (tab: typeof activeTab, icon: string, labelKey: string) => (
     <Pressable
       style={[styles.tabButton, activeTab === tab && styles.activeTab]}
       onPress={() => setActiveTab(tab)}
     >
       <Feather name={icon as any} size={20} color={activeTab === tab ? '#007AFF' : '#8E8E93'} />
       <LansiaText style={[styles.tabLabel, activeTab === tab && styles.activeTabLabel]}>
-        {label}
+        {t(`health.tabs.${labelKey}`)}
       </LansiaText>
     </Pressable>
   );
@@ -136,9 +132,9 @@ export default function HealthCalculatorScreen() {
     <View style={styles.container}>
       {/* Tab Navigation */}
       <View style={styles.tabContainer}>
-        {renderTabButton('calculator', 'calculator', 'Calculator')}
-        {renderTabButton('symptoms', 'activity', 'Symptoms')}
-        {renderTabButton('vitals', 'heart', 'Vitals')}
+        {renderTabButton('calculator', 'calculator', 'calculator')}
+        {renderTabButton('symptoms', 'activity', 'symptoms')}
+        {renderTabButton('vitals', 'heart', 'vitals')}
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -148,35 +144,35 @@ export default function HealthCalculatorScreen() {
             <LansiaText style={styles.title}>{t('health.title')}</LansiaText>
 
             <View style={styles.inputGroup}>
-              <LansiaText style={styles.label}>{t('health.weight')} (kg)</LansiaText>
+              <LansiaText style={styles.label}>{t('health.weight')}</LansiaText>
               <TextInput
                 style={styles.input}
                 keyboardType="numeric"
                 value={weight}
                 onChangeText={setWeight}
-                placeholder="70"
+                placeholder={t('health.placeholders.weight')}
               />
             </View>
 
             <View style={styles.inputGroup}>
-              <LansiaText style={styles.label}>{t('health.height')} (cm)</LansiaText>
+              <LansiaText style={styles.label}>{t('health.height')}</LansiaText>
               <TextInput
                 style={styles.input}
                 keyboardType="numeric"
                 value={height}
                 onChangeText={setHeight}
-                placeholder="170"
+                placeholder={t('health.placeholders.height')}
               />
             </View>
 
             <View style={styles.inputGroup}>
-              <LansiaText style={styles.label}>Age (years)</LansiaText>
+              <LansiaText style={styles.label}>{t('health.age')}</LansiaText>
               <TextInput
                 style={styles.input}
                 keyboardType="numeric"
                 value={age}
                 onChangeText={setAge}
-                placeholder="65"
+                placeholder={t('health.placeholders.age')}
               />
             </View>
 
@@ -201,8 +197,8 @@ export default function HealthCalculatorScreen() {
                   <Feather name="droplet" size={24} color="#007AFF" />
                   <View>
                     <LansiaText style={styles.resultLabel}>{t('health.waterIntake')}:</LansiaText>
-                    <LansiaText style={styles.resultValue}>{waterResult} ml / day</LansiaText>
-                    <LansiaText style={styles.subText}>≈ {Math.round(waterResult / 250)} glasses</LansiaText>
+                    <LansiaText style={styles.resultValue}>{waterResult} ml / {t('health.day')}</LansiaText>
+                    <LansiaText style={styles.subText}>≈ {Math.round(waterResult / 250)} {t('health.units.glasses')}</LansiaText>
                   </View>
                 </View>
               </View>
@@ -214,7 +210,7 @@ export default function HealthCalculatorScreen() {
         {activeTab === 'symptoms' && (
           <View>
             <View style={styles.headerRow}>
-              <LansiaText style={styles.title}>Symptom Tracker</LansiaText>
+              <LansiaText style={styles.title}>{t('health.symptoms.title')}</LansiaText>
               <Pressable style={styles.addButton} onPress={() => setShowSymptomModal(true)}>
                 <Feather name="plus" size={20} color="#fff" />
               </Pressable>
@@ -223,10 +219,8 @@ export default function HealthCalculatorScreen() {
             {symptoms.length === 0 ? (
               <View style={styles.emptyState}>
                 <Feather name="activity" size={48} color="#8E8E93" />
-                <LansiaText style={styles.emptyText}>No symptoms tracked yet</LansiaText>
-                <LansiaText style={styles.emptySubText}>
-                  Track your daily symptoms to monitor your health
-                </LansiaText>
+                <LansiaText style={styles.emptyText}>{t('health.symptoms.empty')}</LansiaText>
+                <LansiaText style={styles.emptySubText}>{t('health.symptoms.emptySub')}</LansiaText>
               </View>
             ) : (
               <View style={styles.symptomsList}>
@@ -238,9 +232,9 @@ export default function HealthCalculatorScreen() {
                         <Feather name="x" size={20} color="#8E8E93" />
                       </Pressable>
                     </View>
-                    
+
                     <View style={styles.severityRow}>
-                      <LansiaText style={styles.severityLabel}>Severity:</LansiaText>
+                      <LansiaText style={styles.severityLabel}>{t('health.symptoms.severity')}:</LansiaText>
                       <View style={styles.severityDots}>
                         {[1, 2, 3, 4, 5].map(level => (
                           <View
@@ -261,7 +255,7 @@ export default function HealthCalculatorScreen() {
                     {symptom.notes && (
                       <LansiaText style={styles.symptomNotes}>{symptom.notes}</LansiaText>
                     )}
-                    
+
                     <LansiaText style={styles.symptomDate}>{symptom.date}</LansiaText>
                   </View>
                 ))}
@@ -273,16 +267,17 @@ export default function HealthCalculatorScreen() {
         {/* Vital Signs Tab */}
         {activeTab === 'vitals' && (
           <View>
-            <LansiaText style={styles.title}>Vital Signs Monitor</LansiaText>
+            <LansiaText style={styles.title}>{t('health.vitals.title')}</LansiaText>
 
+            {/* Blood Pressure */}
             <View style={styles.vitalCard}>
               <View style={styles.vitalHeader}>
                 <Feather name="heart" size={24} color="#FF3B30" />
-                <LansiaText style={styles.vitalTitle}>Blood Pressure</LansiaText>
+                <LansiaText style={styles.vitalTitle}>{t('health.vitals.bloodPressure')}</LansiaText>
               </View>
               <View style={styles.bpInputRow}>
                 <View style={styles.bpInput}>
-                  <LansiaText style={styles.vitalLabel}>Systolic</LansiaText>
+                  <LansiaText style={styles.vitalLabel}>{t('health.vitals.systolic')}</LansiaText>
                   <TextInput
                     style={styles.vitalInputField}
                     keyboardType="numeric"
@@ -298,7 +293,7 @@ export default function HealthCalculatorScreen() {
                 </View>
                 <LansiaText style={styles.bpSeparator}>/</LansiaText>
                 <View style={styles.bpInput}>
-                  <LansiaText style={styles.vitalLabel}>Diastolic</LansiaText>
+                  <LansiaText style={styles.vitalLabel}>{t('health.vitals.diastolic')}</LansiaText>
                   <TextInput
                     style={styles.vitalInputField}
                     keyboardType="numeric"
@@ -315,10 +310,11 @@ export default function HealthCalculatorScreen() {
               </View>
             </View>
 
+            {/* Heart Rate */}
             <View style={styles.vitalCard}>
               <View style={styles.vitalHeader}>
                 <Feather name="activity" size={24} color="#FF9500" />
-                <LansiaText style={styles.vitalTitle}>Heart Rate</LansiaText>
+                <LansiaText style={styles.vitalTitle}>{t('health.vitals.heartRate')}</LansiaText>
               </View>
               <TextInput
                 style={styles.vitalInputField}
@@ -327,7 +323,7 @@ export default function HealthCalculatorScreen() {
                 onChangeText={(value) => 
                   setVitalSigns(prev => ({ ...prev, heartRate: value }))
                 }
-                placeholder="72 BPM"
+                placeholder={t('health.placeholders.heartRate')}
               />
               {vitalSigns.heartRate && (
                 <View style={[styles.statusBadge, { backgroundColor: getVitalStatus('heartRate', vitalSigns.heartRate).color }]}>
@@ -338,10 +334,11 @@ export default function HealthCalculatorScreen() {
               )}
             </View>
 
+            {/* Temperature */}
             <View style={styles.vitalCard}>
               <View style={styles.vitalHeader}>
                 <Feather name="thermometer" size={24} color="#007AFF" />
-                <LansiaText style={styles.vitalTitle}>Temperature</LansiaText>
+                <LansiaText style={styles.vitalTitle}>{t('health.vitals.temperature')}</LansiaText>
               </View>
               <TextInput
                 style={styles.vitalInputField}
@@ -350,7 +347,7 @@ export default function HealthCalculatorScreen() {
                 onChangeText={(value) => 
                   setVitalSigns(prev => ({ ...prev, temperature: value }))
                 }
-                placeholder="36.5°C"
+                placeholder={t('health.placeholders.temperature')}
               />
               {vitalSigns.temperature && (
                 <View style={[styles.statusBadge, { backgroundColor: getVitalStatus('temperature', vitalSigns.temperature).color }]}>
@@ -361,10 +358,11 @@ export default function HealthCalculatorScreen() {
               )}
             </View>
 
+            {/* Blood Sugar */}
             <View style={styles.vitalCard}>
               <View style={styles.vitalHeader}>
                 <Feather name="zap" size={24} color="#AF52DE" />
-                <LansiaText style={styles.vitalTitle}>Blood Sugar</LansiaText>
+                <LansiaText style={styles.vitalTitle}>{t('health.vitals.bloodSugar')}</LansiaText>
               </View>
               <TextInput
                 style={styles.vitalInputField}
@@ -373,7 +371,7 @@ export default function HealthCalculatorScreen() {
                 onChangeText={(value) => 
                   setVitalSigns(prev => ({ ...prev, bloodSugar: value }))
                 }
-                placeholder="100 mg/dL"
+                placeholder={t('health.placeholders.bloodSugar')}
               />
               {vitalSigns.bloodSugar && (
                 <View style={[styles.statusBadge, { backgroundColor: getVitalStatus('bloodSugar', vitalSigns.bloodSugar).color }]}>
@@ -386,79 +384,10 @@ export default function HealthCalculatorScreen() {
           </View>
         )}
       </ScrollView>
-
-      {/* Symptom Modal */}
-      <Modal
-        visible={showSymptomModal}
-        animationType="slide"
-        presentationStyle="pageSheet"
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalHeader}>
-            <Pressable onPress={() => setShowSymptomModal(false)}>
-              <Feather name="x" size={24} color="#8E8E93" />
-            </Pressable>
-            <LansiaText style={styles.modalTitle}>Add Symptom</LansiaText>
-            <Pressable onPress={addSymptom}>
-              <LansiaText style={styles.saveButton}>Save</LansiaText>
-            </Pressable>
-          </View>
-
-          <ScrollView style={styles.modalContent}>
-            <View style={styles.inputGroup}>
-              <LansiaText style={styles.label}>Symptom Name</LansiaText>
-              <TextInput
-                style={styles.input}
-                value={newSymptom.name}
-                onChangeText={(value) => setNewSymptom(prev => ({ ...prev, name: value }))}
-                placeholder="e.g., Headache, Fatigue, Joint pain"
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <LansiaText style={styles.label}>Severity (1-5)</LansiaText>
-              <View style={styles.severitySelector}>
-                {[1, 2, 3, 4, 5].map(level => (
-                  <Pressable
-                    key={level}
-                    style={[
-                      styles.severityButton,
-                      newSymptom.severity === level && styles.selectedSeverity
-                    ]}
-                    onPress={() => setNewSymptom(prev => ({ ...prev, severity: level }))}
-                  >
-                    <LansiaText style={[
-                      styles.severityButtonText,
-                      newSymptom.severity === level && styles.selectedSeverityText
-                    ]}>
-                      {level}
-                    </LansiaText>
-                  </Pressable>
-                ))}
-              </View>
-              <View style={styles.severityLabels}>
-                <LansiaText style={styles.severityLabelText}>Mild</LansiaText>
-                <LansiaText style={styles.severityLabelText}>Severe</LansiaText>
-              </View>
-            </View>
-
-            <View style={styles.inputGroup}>
-              <LansiaText style={styles.label}>Notes (Optional)</LansiaText>
-              <TextInput
-                style={[styles.input, styles.notesInput]}
-                multiline
-                numberOfLines={3}
-                value={newSymptom.notes}
-                onChangeText={(value) => setNewSymptom(prev => ({ ...prev, notes: value }))}
-                placeholder="Additional details about the symptom..."
-              />
-            </View>
-          </ScrollView>
-        </View>
-      </Modal>
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F2F2F7' },

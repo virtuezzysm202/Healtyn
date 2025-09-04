@@ -56,9 +56,87 @@
       "medicineReminder": "Medicine Reminder",
       "scanBook": "Scan Book",
       "callDoctor": "Call Doctor",
+      "health-check": "Health Check",
       "callFamily": "Call Family",
       "health": "Health",
       "relaxMusic": "Relax Music"
+    }
+  },
+  "health": {
+    "title": "Health Calculator",
+    "weight": "Weight (kg)",
+    "height": "Height (cm)",
+    "age": "Age (years)",
+    "calculate": "Calculate",
+    "bmi": "BMI",
+    "waterIntake": "Daily Water Intake",
+    "invalidInput": "Please enter valid weight and height values",
+    "bmiCategories": {
+      "underweight": "Underweight",
+      "normal": "Normal",
+      "overweight": "Overweight",
+      "obese": "Obese"
+    },
+    "units": {
+      "kg": "kg",
+      "cm": "cm",
+      "years": "years",
+      "ml": "ml",
+      "glasses": "glasses",
+      "bpm": "BPM",
+      "celsius": "°C",
+      "mgdl": "mg/dL"
+    },
+    "day": "day",
+    "placeholders": {
+      "weight": "Enter your weight",
+      "height": "Enter your height",
+      "age": "Enter your age",
+      "heartRate": "e.g., 72",
+      "temperature": "e.g., 36.5",
+      "bloodSugar": "e.g., 100"
+    },
+    "tabs": {
+      "calculator": "Calculator",
+      "symptoms": "Symptoms",
+      "vitals": "Vitals"
+    },
+    "symptoms": {
+      "title": "Symptom Tracker",
+      "add": "Add Symptom",
+      "empty": "No symptoms tracked yet",
+      "emptySub": "Track your daily symptoms to monitor your health",
+      "name": "Symptom Name",
+      "severity": "Severity (1-5)",
+      "mild": "Mild",
+      "severe": "Severe",
+      "notes": "Notes (Optional)",
+      "placeholders": {
+        "symptomName": "e.g., Headache, Fatigue, Joint pain",
+        "symptomNotes": "Additional details about the symptom..."
+      },
+      "save": "Save",
+      "nameRequired": "Please enter symptom name"
+    },
+    "vitals": {
+      "title": "Vital Signs Monitor",
+      "bloodPressure": "Blood Pressure",
+      "systolic": "Systolic",
+      "diastolic": "Diastolic",
+      "heartRate": "Heart Rate",
+      "temperature": "Temperature",
+      "bloodSugar": "Blood Sugar",
+      "status": {
+        "normal": "Normal",
+        "high": "High",
+        "low": "Low",
+        "unknown": "Unknown"
+      },
+      "placeholders": {
+        "heartRate": "e.g., 72",
+        "temperature": "e.g., 36.5",
+        "bloodSugar": "e.g., 100"
+      }
     }
   },
   "medicine": {
@@ -295,10 +373,16 @@
       }
     }
   },
+  "error": "Error",
   "common": {
     "cancel": "Cancel",
     "delete": "Delete",
     "select": "Select",
-    "back": "Back"
+    "back": "Back",
+    "save": "Save",
+    "ok": "OK",
+    "close": "Close",
+    "yes": "Yes",
+    "no": "No"
   }
 }
