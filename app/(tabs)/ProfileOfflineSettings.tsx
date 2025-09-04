@@ -18,6 +18,8 @@ const translations = {
     title: "Profil Offline",
     name: "Nama",
     age: "Usia",
+    gender: "Jenis Kelamin",
+    genderOptions: ["Laki-laki", "Perempuan"],
     address: "Alamat",
     save: "Simpan",
     edit: "Edit",
@@ -35,6 +37,8 @@ const translations = {
     title: "Offline Profile",
     name: "Name",
     age: "Age",
+    gender: "Gender",
+    genderOptions: ["Male", "Female"],
     address: "Address",
     save: "Save",
     edit: "Edit",
@@ -63,6 +67,7 @@ export default function ProfileOfflineSettings() {
   const [isSaving, setIsSaving] = useState(false);
   const [hasProfile, setHasProfile] = useState(false);
   const [fadeAnim] = useState(new Animated.Value(1));
+  const [gender, setGender] = useState<string | null>(null);
 
   // Load data
   useEffect(() => {
@@ -71,18 +76,13 @@ export default function ProfileOfflineSettings() {
 
   const loadProfileData = async () => {
     try {
-   
-      const demoProfile = {
-        name: "John Doe",
-        age: "25",
-        address: "Jl. Contoh No. 123, Jakarta"
-      };
-      
-      setName(demoProfile.name);
-      setAge(demoProfile.age);
-      setAddress(demoProfile.address);
-      setHasProfile(true);
-      
+      // Profile kosong
+      setName("");
+      setAge("");
+      setAddress("");
+      setGender(null);
+      setHasProfile(false); 
+  
     } catch (error) {
       console.error("Error loading profile data:", error);
     }
@@ -91,6 +91,12 @@ export default function ProfileOfflineSettings() {
   const saveProfile = async () => {
     if (!name.trim()) {
       Alert.alert("Error", language === 'id' ? "Nama tidak boleh kosong" : "Name cannot be empty");
+      return;
+    }
+
+    if (!gender) {
+      Alert.alert("Error", language === 'id' ? "Pilih jenis kelamin" : "Please select gender");
+      setIsSaving(false);
       return;
     }
 
@@ -155,8 +161,8 @@ export default function ProfileOfflineSettings() {
           {!name && <Text style={styles.profileSubtext}>{t.fillProfile}</Text>}
         </View>
       </View>
-
-      {(name || age || address) && (
+  
+      {(name || age || gender || address) ? (
         <View style={styles.profileDetails}>
           {name && (
             <View style={styles.detailRow}>
@@ -164,14 +170,21 @@ export default function ProfileOfflineSettings() {
               <Text style={styles.detailValue}>{name}</Text>
             </View>
           )}
-          
+  
           {age && (
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>{t.age}</Text>
               <Text style={styles.detailValue}>{age} tahun</Text>
             </View>
           )}
-          
+  
+          {gender && (
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>{t.gender}</Text>
+              <Text style={styles.detailValue}>{gender}</Text>
+            </View>
+          )}
+  
           {address && (
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>{t.address}</Text>
@@ -179,8 +192,12 @@ export default function ProfileOfflineSettings() {
             </View>
           )}
         </View>
+      ) : (
+        <Text style={[styles.profileSubtext, { textAlign: "center" }]}>
+          {t.fillProfile}
+        </Text>
       )}
-
+  
       <TouchableOpacity
         style={styles.editButton}
         onPress={handleEdit}
@@ -232,6 +249,33 @@ export default function ProfileOfflineSettings() {
           textAlignVertical="top"
         />
       </View>
+
+      {/* Gender Picker */}
+<View style={styles.inputGroup}>
+  <Text style={styles.label}>{t.gender}</Text>
+  <View style={styles.optionRow}>
+    {t.genderOptions.map(option => (
+      <TouchableOpacity
+        key={option}
+        style={[
+          styles.optionButton,
+          gender === option && styles.optionButtonSelected
+        ]}
+        onPress={() => setGender(option)}
+        activeOpacity={0.8}
+      >
+        <Text
+          style={[
+            styles.optionText,
+            gender === option && styles.optionTextSelected
+          ]}
+        >
+          {option}
+        </Text>
+      </TouchableOpacity>
+    ))}
+  </View>
+</View>
 
       {/* Action Buttons */}
       <View style={styles.buttonRow}>
@@ -479,6 +523,33 @@ const styles = StyleSheet.create({
   saveButtonText: {
     color: "#ffffff",
     fontSize: 16,
+    fontWeight: "700",
+    
+  },
+  optionRow: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  optionButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: "#e2e8f0",
+    backgroundColor: "#f7fafc",
+    alignItems: "center",
+  },
+  optionButtonSelected: {
+    backgroundColor: "#3b82f6",
+    borderColor: "#3b82f6",
+  },
+  optionText: {
+    fontSize: 16,
+    color: "#1a202c",
+    fontWeight: "500",
+  },
+  optionTextSelected: {
+    color: "#ffffff",
     fontWeight: "700",
   },
 });
