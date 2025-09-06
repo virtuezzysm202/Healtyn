@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
 import {
@@ -7,10 +8,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useSettings } from '../../contexts/SettingsContext';
+import { useSettings } from "../../contexts/SettingsContext";
 
-
-// Translation object
 const translations = {
   id: {
     title: "Pengaturan",
@@ -41,35 +40,15 @@ export default function SettingsPage() {
   const t = translations[language];
   const router = useRouter();
 
- 
   const [isLoggedIn, setIsLoggedIn] = React.useState(false);
 
-  const navigateToProfile = () => {
-    try {
-      router.push("/(tabs)/ProfileOfflineSettings");
-    } catch (error) {
-      console.error("Navigation error:", error);
-    }
-  };
+  const navigateToProfile = () => router.push("/(tabs)/ProfileOfflineSettings");
+  const navigateToDisplay = () => router.push("/(tabs)/DisplaySettings");
+  const navigateToAccount = () =>
+    router.push(isLoggedIn ? "/(tabs)/profile-online" : "/(tabs)/AuthScreen");
 
-  const navigateToDisplay = () => {
-    try {
-      router.push("/(tabs)/DisplaySettings");
-    } catch (error) {
-      console.error("Navigation error:", error);
-    }
-  };
-
-  const navigateToAccount = () => {
-    try {
-      if (isLoggedIn) {
-        router.push("/(tabs)/profile-online");
-      } else {
-        router.push("/(tabs)/AuthScreen");
-      }
-    } catch (error) {
-      console.error("Navigation error:", error);
-    }
+  const goBack = () => {
+    router.push("/(tabs)");
   };
 
   return (
@@ -77,6 +56,9 @@ export default function SettingsPage() {
       <View style={styles.content}>
         {/* Header */}
         <View style={styles.header}>
+          <TouchableOpacity onPress={goBack} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color="#3b82f6" />
+          </TouchableOpacity>
           <Text style={styles.title}>{t.title}</Text>
         </View>
 
@@ -89,7 +71,7 @@ export default function SettingsPage() {
             activeOpacity={0.7}
           >
             <View style={styles.menuIconContainer}>
-              <Text style={styles.menuIcon}>👤</Text>
+              <Ionicons name="person-circle-outline" size={26} color="#3b82f6" />
             </View>
             <View style={styles.menuContent}>
               <Text style={styles.menuTitle}>{t.profileOffline}</Text>
@@ -97,7 +79,7 @@ export default function SettingsPage() {
                 {t.profileOfflineDesc}
               </Text>
             </View>
-            <Text style={styles.chevron}>›</Text>
+            <Ionicons name="chevron-forward" size={22} color="#9ca3af" />
           </TouchableOpacity>
 
           {/* Display Settings */}
@@ -107,13 +89,13 @@ export default function SettingsPage() {
             activeOpacity={0.7}
           >
             <View style={styles.menuIconContainer}>
-              <Text style={styles.menuIcon}>🎨</Text>
+              <Ionicons name="color-palette-outline" size={26} color="#f59e0b" />
             </View>
             <View style={styles.menuContent}>
               <Text style={styles.menuTitle}>{t.display}</Text>
               <Text style={styles.menuDescription}>{t.displayDesc}</Text>
             </View>
-            <Text style={styles.chevron}>›</Text>
+            <Ionicons name="chevron-forward" size={22} color="#9ca3af" />
           </TouchableOpacity>
 
           {/* Account Settings */}
@@ -123,7 +105,11 @@ export default function SettingsPage() {
             activeOpacity={0.7}
           >
             <View style={styles.menuIconContainer}>
-              <Text style={styles.menuIcon}>{isLoggedIn ? "⚙️" : "🔐"}</Text>
+              <Ionicons
+                name={isLoggedIn ? "settings-outline" : "lock-closed-outline"}
+                size={26}
+                color={isLoggedIn ? "#10b981" : "#ef4444"}
+              />
             </View>
             <View style={styles.menuContent}>
               <Text style={styles.menuTitle}>
@@ -133,7 +119,7 @@ export default function SettingsPage() {
                 {isLoggedIn ? t.accountDescLoggedIn : t.accountDesc}
               </Text>
             </View>
-            <Text style={styles.chevron}>›</Text>
+            <Ionicons name="chevron-forward" size={22} color="#9ca3af" />
           </TouchableOpacity>
         </View>
       </View>
@@ -151,14 +137,25 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   header: {
-    marginBottom: 32,
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 32,
+    position: "relative",
+  },
+  backButton: {
+    position: "absolute",
+    left: 0,
+    padding: 8,
+    borderRadius: 12,
+    zIndex: 10,
   },
   title: {
     fontSize: 32,
     fontWeight: "700",
     color: "#1a1a1a",
     textAlign: "center",
+    flex: 0,
   },
   menuContainer: {
     gap: 12,
@@ -170,10 +167,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
@@ -186,9 +180,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginRight: 16,
-  },
-  menuIcon: {
-    fontSize: 24,
   },
   menuContent: {
     flex: 1,
@@ -203,10 +194,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#6b7280",
     lineHeight: 20,
-  },
-  chevron: {
-    fontSize: 24,
-    color: "#9ca3af",
-    fontWeight: "300",
   },
 });

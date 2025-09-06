@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from "../../hooks/useTranslation";
 
 
+
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -22,7 +23,9 @@ const API_KEY = process.env.EXPO_PUBLIC_WEATHER_API_KEY ?? '';
 
 // ===== Types =====
 type WeatherData = {
-  weather: { icon: string; description: string }[];
+  weather: {
+    main: string; icon: string; description: string 
+}[];
   main: { temp: number; humidity?: number };
   wind?: { speed: number };
   name?: string;
@@ -177,21 +180,37 @@ export default function HomePage() {
     }
   };
 
-  // ===== Weather: API calls =====
+  // Weather: API calls 
   const fetchWeather = async (loc: GeoLocation) => {
     try {
       if (!API_KEY) {
-        throw new Error(t('home.weather.apiError'));
+        throw new Error(t("home.weather.apiError"));
       }
       setLoadingWeather(true);
-      const url = `https://api.openweathermap.org/data/2.5/weather?lat=${loc.lat}&lon=${loc.lon}&appid=${API_KEY}&units=metric&lang=id`;
+  
+  
+      const url = `https://api.openweathermap.org/data/2.5/weather?lat=${loc.lat}&lon=${loc.lon}&appid=${API_KEY}&units=metric`;
       const res = await fetch(url);
+  
       if (!res.ok) throw new Error(`Gagal fetch weather: ${res.status}`);
       const data: WeatherData = await res.json();
-      setWeather(data);
+  
+      
+      const mainCondition = data.weather?.[0]?.main || "Unknown";
+  
+
+      const localizedCondition =
+        t(`weather.conditions.${mainCondition}`) || mainCondition;
+  
+    
+      setWeather({
+        ...data,
+        weather: [{ ...data.weather[0], description: localizedCondition }],
+      });
+  
       setWeatherError(null);
     } catch (err: any) {
-      setWeatherError(err?.message ?? t('home.weather.generalError'));
+      setWeatherError(err?.message ?? t("home.weather.generalError"));
     } finally {
       setLoadingWeather(false);
     }

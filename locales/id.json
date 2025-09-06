@@ -1,4 +1,24 @@
 {
+  "weather": {
+    "conditions": {
+      "Clear": "Cerah",
+      "Clouds": "Berawan",
+      "Rain": "Hujan",
+      "Drizzle": "Gerimis",
+      "Thunderstorm": "Badai Petir",
+      "Snow": "Salju",
+      "Mist": "Berkabut",
+      "Smoke": "Berasap",
+      "Haze": "Berkabut Tipis",
+      "Dust": "Berdebu",
+      "Fog": "Berkabut Tebal",
+      "Sand": "Badai Pasir",
+      "Ash": "Debu Vulkanik",
+      "Squall": "Angin Kencang",
+      "Tornado": "Tornado",
+      "Unknown": "Tidak Diketahui"
+    }
+  },
   "display": {
     "title": "Pengaturan Tampilan",
     "language": "Bahasa",
@@ -63,10 +83,10 @@
     }
   },
   "health": {
-    "title": "Health Calculator",
+    "title": "Kalkulator Kesehatan",
     "weight": "Berat Badan (kg)",
     "height": "Tinggi Badan (cm)",
-    "age": "Usia (years)",
+    "age": "Usia (tahun)",
     "calculate": "Hitung",
     "bmi": "BMI",
     "waterIntake": "Asupan Air Harian",
@@ -80,7 +100,7 @@
     "units": {
       "kg": "kg",
       "cm": "cm",
-      "years": "years",
+      "years": "tahun",
       "ml": "ml",
       "glasses": "gelas",
       "bpm": "BPM",

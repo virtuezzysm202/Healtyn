@@ -1,4 +1,23 @@
 {
+  "weather": {
+    "conditions": {
+      "Clear": "Clear Sky",
+      "Clouds": "Cloudy",
+      "Rain": "Rainy",
+      "Drizzle": "Light Rain",
+      "Thunderstorm": "Thunderstorm",
+      "Snow": "Snowy",
+      "Mist": "Misty",
+      "Smoke": "Smoky",
+      "Haze": "Hazy",
+      "Dust": "Dusty",
+      "Fog": "Foggy",
+      "Sand": "Sandy",
+      "Ash": "Ash",
+      "Squall": "Squall",
+      "Tornado": "Tornado"
+    }
+  },
   "display": {
     "title": "Display Settings",
     "language": "Language",
@@ -54,7 +73,6 @@
     },
     "menu": {
       "medicineReminder": "Medicine Reminder",
-      "scanBook": "Scan Book",
       "callDoctor": "Call Doctor",
       "health-check": "Health Check",
       "callFamily": "Call Family",
@@ -297,20 +315,6 @@
       "ml": "ml"
     }
   },
-  "scan": {
-    "permissionTitle": "Permission Required",
-    "permissionGallery": "The app needs access to the gallery to select images.",
-    "permissionCamera": "The app needs access to the camera.",
-    "pickImage": "Pick Image",
-    "takePhoto": "Take Photo",
-    "processing": "Processing...",
-    "readingText": "Reading text...",
-    "resultHeader": "OCR Result:",
-    "noTextTitle": "No Text Found",
-    "noTextMessage": "No text detected in the image.",
-    "errorTitle": "Error",
-    "errorMessage": "Failed to process image:"
-  },
   "callDoctor": {
     "title": "Call Doctor / Emergency",
     "subtitle": "Choose an emergency number or call your favorite doctor.",
@@ -372,17 +376,5 @@
         "desc": "Relaxing rain sounds with gentle distant thunder"
       }
     }
-  },
-  "error": "Error",
-  "common": {
-    "cancel": "Cancel",
-    "delete": "Delete",
-    "select": "Select",
-    "back": "Back",
-    "save": "Save",
-    "ok": "OK",
-    "close": "Close",
-    "yes": "Yes",
-    "no": "No"
   }
 }

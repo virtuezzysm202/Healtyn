@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
 import {
@@ -16,16 +17,14 @@ const translations = {
     register: "Daftar",
     loginDesc: "Masuk ke akun yang sudah ada",
     registerDesc: "Buat akun baru",
-    back: "Kembali",
     comingSoon: "Fitur ini akan segera hadir!",
   },
   en: {
     title: "Sign In / Sign Up",
     login: "Sign In",
-    register: "Sign Up", 
+    register: "Sign Up",
     loginDesc: "Sign in to existing account",
     registerDesc: "Create a new account",
-    back: "Back",
     comingSoon: "This feature is coming soon!",
   },
 };
@@ -34,44 +33,24 @@ export default function AuthScreen() {
   const { language, theme } = useSettings();
   const t = translations[language];
   const router = useRouter();
-  const isDark = theme === 'dark';
+  const isDark = theme === "dark";
 
   const goBack = () => {
-    try {
-      if (router.canGoBack()) {
-        router.back();
-      } else {
-        router.replace("/(tabs)/settings");
-      }
-    } catch (error) {
-      console.error("Navigation error:", error);
-      router.replace("/(tabs)/settings");
-    }
+    router.replace("/(tabs)/settings"); // langsung balik ke settings
   };
 
   return (
-    <ScrollView 
-      style={[
-        styles.container, 
-        isDark && styles.containerDark
-      ]} 
+    <ScrollView
+      style={[styles.container, isDark && styles.containerDark]}
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.content}>
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={goBack} style={styles.backButton}>
-            <Text style={[
-              styles.backButtonText,
-              isDark && styles.backButtonTextDark
-            ]}>
-              ‹ {t.back}
-            </Text>
+            <Ionicons name="arrow-back" size={24} color="#3b82f6" />
           </TouchableOpacity>
-          <Text style={[
-            styles.title,
-            isDark && styles.titleDark
-          ]}>
+          <Text style={[styles.title, isDark && styles.titleDark]}>
             {t.title}
           </Text>
         </View>
@@ -79,67 +58,63 @@ export default function AuthScreen() {
         {/* Auth Options */}
         <View style={styles.authContainer}>
           <TouchableOpacity
-            style={[
-              styles.authButton,
-              isDark && styles.authButtonDark
-            ]}
+            style={[styles.authButton, isDark && styles.authButtonDark]}
             activeOpacity={0.7}
           >
             <View style={styles.authIconContainer}>
               <Text style={styles.authIcon}>🔑</Text>
             </View>
             <View style={styles.authContent}>
-              <Text style={[
-                styles.authTitle,
-                isDark && styles.authTitleDark
-              ]}>
+              <Text style={[styles.authTitle, isDark && styles.authTitleDark]}>
                 {t.login}
               </Text>
-              <Text style={[
-                styles.authDescription,
-                isDark && styles.authDescriptionDark
-              ]}>
+              <Text
+                style={[
+                  styles.authDescription,
+                  isDark && styles.authDescriptionDark,
+                ]}
+              >
                 {t.loginDesc}
               </Text>
             </View>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[
-              styles.authButton,
-              isDark && styles.authButtonDark
-            ]}
+            style={[styles.authButton, isDark && styles.authButtonDark]}
             activeOpacity={0.7}
           >
             <View style={styles.authIconContainer}>
               <Text style={styles.authIcon}>📝</Text>
             </View>
             <View style={styles.authContent}>
-              <Text style={[
-                styles.authTitle,
-                isDark && styles.authTitleDark
-              ]}>
+              <Text style={[styles.authTitle, isDark && styles.authTitleDark]}>
                 {t.register}
               </Text>
-              <Text style={[
-                styles.authDescription,
-                isDark && styles.authDescriptionDark
-              ]}>
+              <Text
+                style={[
+                  styles.authDescription,
+                  isDark && styles.authDescriptionDark,
+                ]}
+              >
                 {t.registerDesc}
               </Text>
             </View>
           </TouchableOpacity>
         </View>
 
-        {/* Coming Soon Message */}
-        <View style={[
-          styles.comingSoonContainer,
-          isDark && styles.comingSoonContainerDark
-        ]}>
-          <Text style={[
-            styles.comingSoonText,
-            isDark && styles.comingSoonTextDark
-          ]}>
+        {/* Coming Soon */}
+        <View
+          style={[
+            styles.comingSoonContainer,
+            isDark && styles.comingSoonContainerDark,
+          ]}
+        >
+          <Text
+            style={[
+              styles.comingSoonText,
+              isDark && styles.comingSoonTextDark,
+            ]}
+          >
             {t.comingSoon}
           </Text>
         </View>
@@ -160,27 +135,26 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 32,
+    position: "relative",
   },
   backButton: {
-    alignSelf: "flex-start",
-    marginBottom: 16,
-    paddingVertical: 8,
-    paddingHorizontal: 4,
-  },
-  backButtonText: {
-    fontSize: 18,
-    color: "#3b82f6",
-    fontWeight: "500",
-  },
-  backButtonTextDark: {
-    color: "#60a5fa",
+    position: "absolute",
+    left: 0,
+    padding: 8,
+    borderRadius: 12,
+    zIndex: 10,
   },
   title: {
     fontSize: 28,
     fontWeight: "700",
     color: "#1a1a1a",
     textAlign: "center",
+    flex: 1,
+    zIndex: 1,
   },
   titleDark: {
     color: "#ffffff",
@@ -196,10 +170,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
