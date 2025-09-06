@@ -1,14 +1,14 @@
-// app/TabLayout.tsx
+import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Text } from 'react-native';
 import { useSettings } from '../../contexts/SettingsContext';
 
-// Tab titles (translations)
 const tabTranslations = {
-  id: { home: "Beranda", health: "Kesehatan", medicine: "Obat", settings: "Pengaturan" },
-  en: { home: "Home", health: "Health", medicine: "Medicine", settings: "Settings" }
+  id: { home: "Beranda", health: "Kesehatan", medicine: "Obat", call: "Panggil Dokter", settings: "Pengaturan" },
+  en: { home: "Home", health: "Health", medicine: "Medicine", call: "Call Doctor", settings: "Settings" }
 };
+
+type TabBarIconProps = { color: string; size: number };
 
 export default function TabLayout() {
   const { theme, language } = useSettings();
@@ -32,22 +32,19 @@ export default function TabLayout() {
         headerTintColor: isDark ? '#ffffff' : '#1a1a1a',
       }}
     >
-      {/* Main Home Tab */}
       <Tabs.Screen
         name="index"
         options={{
           title: t.home,
-          tabBarIcon: () => <Text style={{ fontSize: 24 }}>🏠</Text>,
+          tabBarIcon: ({ color, size }: TabBarIconProps) => <Ionicons name="home-outline" size={size} color={color} />,
           headerShown: false,
         }}
       />
-
-      {/* Additional Tabs (optional, start with simple icon first) */}
       <Tabs.Screen
         name="health"
         options={{
           title: t.health,
-          tabBarIcon: () => <Text style={{ fontSize: 24 }}>❤️</Text>,
+          tabBarIcon: ({ color, size }: TabBarIconProps) => <Ionicons name="heart-outline" size={size} color={color} />,
           headerShown: false,
         }}
       />
@@ -55,7 +52,15 @@ export default function TabLayout() {
         name="medicine"
         options={{
           title: t.medicine,
-          tabBarIcon: () => <Text style={{ fontSize: 24 }}>💊</Text>,
+          tabBarIcon: ({ color, size }: TabBarIconProps) => <Ionicons name="medkit-outline" size={size} color={color} />,
+          headerShown: false,
+        }}
+      />
+      <Tabs.Screen
+        name="call-doctor"
+        options={{
+          title: t.call,
+          tabBarIcon: ({ color, size }: TabBarIconProps) => <Ionicons name="call-outline" size={size} color={color} />,
           headerShown: false,
         }}
       />
@@ -63,20 +68,19 @@ export default function TabLayout() {
         name="settings"
         options={{
           title: t.settings,
-          tabBarIcon: () => <Text style={{ fontSize: 24 }}>⚙️</Text>,
+          tabBarIcon: ({ color, size }: TabBarIconProps) => <Ionicons name="settings-outline" size={size} color={color} />,
           headerShown: false,
         }}
       />
 
-      {/* Hidden screens */}
       {[
+        "family",
         "ProfileOfflineSettings",
         "profile-online",
         "DisplaySettings",
         "AuthScreen",
         "AccountSettings",
         "CreateMedicineSchedule",
-        "call-doctor",
         "explore",
         "relax-music",
         "health-check",
