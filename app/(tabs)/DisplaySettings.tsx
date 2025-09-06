@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
 import {
@@ -16,16 +17,7 @@ export default function DisplaySettings() {
   const router = useRouter();
 
   const goBack = () => {
-    try {
-      if (router.canGoBack()) {
-        router.back();
-      } else {
-        router.replace("/(tabs)/settings");
-      }
-    } catch (error) {
-      console.error("Navigation error:", error);
-      router.replace("/(tabs)/settings");
-    }
+    router.push("/(tabs)/settings");
   };
 
   const handleLanguageChange = async (newLanguage: "id" | "en") => {
@@ -48,14 +40,11 @@ export default function DisplaySettings() {
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={goBack} style={styles.backButton}>
-            <Text
-              style={[
-                styles.backButtonText,
-                isDark && styles.backButtonTextDark,
-              ]}
-            >
-              ‹ {t("display.back")}
-            </Text>
+            <Ionicons
+              name="arrow-back"
+              size={24}
+              color={isDark ? "#60a5fa" : "#3b82f6"}
+            />
           </TouchableOpacity>
           <Text style={[styles.title, isDark && styles.titleDark]}>
             {t("display.title")}
@@ -66,7 +55,9 @@ export default function DisplaySettings() {
         <View style={styles.settingsContainer}>
           {/* Language Section */}
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>
+            <Text
+              style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}
+            >
               {t("display.language")}
             </Text>
             <Text
@@ -129,7 +120,9 @@ export default function DisplaySettings() {
 
           {/* Theme Section */}
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>
+            <Text
+              style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}
+            >
               {t("display.theme")}
             </Text>
             <Text
@@ -199,20 +192,34 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f8f9fa" },
   containerDark: { backgroundColor: "#1a1a1a" },
   content: { padding: 20 },
-  header: { marginBottom: 32 },
-  backButton: {
-    alignSelf: "flex-start",
-    marginBottom: 16,
-    paddingVertical: 8,
-    paddingHorizontal: 4,
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 32,
   },
-  backButtonText: { fontSize: 18, color: "#3b82f6", fontWeight: "500" },
-  backButtonTextDark: { color: "#60a5fa" },
-  title: { fontSize: 28, fontWeight: "700", color: "#1a1a1a", textAlign: "center" },
+  backButton: {
+    marginRight: 12,
+    padding: 8,
+    borderRadius: 12,
+    backgroundColor: "transparent",
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: "#1a1a1a",
+    flex: 1,
+    textAlign: "center",
+    marginRight: 40, 
+  },
   titleDark: { color: "#ffffff" },
   settingsContainer: { gap: 32 },
   section: { marginBottom: 8 },
-  sectionTitle: { fontSize: 20, fontWeight: "600", color: "#1a1a1a", marginBottom: 8 },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "600",
+    color: "#1a1a1a",
+    marginBottom: 8,
+  },
   sectionTitleDark: { color: "#ffffff" },
   sectionDescription: { fontSize: 14, color: "#6b7280", marginBottom: 16 },
   sectionDescriptionDark: { color: "#9ca3af" },

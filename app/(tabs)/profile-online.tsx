@@ -18,9 +18,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f9fa',
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
+    fontSize: 18, 
+    fontWeight: "700",
+    color: "#1a202c",
+    textAlign: "center",
+    flex: 1, 
+    marginRight: 40, 
   },
   subtitle: {
     fontSize: 16,

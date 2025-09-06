@@ -20,7 +20,7 @@
     "greeting": {
       "healthyTitle": "Stay Healthy!",
       "healthySubtitle": "Take care of your body every day",
-      "sickTitle": "🤗 Get Well Soon!",
+      "sickTitle": " Get Well Soon!",
       "sickSubtitle": "Don't forget to rest well"
     },
     "weather": {

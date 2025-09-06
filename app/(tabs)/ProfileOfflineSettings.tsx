@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -15,7 +16,7 @@ import { useSettings } from "../../contexts/SettingsContext";
 // Translation object
 const translations = {
   id: {
-    title: "Profil Offline",
+    title: "Profil",
     name: "Nama",
     age: "Usia",
     gender: "Jenis Kelamin",
@@ -34,7 +35,7 @@ const translations = {
     fillProfile: "Silakan isi profil Anda",
   },
   en: {
-    title: "Offline Profile",
+    title: "Profile",
     name: "Name",
     age: "Age",
     gender: "Gender",
@@ -69,20 +70,17 @@ export default function ProfileOfflineSettings() {
   const [fadeAnim] = useState(new Animated.Value(1));
   const [gender, setGender] = useState<string | null>(null);
 
-  // Load data
   useEffect(() => {
     loadProfileData();
   }, []);
 
   const loadProfileData = async () => {
     try {
-      // Profile kosong
       setName("");
       setAge("");
       setAddress("");
       setGender(null);
-      setHasProfile(false); 
-  
+      setHasProfile(false);
     } catch (error) {
       console.error("Error loading profile data:", error);
     }
@@ -101,23 +99,18 @@ export default function ProfileOfflineSettings() {
     }
 
     setIsSaving(true);
-    
-    // Animate button
+
     Animated.sequence([
       Animated.timing(fadeAnim, { duration: 200, toValue: 0.7, useNativeDriver: true }),
       Animated.timing(fadeAnim, { duration: 200, toValue: 1, useNativeDriver: true }),
     ]).start();
-    
+
     try {
-  
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
       const message = hasProfile ? t.updated : t.saved;
       Alert.alert("Sukses", message);
-      
       setHasProfile(true);
       setIsEditing(false);
-      
     } catch (error) {
       console.error("Error saving profile:", error);
       Alert.alert("Error", language === 'id' ? "Gagal menyimpan profil" : "Failed to save profile");
@@ -126,25 +119,19 @@ export default function ProfileOfflineSettings() {
     }
   };
 
-  const handleEdit = () => {
-    setIsEditing(true);
-  };
+  const handleEdit = () => setIsEditing(true);
 
   const handleCancel = () => {
     setIsEditing(false);
-    loadProfileData(); // Reset to saved data
+    loadProfileData();
   };
 
   const goBack = () => {
     try {
-      if (router.canGoBack()) {
-        router.back();
-      } else {
-        router.replace("/(tabs)/settings");
-      }
+      router.push("/(tabs)/settings"); 
     } catch (error) {
       console.error("Navigation error:", error);
-      router.replace("/(tabs)/settings");
+      router.push("/(tabs)/settings");
     }
   };
 
@@ -152,16 +139,20 @@ export default function ProfileOfflineSettings() {
     <View style={styles.profileCard}>
       <View style={styles.profileHeader}>
         <View style={styles.avatarContainer}>
-          <Text style={styles.avatarText}>
-            {name ? name.charAt(0).toUpperCase() : "?"}
-          </Text>
+          {name ? (
+            <Text style={styles.avatarText}>
+              {name.charAt(0).toUpperCase()}
+            </Text>
+          ) : (
+            <Ionicons name="person-circle-outline" size={64} color="#3b82f6" />
+          )}
         </View>
         <View style={styles.profileInfo}>
           <Text style={styles.profileName}>{name || t.emptyProfile}</Text>
           {!name && <Text style={styles.profileSubtext}>{t.fillProfile}</Text>}
         </View>
       </View>
-  
+
       {(name || age || gender || address) ? (
         <View style={styles.profileDetails}>
           {name && (
@@ -170,21 +161,21 @@ export default function ProfileOfflineSettings() {
               <Text style={styles.detailValue}>{name}</Text>
             </View>
           )}
-  
+
           {age && (
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>{t.age}</Text>
               <Text style={styles.detailValue}>{age} tahun</Text>
             </View>
           )}
-  
+
           {gender && (
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>{t.gender}</Text>
               <Text style={styles.detailValue}>{gender}</Text>
             </View>
           )}
-  
+
           {address && (
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>{t.address}</Text>
@@ -197,7 +188,7 @@ export default function ProfileOfflineSettings() {
           {t.fillProfile}
         </Text>
       )}
-  
+
       <TouchableOpacity
         style={styles.editButton}
         onPress={handleEdit}
@@ -210,7 +201,7 @@ export default function ProfileOfflineSettings() {
 
   const renderEditMode = () => (
     <View style={styles.form}>
-      {/* Name Input */}
+      {/* Name */}
       <View style={styles.inputGroup}>
         <Text style={styles.label}>{t.name} *</Text>
         <TextInput
@@ -222,7 +213,7 @@ export default function ProfileOfflineSettings() {
         />
       </View>
 
-      {/* Age Input */}
+      {/* Age */}
       <View style={styles.inputGroup}>
         <Text style={styles.label}>{t.age}</Text>
         <TextInput
@@ -235,7 +226,7 @@ export default function ProfileOfflineSettings() {
         />
       </View>
 
-      {/* Address Input */}
+      {/* Address */}
       <View style={styles.inputGroup}>
         <Text style={styles.label}>{t.address}</Text>
         <TextInput
@@ -244,40 +235,40 @@ export default function ProfileOfflineSettings() {
           onChangeText={setAddress}
           placeholder={t.addressPlaceholder}
           placeholderTextColor="#9ca3af"
-          multiline={true}
+          multiline
           numberOfLines={3}
           textAlignVertical="top"
         />
       </View>
 
-      {/* Gender Picker */}
-<View style={styles.inputGroup}>
-  <Text style={styles.label}>{t.gender}</Text>
-  <View style={styles.optionRow}>
-    {t.genderOptions.map(option => (
-      <TouchableOpacity
-        key={option}
-        style={[
-          styles.optionButton,
-          gender === option && styles.optionButtonSelected
-        ]}
-        onPress={() => setGender(option)}
-        activeOpacity={0.8}
-      >
-        <Text
-          style={[
-            styles.optionText,
-            gender === option && styles.optionTextSelected
-          ]}
-        >
-          {option}
-        </Text>
-      </TouchableOpacity>
-    ))}
-  </View>
-</View>
+      {/* Gender */}
+      <View style={styles.inputGroup}>
+        <Text style={styles.label}>{t.gender}</Text>
+        <View style={styles.optionRow}>
+          {t.genderOptions.map(option => (
+            <TouchableOpacity
+              key={option}
+              style={[
+                styles.optionButton,
+                gender === option && styles.optionButtonSelected
+              ]}
+              onPress={() => setGender(option)}
+              activeOpacity={0.8}
+            >
+              <Text
+                style={[
+                  styles.optionText,
+                  gender === option && styles.optionTextSelected
+                ]}
+              >
+                {option}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
 
-      {/* Action Buttons */}
+      {/* Buttons */}
       <View style={styles.buttonRow}>
         <TouchableOpacity
           style={styles.cancelButton}
@@ -287,15 +278,21 @@ export default function ProfileOfflineSettings() {
           <Text style={styles.cancelButtonText}>{t.cancel}</Text>
         </TouchableOpacity>
 
-        <Animated.View style={{ opacity: fadeAnim }}>
+        <Animated.View style={{ flex: 2, opacity: fadeAnim }}>
           <TouchableOpacity
             style={[styles.saveButton, isSaving && styles.saveButtonDisabled]}
             onPress={saveProfile}
             disabled={isSaving}
             activeOpacity={0.8}
           >
+            <Ionicons
+              name={isSaving ? "time-outline" : "save-outline"}
+              size={18}
+              color="#fff"
+              style={{ marginRight: 6 }}
+            />
             <Text style={styles.saveButtonText}>
-              {isSaving ? "💾 Menyimpan..." : `💾 ${t.save}`}
+              {isSaving ? "Menyimpan..." : t.save}
             </Text>
           </TouchableOpacity>
         </Animated.View>
@@ -306,16 +303,13 @@ export default function ProfileOfflineSettings() {
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.content}>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={goBack} style={styles.backButton}>
-            <Text style={styles.backButtonText}>← {t.back}</Text>
-          </TouchableOpacity>
-          <Text style={styles.title}>{t.title}</Text>
-          <Text style={styles.subtitle}>
-            {isEditing ? "Mode Edit" : "Mode Tampil"}
-          </Text>
-        </View>
+       {/* Header */}
+       <View style={styles.header}>
+  <TouchableOpacity onPress={goBack} style={styles.backButton}>
+    <Ionicons name="arrow-back" size={24} color="#3b82f6" />
+  </TouchableOpacity>
+  <Text style={styles.title}>{t.title}</Text>
+</View>
 
         {/* Content */}
         {!hasProfile || isEditing ? renderEditMode() : renderViewMode()}
@@ -333,41 +327,29 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   header: {
-    marginBottom: 32,
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center", 
+    marginBottom: 32,
+    position: "relative",
   },
   backButton: {
-    alignSelf: "flex-start",
-    marginBottom: 16,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    backgroundColor: "#ffffff",
-    borderRadius: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  backButtonText: {
-    fontSize: 16,
-    color: "#3b82f6",
-    fontWeight: "600",
+    position: "absolute",
+    left: 0,
+    padding: 8,
+    borderRadius: 12,
+    zIndex: 10, 
   },
   title: {
-    fontSize: 32,
-    fontWeight: "800",
+    fontSize: 30,
+    fontWeight: "700",
     color: "#1a202c",
     textAlign: "center",
-    marginBottom: 4,
+    flex: 1,
+    zIndex: 1,
   },
-  subtitle: {
-    fontSize: 14,
-    color: "#718096",
-    fontWeight: "500",
-  },
-  
-  // Profile Card Styles
+
+  // Profile card
   profileCard: {
     backgroundColor: "#ffffff",
     borderRadius: 20,
@@ -449,8 +431,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
-  
-  // Form Styles
+
+  // Form
   form: {
     backgroundColor: "#ffffff",
     borderRadius: 20,
@@ -496,7 +478,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#e2e8f0",
     borderRadius: 12,
-    paddingVertical: 14,
+    paddingVertical: 16,
     alignItems: "center",
   },
   cancelButtonText: {
@@ -505,11 +487,13 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   saveButton: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
     flex: 2,
     backgroundColor: "#10b981",
     borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: "center",
+    paddingVertical: 16,
     shadowColor: "#10b981",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -524,8 +508,9 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontSize: 16,
     fontWeight: "700",
-    
   },
+
+  // Gender option
   optionRow: {
     flexDirection: "row",
     gap: 12,
