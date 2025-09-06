@@ -1,8 +1,8 @@
 
 # Welcome to your Expo app 👋
 
-# ElderCare
-ElderCare+ is a React Native mobile application designed to assist elderly users in managing their daily routines.
+# HealthyX App
+HealthyX App is a React Native based mobile application designed to help users manage their health.
 
 
 

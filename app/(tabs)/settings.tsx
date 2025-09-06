@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useSettings } from "../../contexts/SettingsContext";
 
+// Translations
 const translations = {
   id: {
     title: "Pengaturan",
@@ -35,6 +36,15 @@ const translations = {
   },
 };
 
+// Enum untuk routes supaya TypeScript aman
+enum Routes {
+  Tabs = "/(tabs)",
+  ProfileOffline = "/(tabs)/ProfileOfflineSettings",
+  DisplaySettings = "/(tabs)/DisplaySettings",
+  AuthScreen = "/(tabs)/AuthScreen",
+  ProfileOnline = "/(tabs)/profile-online",
+}
+
 export default function SettingsPage() {
   const { language } = useSettings();
   const t = translations[language];
@@ -42,13 +52,14 @@ export default function SettingsPage() {
 
   const [isLoggedIn, setIsLoggedIn] = React.useState(false);
 
-  const navigateToProfile = () => router.push("/(tabs)/ProfileOfflineSettings");
-  const navigateToDisplay = () => router.push("/(tabs)/DisplaySettings");
+  // Navigasi
+  const navigateToProfile = () => router.push(Routes.ProfileOffline as any);
+  const navigateToDisplay = () => router.push(Routes.DisplaySettings as any);
   const navigateToAccount = () =>
-    router.push(isLoggedIn ? "/(tabs)/profile-online" : "/(tabs)/AuthScreen");
+    router.push(isLoggedIn ? (Routes.ProfileOnline as any) : Routes.AuthScreen as any);
 
   const goBack = () => {
-    router.push("/(tabs)");
+    router.push(Routes.Tabs as any);
   };
 
   return (
@@ -75,9 +86,7 @@ export default function SettingsPage() {
             </View>
             <View style={styles.menuContent}>
               <Text style={styles.menuTitle}>{t.profileOffline}</Text>
-              <Text style={styles.menuDescription}>
-                {t.profileOfflineDesc}
-              </Text>
+              <Text style={styles.menuDescription}>{t.profileOfflineDesc}</Text>
             </View>
             <Ionicons name="chevron-forward" size={22} color="#9ca3af" />
           </TouchableOpacity>
@@ -127,6 +136,7 @@ export default function SettingsPage() {
   );
 }
 
+// Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,

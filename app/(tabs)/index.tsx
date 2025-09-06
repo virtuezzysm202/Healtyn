@@ -757,23 +757,23 @@ useEffect(() => {
             styles.reminderIconContainer,
             { backgroundColor: darkMode ? '#444' : '#F2F2F7' } 
           ]}>
-            {/* Render icon  */}
-            {reminder.iconType === 'FontAwesome5' && reminder.iconName ? (
-              <FontAwesome5 
-                name={reminder.iconName} 
-                size={20} 
-                color={darkMode ? '#FFFFFF' : (reminder.iconColor || '#007AFF')} 
-              />
-            ) : reminder.iconType === 'MaterialCommunityIcons' && reminder.iconName ? (
-              <MaterialCommunityIcons 
-                name={reminder.iconName} 
-                size={20} 
-                color={darkMode ? '#FFFFFF' : (reminder.iconColor || '#007AFF')} 
-              />
-            ) : (
-              <LansiaText style={styles.reminderIcon}>💡</LansiaText>
-            )}
-          </View>
+           {/* Render icon */}
+  {reminder.iconType === "FontAwesome5" && reminder.iconName ? (
+    <FontAwesome5
+      name={reminder.iconName as any} // simple fix
+      size={20}
+      color={darkMode ? "#FFFFFF" : reminder.iconColor || "#007AFF"}
+    />
+  ) : reminder.iconType === "MaterialCommunityIcons" && reminder.iconName ? (
+    <MaterialCommunityIcons
+      name={reminder.iconName as any} // simple fix juga
+      size={20}
+      color={darkMode ? "#FFFFFF" : reminder.iconColor || "#007AFF"}
+    />
+  ) : (
+    <LansiaText style={styles.reminderIcon}>💡</LansiaText>
+  )}
+</View>
           <View style={styles.reminderContent}>
             {/* <LansiaText style={[styles.reminderTitle, darkMode && styles.darkText]}>
               {t('home.healthReminders.tip')}
