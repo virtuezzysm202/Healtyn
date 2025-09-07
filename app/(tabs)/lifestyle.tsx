@@ -1,19 +1,20 @@
-// app/(tabs)/musik.tsx
 import { Feather } from '@expo/vector-icons';
 import { Audio, AVPlaybackStatus } from 'expo-av';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import LansiaText from '../../components/ui/LansiaText';
 import i18n from "../../utils/i18n";
+
 interface MusicItem {
   id: number;
   title: string;
   description: string;
-  duration?: number; // dalam ms
+  duration?: number;
   uri: any;
 }
 
-export default function MusikScreen() {
+export default function LifestyleScreen() {
+  //MUSIC
   const [musicList, setMusicList] = useState<MusicItem[]>([
     {
       id: 1,
@@ -52,14 +53,12 @@ export default function MusikScreen() {
     try {
       setIsLoading(true);
 
-      // stop & unload jika ada sound sebelumnya
       if (sound) {
         await sound.unloadAsync();
         setSound(null);
         setIsPlaying(false);
       }
 
-      // jika lagu sama diklik saat sedang main → stop
       if (currentTrack?.id === musicItem.id && isPlaying) {
         await sound?.unloadAsync();
         setSound(null);
@@ -68,14 +67,12 @@ export default function MusikScreen() {
         setIsLoading(false);
         return;
       }
-      
 
       const { sound: newSound } = await Audio.Sound.createAsync(
         musicItem.uri,
         { shouldPlay: true, isLooping: true }
       );
 
-      // ambil status (durasi)
       const status = await newSound.getStatusAsync();
       if ((status as any).isLoaded && (status as any).durationMillis) {
         setMusicList((prev) =>
@@ -90,7 +87,6 @@ export default function MusikScreen() {
       setIsPlaying(true);
       setIsLoading(false);
 
-      // event selesai
       newSound.setOnPlaybackStatusUpdate((status: AVPlaybackStatus) => {
         if ('didJustFinish' in status && status.didJustFinish) {
           setIsPlaying(false);
@@ -107,17 +103,46 @@ export default function MusikScreen() {
     }
   };
 
-  // cleanup 
   useEffect(() => {
     return sound ? () => { sound.unloadAsync(); } : undefined;
   }, [sound]);
 
+  //MEDITASI
+  const [timer, setTimer] = useState<number | null>(null);
+  const [remaining, setRemaining] = useState<number>(0);
+
+  useEffect(() => {
+    let interval: any;
+    if (remaining > 0) {
+      interval = setInterval(() => setRemaining((prev) => prev - 1), 1000);
+    } else if (remaining === 0 && timer) {
+      Alert.alert("Meditasi selesai 🙏");
+      setTimer(null);
+    }
+    return () => clearInterval(interval);
+  }, [remaining]);
+
+  const startMeditation = (minutes: number) => {
+    setTimer(minutes);
+    setRemaining(minutes * 60);
+  };
+
+  const formatTime = (s: number) => {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${m}:${sec < 10 ? '0' : ''}${sec}`;
+  };
+
+  // WORKOUT
+  const days = ['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'];
+  const [workouts, setWorkouts] = useState<{[key: string]: string}>({});
+
+  // RENDER 
   return (
-    <ScrollView 
-    style={[styles.container]}
-    contentContainerStyle={{ paddingBottom: 50 }}
-  >
-      <LansiaText style={styles.title}>{i18n.translate("music.title")}</LansiaText>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 50 }}>
+      
+      {/* MUSIC */}
+      <LansiaText style={styles.title}> Musik Relaksasi</LansiaText>
       {musicList.map((item) => (
         <MusicCard
           key={item.id}
@@ -128,11 +153,44 @@ export default function MusikScreen() {
           formatDuration={formatDuration}
         />
       ))}
+
+      {/* MEDITATION */}
+      <LansiaText style={styles.title}> Meditasi</LansiaText>
+      <View style={styles.card}>
+        {timer ? (
+          <LansiaText style={styles.meditationTimer}>{formatTime(remaining)}</LansiaText>
+        ) : (
+          <LansiaText style={styles.musicDesc}>Pilih durasi meditasi</LansiaText>
+        )}
+        <View style={styles.meditationButtons}>
+          {[5,10,15].map((m) => (
+            <Pressable key={m} style={styles.meditationBtn} onPress={() => startMeditation(m)}>
+              <LansiaText style={styles.meditationBtnText}>{m} mnt</LansiaText>
+            </Pressable>
+          ))}
+        </View>
+      </View>
+
+      {/* WORKOUT */}
+      <LansiaText style={styles.title}> Workout Plan</LansiaText>
+      <View style={styles.card}>
+        {days.map((day) => (
+          <View key={day} style={styles.workoutRow}>
+            <LansiaText style={styles.dayLabel}>{day}</LansiaText>
+            <TextInput
+              style={styles.input}
+              placeholder="Isi workout..."
+              value={workouts[day] || ''}
+              onChangeText={(text) => setWorkouts((prev) => ({...prev, [day]: text}))}
+            />
+          </View>
+        ))}
+      </View>
     </ScrollView>
   );
 }
 
-// 
+//COMPONENT MUSIC CARD 
 function MusicCard({ item, isActive, isLoading, onPress, formatDuration }: any) {
   return (
     <Pressable style={[styles.card, isActive && styles.cardActive]} onPress={onPress}>
@@ -158,15 +216,15 @@ function MusicCard({ item, isActive, isLoading, onPress, formatDuration }: any) 
   );
 }
 
-// styles
+// STYLES 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F9FAFB', padding: 16 },
-  title: { fontSize: 22, fontWeight: 'bold', marginBottom: 16, color: '#111827' },
+  title: { fontSize: 20, fontWeight: 'bold', marginVertical: 12, color: '#111827' },
   card: {
     backgroundColor: 'white',
     borderRadius: 12,
     padding: 16,
-    marginBottom: 12,
+    marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -178,4 +236,19 @@ const styles = StyleSheet.create({
   musicTitle: { fontSize: 18, fontWeight: '600', marginBottom: 4, color: '#1F2937' },
   musicDesc: { fontSize: 14, color: '#4B5563', marginBottom: 8 },
   musicDuration: { fontSize: 13, color: '#6B7280' },
+
+  meditationTimer: { fontSize: 28, fontWeight: 'bold', color: '#007AFF', textAlign: 'center' },
+  meditationButtons: { flexDirection: 'row', justifyContent: 'center', marginTop: 12 },
+  meditationBtn: {
+    backgroundColor: '#007AFF', paddingVertical: 8, paddingHorizontal: 16,
+    borderRadius: 8, marginHorizontal: 6
+  },
+  meditationBtnText: { color: 'white', fontWeight: 'bold' },
+
+  workoutRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
+  dayLabel: { width: 70, fontWeight: '600' },
+  input: {
+    flex: 1, borderWidth: 1, borderColor: '#ddd', borderRadius: 8,
+    padding: 8, backgroundColor: '#F3F4F6'
+  }
 });

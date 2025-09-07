@@ -37,7 +37,7 @@ type AppRoute =
   | '/call-doctor'
   | '/family'
   | '/health'
-  | '/relax-music';
+  | '/lifestyle';
 
 type MenuItem = {
   icon: string;
@@ -85,26 +85,21 @@ export default function HomePage() {
   const router = useRouter();
   const { t } = useTranslation();
 
-  // ===== UI / App State =====
   const [darkMode, setDarkMode] = useState(false);
 
-  // ===== Weather State =====
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loadingWeather, setLoadingWeather] = useState(true);
   const [weatherError, setWeatherError] = useState<string | null>(null);
 
-  // Lokasi: tersimpan, dipilih, dan hasil pencarian
   const [savedLocations, setSavedLocations] = useState<GeoLocation[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<GeoLocation | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<GeoLocation[]>([]);
 
-  // ===== Health State =====
   const [healthCondition, setHealthCondition] = useState<"healthy" | "sick" | null>(null);
   const [healthReminders, setHealthReminders] = useState<HealthTip[]>([]);
 
-  // ===== Medicine State =====
   const [medicineSchedules, setMedicineSchedules] = useState<MedicineSchedule[]>([]);
   const [loadingMedicine, setLoadingMedicine] = useState(true);
 
@@ -117,7 +112,7 @@ export default function HomePage() {
     { icon: 'user-md', label: t('home.menu.callDoctor'), route: '/call-doctor' },
     { icon: 'users', label: t('home.menu.callFamily'), route: '/family' },
     { icon: 'heartbeat', label: t('home.menu.health'), route: '/health' },
-    { icon: 'music', label: t('home.menu.relaxMusic'), route: '/relax-music' },
+    { icon: 'leaf', label: t('home.menu.lifestyle'), route: '/lifestyle' },
   ];
 
   // ===== Helpers =====

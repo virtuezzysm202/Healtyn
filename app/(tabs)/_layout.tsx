@@ -4,8 +4,22 @@ import React from 'react';
 import { useSettings } from '../../contexts/SettingsContext';
 
 const tabTranslations = {
-  id: { home: "Beranda", health: "Kesehatan", medicine: "Obat", call: "Panggil Dokter", settings: "Pengaturan" },
-  en: { home: "Home", health: "Health", medicine: "Medicine", call: "Call Doctor", settings: "Settings" }
+  id: { 
+    home: "Beranda", 
+    health: "Kesehatan", 
+    medicine: "Obat", 
+    call: "Panggil Dokter", 
+    lifestyle: "Gaya Hidup",
+    settings: "Pengaturan" 
+  },
+  en: { 
+    home: "Home", 
+    health: "Health", 
+    medicine: "Medicine", 
+    call: "Call Doctor", 
+    lifestyle: "Lifestyle",
+    settings: "Settings" 
+  }
 };
 
 type TabBarIconProps = { color: string; size: number };
@@ -36,7 +50,9 @@ export default function TabLayout() {
         name="index"
         options={{
           title: t.home,
-          tabBarIcon: ({ color, size }: TabBarIconProps) => <Ionicons name="home-outline" size={size} color={color} />,
+          tabBarIcon: ({ color, size }: TabBarIconProps) => (
+            <Ionicons name="home-outline" size={size} color={color} />
+          ),
           headerShown: false,
         }}
       />
@@ -44,7 +60,9 @@ export default function TabLayout() {
         name="health"
         options={{
           title: t.health,
-          tabBarIcon: ({ color, size }: TabBarIconProps) => <Ionicons name="heart-outline" size={size} color={color} />,
+          tabBarIcon: ({ color, size }: TabBarIconProps) => (
+            <Ionicons name="heart-outline" size={size} color={color} />
+          ),
           headerShown: false,
         }}
       />
@@ -52,7 +70,9 @@ export default function TabLayout() {
         name="medicine"
         options={{
           title: t.medicine,
-          tabBarIcon: ({ color, size }: TabBarIconProps) => <Ionicons name="medkit-outline" size={size} color={color} />,
+          tabBarIcon: ({ color, size }: TabBarIconProps) => (
+            <Ionicons name="medkit-outline" size={size} color={color} />
+          ),
           headerShown: false,
         }}
       />
@@ -60,7 +80,19 @@ export default function TabLayout() {
         name="call-doctor"
         options={{
           title: t.call,
-          tabBarIcon: ({ color, size }: TabBarIconProps) => <Ionicons name="call-outline" size={size} color={color} />,
+          tabBarIcon: ({ color, size }: TabBarIconProps) => (
+            <Ionicons name="call-outline" size={size} color={color} />
+          ),
+          headerShown: false,
+        }}
+      />
+      <Tabs.Screen
+        name="lifestyle"
+        options={{
+          title: t.lifestyle,
+          tabBarIcon: ({ color, size }: TabBarIconProps) => (
+            <Ionicons name="fitness-outline" size={size} color={color} />
+          ),
           headerShown: false,
         }}
       />
@@ -68,7 +100,9 @@ export default function TabLayout() {
         name="settings"
         options={{
           title: t.settings,
-          tabBarIcon: ({ color, size }: TabBarIconProps) => <Ionicons name="settings-outline" size={size} color={color} />,
+          tabBarIcon: ({ color, size }: TabBarIconProps) => (
+            <Ionicons name="settings-outline" size={size} color={color} />
+          ),
           headerShown: false,
         }}
       />
@@ -82,7 +116,6 @@ export default function TabLayout() {
         "AccountSettings",
         "CreateMedicineSchedule",
         "explore",
-        "relax-music",
         "health-check",
       ].map((name) => (
         <Tabs.Screen
