@@ -113,7 +113,10 @@ export default function MusikScreen() {
   }, [sound]);
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView 
+    style={[styles.container]}
+    contentContainerStyle={{ paddingBottom: 50 }}
+  >
       <LansiaText style={styles.title}>{i18n.translate("music.title")}</LansiaText>
       {musicList.map((item) => (
         <MusicCard

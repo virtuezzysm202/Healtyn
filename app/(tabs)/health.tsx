@@ -224,7 +224,10 @@ const generateDefaultTips = () => {
 
   return (
     <View style={styles.wrapper}>
-      <ScrollView style={styles.container}>
+      <ScrollView 
+  style={[styles.container]}
+  contentContainerStyle={{ paddingBottom: 50 }}
+>
         {/* Condition Question */}
         {condition === null ? (
           <View>

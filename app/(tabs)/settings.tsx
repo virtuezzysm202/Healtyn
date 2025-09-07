@@ -63,7 +63,10 @@ export default function SettingsPage() {
   };
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView 
+    style={[styles.container]}
+    contentContainerStyle={{ paddingBottom: 50 }}
+  >
       <View style={styles.content}>
         {/* Header */}
         <View style={styles.header}>

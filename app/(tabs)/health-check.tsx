@@ -137,7 +137,10 @@ export default function HealthCalculatorScreen() {
         {renderTabButton('vitals', 'heart', 'vitals')}
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <ScrollView 
+  style={[styles.container]}
+  contentContainerStyle={{ paddingBottom: 50 }}
+>
         {/* BMI Calculator Tab */}
         {activeTab === 'calculator' && (
           <View>

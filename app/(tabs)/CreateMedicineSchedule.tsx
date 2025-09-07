@@ -580,7 +580,7 @@ export default function CreateMedicineSchedule({ navigation }: CreateMedicineSch
       style={{ flex: 1, backgroundColor: "#F5F5F5" }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 50 }}>
         <View style={styles.section}>
         <Text style={styles.sectionLabel}>{i18n.translate("createMedicine.medicineName.label")}</Text>
           <View style={styles.inputContainer}>

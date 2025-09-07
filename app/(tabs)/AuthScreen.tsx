@@ -40,9 +40,9 @@ export default function AuthScreen() {
   };
 
   return (
-    <ScrollView
-      style={[styles.container, isDark && styles.containerDark]}
-      showsVerticalScrollIndicator={false}
+    <ScrollView 
+  style={[styles.container]}
+  contentContainerStyle={{ paddingBottom: 50 }}
     >
       <View style={styles.content}>
         {/* Header */}

@@ -456,7 +456,10 @@ useEffect(() => {
   const nextMedicineReminder = getNextMedicineReminder();
 
   return (
-    <ScrollView style={[styles.container, darkMode && styles.darkContainer]}>
+    <ScrollView 
+  style={[styles.container, darkMode && styles.darkContainer]}
+  contentContainerStyle={{ paddingBottom: 50 }}
+>
       {/* Header */}
       <View style={styles.header}>
         <View>
