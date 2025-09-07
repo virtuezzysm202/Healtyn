@@ -87,10 +87,26 @@
     "weight": "Berat Badan (kg)",
     "height": "Tinggi Badan (cm)",
     "age": "Usia (tahun)",
+    "genderLabel": "Jenis Kelamin",
+    "gender": {
+      "male": "Laki-laki",
+      "female": "Perempuan"
+    },
+    "activityLevel": "Tingkat Aktivitas",
+    "activity": {
+      "sedentary": "Sedentari (jarang atau tidak berolahraga)",
+      "light": "Aktif Ringan (olahraga ringan 1-3 hari/minggu)",
+      "moderate": "Aktif Sedang (olahraga sedang 3-5 hari/minggu)",
+      "active": "Aktif (olahraga berat 6-7 hari/minggu)"
+    },
     "calculate": "Hitung",
     "bmi": "BMI",
     "waterIntake": "Asupan Air Harian",
     "invalidInput": "Masukkan berat dan tinggi yang valid",
+    "allNormal": "Semua tanda vital dalam kisaran normal",
+    "enterVitals": "Masukkan tanda vital terlebih dahulu",
+    "validationSuccess": "Tanda vital berhasil divalidasi",
+    "validationFailed": "Beberapa tanda vital berada di luar kisaran normal",
     "bmiCategories": {
       "underweight": "Kurus",
       "normal": "Normal",
@@ -105,7 +121,8 @@
       "glasses": "gelas",
       "bpm": "BPM",
       "celsius": "°C",
-      "mgdl": "mg/dL"
+      "mgdl": "mg/dL",
+      "mmhg": "mmHg"
     },
     "day": "hari",
     "placeholders": {
@@ -114,7 +131,9 @@
       "age": "Masukkan usia",
       "heartRate": "Misal: 72",
       "temperature": "Misal: 36.5",
-      "bloodSugar": "Misal: 100"
+      "bloodSugar": "Misal: 100",
+      "systolic": "Misal: 120",
+      "diastolic": "Misal: 80"
     },
     "tabs": {
       "calculator": "Kalkulator",
@@ -127,14 +146,17 @@
       "empty": "Belum ada gejala yang dicatat",
       "emptySub": "Catat gejala harian untuk memantau kesehatan",
       "name": "Nama Gejala",
+      "namePlaceholder": "Misal: Sakit Kepala, Lelah, Nyeri Sendi",
       "severity": "Tingkat Keparahan (1-5)",
-      "mild": "Ringan",
-      "severe": "Parah",
-      "notes": "Catatan (Opsional)",
-      "placeholders": {
-        "symptomName": "Misal: Sakit Kepala, Lelah, Nyeri Sendi",
-        "symptomNotes": "Detail tambahan tentang gejala..."
+      "severityScale": {
+        "1": "1 (Ringan)",
+        "2": "2",
+        "3": "3",
+        "4": "4",
+        "5": "5 (Parah)"
       },
+      "notes": "Catatan (Opsional)",
+      "notesPlaceholder": "Detail tambahan tentang gejala...",
       "save": "Simpan",
       "nameRequired": "Masukkan nama gejala"
     },
@@ -155,7 +177,74 @@
       "placeholders": {
         "heartRate": "Misal: 72",
         "temperature": "Misal: 36.5",
-        "bloodSugar": "Misal: 100"
+        "bloodSugar": "Misal: 100",
+        "systolic": "Misal: 120",
+        "diastolic": "Misal: 80"
+      }
+    },
+    "nutrition": {
+      "title": "Panduan Nutrisi",
+      "calories": "Kalori",
+      "protein": "Protein",
+      "carbs": "Karbohidrat",
+      "fats": "Lemak",
+      "recommendedFoods": "Makanan yang Disarankan",
+      "tipsTitle": "Tips Nutrisi",
+      "tips": {
+        "underweight": {
+          "gainWeight": "Tingkatkan asupan kalori harian",
+          "frequentMeals": "Makan 5–6 kali dalam porsi kecil setiap hari",
+          "healthyFats": "Tambahkan lemak sehat seperti kacang-kacangan dan alpukat",
+          "strengthTraining": "Lakukan latihan beban untuk menambah massa otot"
+        },
+        "normal": {
+          "maintainWeight": "Pertahankan berat badan saat ini",
+          "balancedDiet": "Ikuti pola makan seimbang dengan semua kelompok makanan",
+          "regularExercise": "Olahraga teratur untuk tetap bugar",
+          "hydration": "Minum cukup air setiap hari"
+        },
+        "overweight": {
+          "portionControl": "Kendalikan porsi makan",
+          "increaseFiber": "Konsumsi lebih banyak makanan tinggi serat",
+          "limitProcessed": "Batasi makanan olahan dan manis",
+          "regularCardio": "Lakukan olahraga kardio secara rutin"
+        },
+        "obese": {
+          "calorieDeficit": "Ikuti pola makan dengan defisit kalori",
+          "highFiber": "Perbanyak makanan berserat seperti sayuran",
+          "limitSugar": "Hindari minuman dan camilan manis",
+          "consultDoctor": "Konsultasikan dengan dokter atau ahli gizi"
+        }
+      },
+      "foods": {
+        "underweight": {
+          "nuts": "Kacang-kacangan & Biji-bijian",
+          "avocado": "Alpukat",
+          "salmon": "Salmon",
+          "eggs": "Telur",
+          "oats": "Oat"
+        },
+        "normal": {
+          "vegetables": "Sayuran",
+          "fruits": "Buah-buahan",
+          "wholeGrains": "Biji-bijian utuh",
+          "leanProtein": "Protein rendah lemak (ayam, ikan)",
+          "dairy": "Produk susu rendah lemak"
+        },
+        "overweight": {
+          "leafyGreens": "Sayuran hijau",
+          "berries": "Buah beri",
+          "chicken": "Ayam panggang",
+          "quinoa": "Quinoa",
+          "beans": "Kacang-kacangan & Legum"
+        },
+        "obese": {
+          "broccoli": "Brokoli",
+          "fish": "Ikan (salmon, makarel)",
+          "brownRice": "Nasi merah",
+          "tofu": "Tahu",
+          "cucumber": "Mentimun"
+        }
       }
     }
   },

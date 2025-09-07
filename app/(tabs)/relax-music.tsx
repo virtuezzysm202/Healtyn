@@ -132,7 +132,7 @@ export default function MusikScreen() {
   );
 }
 
-// 🎵 Kartu Musik
+// 
 function MusicCard({ item, isActive, isLoading, onPress, formatDuration }: any) {
   return (
     <Pressable style={[styles.card, isActive && styles.cardActive]} onPress={onPress}>

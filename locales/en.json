@@ -85,10 +85,26 @@
     "weight": "Weight (kg)",
     "height": "Height (cm)",
     "age": "Age (years)",
+    "genderLabel": "Gender",
+    "gender": {
+      "male": "Male",
+      "female": "Female"
+    },
+    "activityLevel": "Activity Level",
+    "activity": {
+      "sedentary": "Sedentary (little or no exercise)",
+      "light": "Lightly Active (light exercise 1-3 days/week)",
+      "moderate": "Moderately Active (moderate exercise 3-5 days/week)",
+      "active": "Active (hard exercise 6-7 days/week)"
+    },
     "calculate": "Calculate",
     "bmi": "BMI",
     "waterIntake": "Daily Water Intake",
     "invalidInput": "Please enter valid weight and height values",
+    "allNormal": "All vital signs are within normal range",
+    "enterVitals": "Please enter vital signs first",
+    "validationSuccess": "Vitals validated successfully",
+    "validationFailed": "Some vital signs are outside the normal range",
     "bmiCategories": {
       "underweight": "Underweight",
       "normal": "Normal",
@@ -103,7 +119,8 @@
       "glasses": "glasses",
       "bpm": "BPM",
       "celsius": "°C",
-      "mgdl": "mg/dL"
+      "mgdl": "mg/dL",
+      "mmhg": "mmHg"
     },
     "day": "day",
     "placeholders": {
@@ -112,7 +129,9 @@
       "age": "Enter your age",
       "heartRate": "e.g., 72",
       "temperature": "e.g., 36.5",
-      "bloodSugar": "e.g., 100"
+      "bloodSugar": "e.g., 100",
+      "systolic": "e.g., 120",
+      "diastolic": "e.g., 80"
     },
     "tabs": {
       "calculator": "Calculator",
@@ -125,14 +144,17 @@
       "empty": "No symptoms tracked yet",
       "emptySub": "Track your daily symptoms to monitor your health",
       "name": "Symptom Name",
+      "namePlaceholder": "e.g., Headache, Fatigue, Joint pain",
       "severity": "Severity (1-5)",
-      "mild": "Mild",
-      "severe": "Severe",
-      "notes": "Notes (Optional)",
-      "placeholders": {
-        "symptomName": "e.g., Headache, Fatigue, Joint pain",
-        "symptomNotes": "Additional details about the symptom..."
+      "severityScale": {
+        "1": "1 (Mild)",
+        "2": "2",
+        "3": "3",
+        "4": "4",
+        "5": "5 (Severe)"
       },
+      "notes": "Notes (Optional)",
+      "notesPlaceholder": "Additional details about the symptom...",
       "save": "Save",
       "nameRequired": "Please enter symptom name"
     },
@@ -153,7 +175,74 @@
       "placeholders": {
         "heartRate": "e.g., 72",
         "temperature": "e.g., 36.5",
-        "bloodSugar": "e.g., 100"
+        "bloodSugar": "e.g., 100",
+        "systolic": "e.g., 120",
+        "diastolic": "e.g., 80"
+      }
+    },
+    "nutrition": {
+      "title": "Nutrition Guide",
+      "calories": "Calories",
+      "protein": "Protein",
+      "carbs": "Carbohydrates",
+      "fats": "Fats",
+      "recommendedFoods": "Recommended Foods",
+      "tipsTitle": "Nutrition tips",
+      "tips": {
+        "underweight": {
+          "gainWeight": "Increase your daily calorie intake",
+          "frequentMeals": "Eat 5-6 small meals per day",
+          "healthyFats": "Include healthy fats like nuts and avocado",
+          "strengthTraining": "Do strength training to build muscle mass"
+        },
+        "normal": {
+          "maintainWeight": "Maintain your current weight",
+          "balancedDiet": "Follow a balanced diet with all food groups",
+          "regularExercise": "Exercise regularly to stay fit",
+          "hydration": "Drink enough water daily"
+        },
+        "overweight": {
+          "portionControl": "Practice portion control at meals",
+          "increaseFiber": "Eat more fiber-rich foods",
+          "limitProcessed": "Limit processed and sugary foods",
+          "regularCardio": "Do regular cardio exercises"
+        },
+        "obese": {
+          "calorieDeficit": "Adopt a calorie deficit diet",
+          "highFiber": "Increase high-fiber foods like vegetables",
+          "limitSugar": "Avoid sugary drinks and snacks",
+          "consultDoctor": "Consult a doctor or nutritionist for guidance"
+        }
+      },
+      "foods": {
+        "underweight": {
+          "nuts": "Nuts & Seeds",
+          "avocado": "Avocado",
+          "salmon": "Salmon",
+          "eggs": "Eggs",
+          "oats": "Oats"
+        },
+        "normal": {
+          "vegetables": "Vegetables",
+          "fruits": "Fruits",
+          "wholeGrains": "Whole grains",
+          "leanProtein": "Lean protein (chicken, fish)",
+          "dairy": "Low-fat dairy"
+        },
+        "overweight": {
+          "leafyGreens": "Leafy greens",
+          "berries": "Berries",
+          "chicken": "Grilled chicken",
+          "quinoa": "Quinoa",
+          "beans": "Beans & legumes"
+        },
+        "obese": {
+          "broccoli": "Broccoli",
+          "fish": "Fish (salmon, mackerel)",
+          "brownRice": "Brown rice",
+          "tofu": "Tofu",
+          "cucumber": "Cucumber"
+        }
       }
     }
   },
