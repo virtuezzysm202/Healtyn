@@ -143,6 +143,7 @@
       "add": "Add Symptom",
       "empty": "No symptoms tracked yet",
       "emptySub": "Track your daily symptoms to monitor your health",
+      "addNew": "Add health symptoms",
       "name": "Symptom Name",
       "namePlaceholder": "e.g., Headache, Fatigue, Joint pain",
       "severity": "Severity (1-5)",
@@ -401,7 +402,8 @@
     },
     "common": {
       "ok": "OK",
-      "ml": "ml"
+      "ml": "ml",
+      "select": "Select"
     }
   },
   "callDoctor": {
@@ -446,6 +448,25 @@
       "tip5": "Wishing you a speedy recovery!"
     }
   },
+  "workout": {
+    "title": "Workout Plan",
+    "placeholder": "Enter workout...",
+    "days": {
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday",
+      "sunday": "Sunday"
+    }
+  },
+  "meditation": {
+    "title": "Meditation",
+    "selectDuration": "Select meditation duration",
+    "minutes": "min",
+    "completed": "Meditation completed 🙏"
+  },
   "music": {
     "title": "Relaxation Music",
     "duration": "Duration",
@@ -465,5 +486,17 @@
         "desc": "Relaxing rain sounds with gentle distant thunder"
       }
     }
+  },
+  "error": "Error",
+  "common": {
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "select": "Select",
+    "back": "Back",
+    "save": "Save",
+    "ok": "OK",
+    "close": "Close",
+    "yes": "Yes",
+    "no": "No"
   }
 }

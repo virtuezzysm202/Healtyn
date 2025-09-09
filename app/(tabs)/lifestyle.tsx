@@ -1,7 +1,17 @@
 import { Feather } from '@expo/vector-icons';
 import { Audio, AVPlaybackStatus } from 'expo-av';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  StyleSheet,
+  TextInput,
+  View,
+} from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import LansiaText from '../../components/ui/LansiaText';
 import i18n from "../../utils/i18n";
 
@@ -14,7 +24,6 @@ interface MusicItem {
 }
 
 export default function LifestyleScreen() {
-  //MUSIC
   const [musicList, setMusicList] = useState<MusicItem[]>([
     {
       id: 1,
@@ -41,7 +50,6 @@ export default function LifestyleScreen() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // format durasi jadi mm:ss
   const formatDuration = (millis: number) => {
     const totalSeconds = Math.floor(millis / 1000);
     const minutes = Math.floor(totalSeconds / 60);
@@ -49,24 +57,31 @@ export default function LifestyleScreen() {
     return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   };
 
+  const stopMusic = async () => {
+    try {
+      if (sound) {
+        await sound.stopAsync();
+        await sound.unloadAsync();
+        setSound(null);
+      }
+      setCurrentTrack(null);
+      setIsPlaying(false);
+    } catch (error) {
+      console.log('Error stopping sound:', error);
+    }
+  };
+
   const playSound = async (musicItem: MusicItem) => {
     try {
       setIsLoading(true);
 
-      if (sound) {
-        await sound.unloadAsync();
-        setSound(null);
-        setIsPlaying(false);
-      }
-
       if (currentTrack?.id === musicItem.id && isPlaying) {
-        await sound?.unloadAsync();
-        setSound(null);
-        setCurrentTrack(null);
-        setIsPlaying(false);
+        await stopMusic();
         setIsLoading(false);
         return;
       }
+
+      if (sound) await stopMusic();
 
       const { sound: newSound } = await Audio.Sound.createAsync(
         musicItem.uri,
@@ -107,16 +122,15 @@ export default function LifestyleScreen() {
     return sound ? () => { sound.unloadAsync(); } : undefined;
   }, [sound]);
 
-  //MEDITASI
   const [timer, setTimer] = useState<number | null>(null);
   const [remaining, setRemaining] = useState<number>(0);
 
   useEffect(() => {
     let interval: any;
     if (remaining > 0) {
-      interval = setInterval(() => setRemaining((prev) => prev - 1), 1000);
+      interval = setInterval(() => setRemaining(prev => prev - 1), 1000);
     } else if (remaining === 0 && timer) {
-      Alert.alert("Meditasi selesai 🙏");
+      Alert.alert(i18n.translate("meditation.completed") || "Meditation completed 🙏");
       setTimer(null);
     }
     return () => clearInterval(interval);
@@ -133,64 +147,84 @@ export default function LifestyleScreen() {
     return `${m}:${sec < 10 ? '0' : ''}${sec}`;
   };
 
-  // WORKOUT
-  const days = ['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'];
+  const days = [
+    i18n.translate("workout.days.monday") || "Monday",
+    i18n.translate("workout.days.tuesday") || "Tuesday",
+    i18n.translate("workout.days.wednesday") || "Wednesday",
+    i18n.translate("workout.days.thursday") || "Thursday",
+    i18n.translate("workout.days.friday") || "Friday",
+    i18n.translate("workout.days.saturday") || "Saturday",
+    i18n.translate("workout.days.sunday") || "Sunday"
+  ];
   const [workouts, setWorkouts] = useState<{[key: string]: string}>({});
 
-  // RENDER 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 50 }}>
-      
-      {/* MUSIC */}
-      <LansiaText style={styles.title}> Musik Relaksasi</LansiaText>
-      {musicList.map((item) => (
-        <MusicCard
-          key={item.id}
-          item={item}
-          isActive={currentTrack?.id === item.id && isPlaying}
-          isLoading={isLoading && currentTrack?.id === item.id}
-          onPress={() => playSound(item)}
-          formatDuration={formatDuration}
-        />
-      ))}
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
+    >
+      <KeyboardAwareScrollView
+        style={styles.container}
+        contentContainerStyle={{ paddingBottom: 50 }}
+        enableOnAndroid={true}
+        extraScrollHeight={20}
+        keyboardShouldPersistTaps="handled"
+      >
+        {/* MUSIC */}
+        <LansiaText style={styles.title}>{i18n.translate("music.title")}</LansiaText>
+        {musicList.map(item => (
+          <MusicCard
+            key={item.id}
+            item={item}
+            isActive={currentTrack?.id === item.id && isPlaying}
+            isLoading={isLoading && currentTrack?.id === item.id}
+            onPress={() => playSound(item)}
+            formatDuration={formatDuration}
+          />
+        ))}
 
-      {/* MEDITATION */}
-      <LansiaText style={styles.title}> Meditasi</LansiaText>
-      <View style={styles.card}>
-        {timer ? (
-          <LansiaText style={styles.meditationTimer}>{formatTime(remaining)}</LansiaText>
-        ) : (
-          <LansiaText style={styles.musicDesc}>Pilih durasi meditasi</LansiaText>
-        )}
-        <View style={styles.meditationButtons}>
-          {[5,10,15].map((m) => (
-            <Pressable key={m} style={styles.meditationBtn} onPress={() => startMeditation(m)}>
-              <LansiaText style={styles.meditationBtnText}>{m} mnt</LansiaText>
-            </Pressable>
+        {/* MEDITATION */}
+        <LansiaText style={styles.title}>{i18n.translate("meditation.title") || "Meditation"}</LansiaText>
+        <View style={styles.card}>
+          {timer ? (
+            <LansiaText style={styles.meditationTimer}>{formatTime(remaining)}</LansiaText>
+          ) : (
+            <LansiaText style={styles.musicDesc}>
+              {i18n.translate("meditation.selectDuration") || "Select meditation duration"}
+            </LansiaText>
+          )}
+          <View style={styles.meditationButtons}>
+            {[5, 10, 15].map(m => (
+              <Pressable key={m} style={styles.meditationBtn} onPress={() => startMeditation(m)}>
+                <LansiaText style={styles.meditationBtnText}>
+                  {m} {i18n.translate("meditation.minutes") || "min"}
+                </LansiaText>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+
+        {/* WORKOUT */}
+        <LansiaText style={styles.title}>{i18n.translate("workout.title") || "Workout Plan"}</LansiaText>
+        <View style={styles.card}>
+          {days.map(day => (
+            <View key={day} style={styles.workoutRow}>
+              <LansiaText style={styles.dayLabel}>{day}</LansiaText>
+              <TextInput
+                style={styles.input}
+                placeholder={i18n.translate("workout.placeholder") || "Enter workout..."}
+                value={workouts[day] || ''}
+                onChangeText={text => setWorkouts(prev => ({ ...prev, [day]: text }))}
+              />
+            </View>
           ))}
         </View>
-      </View>
-
-      {/* WORKOUT */}
-      <LansiaText style={styles.title}> Workout Plan</LansiaText>
-      <View style={styles.card}>
-        {days.map((day) => (
-          <View key={day} style={styles.workoutRow}>
-            <LansiaText style={styles.dayLabel}>{day}</LansiaText>
-            <TextInput
-              style={styles.input}
-              placeholder="Isi workout..."
-              value={workouts[day] || ''}
-              onChangeText={(text) => setWorkouts((prev) => ({...prev, [day]: text}))}
-            />
-          </View>
-        ))}
-      </View>
-    </ScrollView>
+      </KeyboardAwareScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
-//COMPONENT MUSIC CARD 
 function MusicCard({ item, isActive, isLoading, onPress, formatDuration }: any) {
   return (
     <Pressable style={[styles.card, isActive && styles.cardActive]} onPress={onPress}>
@@ -216,39 +250,48 @@ function MusicCard({ item, isActive, isLoading, onPress, formatDuration }: any) 
   );
 }
 
-// STYLES 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F9FAFB', padding: 16 },
-  title: { fontSize: 20, fontWeight: 'bold', marginVertical: 12, color: '#111827' },
+  container: { flex: 1, backgroundColor: '#F9FAFB', paddingHorizontal: 16, paddingTop: 20 },
+  title: { fontSize: 22, fontWeight: '700', marginVertical: 12, color: '#111827' },
   card: {
     backgroundColor: 'white',
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowRadius: 6,
+    elevation: 3,
   },
   cardActive: { borderWidth: 2, borderColor: '#007AFF' },
   cardContent: { flexDirection: 'row', alignItems: 'center' },
   musicTitle: { fontSize: 18, fontWeight: '600', marginBottom: 4, color: '#1F2937' },
-  musicDesc: { fontSize: 14, color: '#4B5563', marginBottom: 8 },
+  musicDesc: { fontSize: 14, color: '#4B5563', marginBottom: 6 },
   musicDuration: { fontSize: 13, color: '#6B7280' },
 
   meditationTimer: { fontSize: 28, fontWeight: 'bold', color: '#007AFF', textAlign: 'center' },
   meditationButtons: { flexDirection: 'row', justifyContent: 'center', marginTop: 12 },
   meditationBtn: {
-    backgroundColor: '#007AFF', paddingVertical: 8, paddingHorizontal: 16,
-    borderRadius: 8, marginHorizontal: 6
+    backgroundColor: '#007AFF',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    marginHorizontal: 6,
   },
-  meditationBtnText: { color: 'white', fontWeight: 'bold' },
+  meditationBtnText: { color: 'white', fontWeight: 'bold', fontSize: 16 },
 
-  workoutRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
-  dayLabel: { width: 70, fontWeight: '600' },
+  workoutRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
+  dayLabel: { width: 80, fontWeight: '600', color: '#111827' },
   input: {
-    flex: 1, borderWidth: 1, borderColor: '#ddd', borderRadius: 8,
-    padding: 8, backgroundColor: '#F3F4F6'
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    backgroundColor: '#F3F4F6',
+    fontSize: 14,
+    color: '#111827'
   }
 });

@@ -32,7 +32,7 @@ interface NutritionRecommendation {
 export default function HealthCalculatorScreen() {
   const { t } = useTranslation();
 
-  // BMI Calculator States
+  // BMI Calculator 
   const [weight, setWeight] = useState('');
   const [height, setHeight] = useState('');
   const [age, setAge] = useState('');
@@ -380,7 +380,7 @@ export default function HealthCalculatorScreen() {
     <View style={styles.container}>
       {/* Tab Navigation */}
       <View style={styles.tabContainer}>
-        {renderTabButton('calculator', 'calculator', 'calculator')}
+        {renderTabButton('calculator', 'tool', 'calculator')}
         {renderTabButton('symptoms', 'activity', 'symptoms')}
         {renderTabButton('vitals', 'heart', 'vitals')}
       </View>

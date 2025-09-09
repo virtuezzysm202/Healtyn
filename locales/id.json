@@ -143,6 +143,7 @@
     "symptoms": {
       "title": "Pelacak Gejala",
       "add": "Tambah Gejala",
+      "addNew": "Tambah gejala",
       "empty": "Belum ada gejala yang dicatat",
       "emptySub": "Catat gejala harian untuk memantau kesehatan",
       "name": "Nama Gejala",
@@ -461,6 +462,25 @@
       "tip4": "Tetap minum air putih yang cukup",
       "tip5": "Semoga lekas sembuh!"
     }
+  },
+  "workout": {
+    "title": "Jadwal Olahraga",
+    "placeholder": "Masukkan jadwal",
+    "days": {
+      "monday": "Senin",
+      "tuesday": "Selasa",
+      "wednesday": "Rabu",
+      "thursday": "Kamis",
+      "friday": "Jumat",
+      "saturday": "Sabtu",
+      "sunday": "minggu"
+    }
+  },
+  "meditation": {
+    "title": "Meditasi",
+    "selectDuration": "Masukan jadwal meditasi",
+    "minutes": "min",
+    "completed": "Meditasi selesai"
   },
   "music": {
     "title": "Musik Relaksasi",
