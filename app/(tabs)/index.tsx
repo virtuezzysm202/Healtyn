@@ -2,8 +2,8 @@ import { Feather, FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icon
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
+import { Image } from 'react-native';
 import { useTranslation } from "../../hooks/useTranslation";
-
 
 
 import { useEffect, useState } from 'react';
@@ -457,14 +457,21 @@ useEffect(() => {
 >
       {/* Header */}
       <View style={styles.header}>
-        <View>
-          <LansiaText style={[styles.appName, darkMode && styles.darkText]}>
-            {t('home.appName')}
-          </LansiaText>
-          <LansiaText style={[styles.appSubtitle, darkMode && styles.darkSubText]}>
-            {t('home.appSubtitle')}
-          </LansiaText>
-        </View>
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+  <Image 
+    source={require('../../assets/images/Icon_App.png')} 
+    style={{ width: 60, height: 60, borderRadius: 40, marginRight: 11 }} 
+  />
+  <View>
+  <LansiaText style={[styles.appName, darkMode && styles.darkText]}>
+    {t('home.appName')}
+  </LansiaText>
+  {/* <LansiaText style={[styles.appSubtitle, darkMode && styles.darkSubText]}>
+    {t('home.appSubtitle')}
+  </LansiaText> */}
+</View>
+</View>
+
         <View style={styles.rightHeader}>
           <LansiaText style={styles.smallLabel}>🌙</LansiaText>
           <Switch 
@@ -480,7 +487,7 @@ useEffect(() => {
           >
             <Feather
               name="settings"
-              size={20}
+              size={25}
               color={darkMode ? '#FFFFFF' : '#007AFF'}
             />
           </Pressable>
@@ -903,11 +910,13 @@ const styles = StyleSheet.create({
   rightHeader: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 6,
+    marginLeft: 15,
   },
   profileButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
@@ -941,8 +950,8 @@ const styles = StyleSheet.create({
     color: '#DDDDDD',
   },
   smallLabel: {
-    fontSize: 16,
-    marginRight: 8,
+    fontSize: 20,
+    marginRight: 2,
   },
 
   // Greeting Card 

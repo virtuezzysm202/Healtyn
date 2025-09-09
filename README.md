@@ -1,8 +1,8 @@
 
 # Welcome to your Expo app 👋
 
-# HealthyX App
-HealthyX App is a React Native based mobile application designed to help users manage their health.
+# Healthyn App
+Healtyn App is a React Native based mobile application designed to help users manage their health.
 
 
 
