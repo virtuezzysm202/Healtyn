@@ -473,6 +473,24 @@ useEffect(() => {
 </View>
 
         <View style={styles.rightHeader}>
+        <Pressable
+						onPress={() =>
+							router.push(
+								'/call-doctor'
+							)
+						}
+						style={
+							styles.emergencyButton
+						}
+					>
+						<LansiaText
+							style={
+								styles.emergencyText
+							}
+						>
+							🆘
+						</LansiaText>
+					</Pressable>
           <LansiaText style={styles.smallLabel}>🌙</LansiaText>
           <Switch 
             value={darkMode} 
