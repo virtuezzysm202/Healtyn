@@ -1,10 +1,8 @@
 # Healtyn
 
 Healtyn is a Flutter-based mobile health assistant app designed to help users manage daily health activities.  
-It provides medicine reminders, BMI checking, lifestyle tracking, family support features, and quick doctor calls —  
-especially helpful for elderly users.  
+It provides medicine reminders, BMI checking, lifestyle tracking, family support features, and quick doctor calls especially helpful for elderly users.  
 
----
 
 ## 📸 Snapshots
 
@@ -21,7 +19,6 @@ especially helpful for elderly users.
   <img src="./assets/images/Lifestyle.png" alt="Lifestyle" width="180"/>
 </p>
 
----
 
 ## ✨ Features
 
@@ -64,7 +61,6 @@ especially helpful for elderly users.
 - Add workout schedules.  
 - Meditation timer with progress tracking.  
 
----
 
 ## 🚀 About
 
