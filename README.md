@@ -1,57 +1,72 @@
+# Healtyn
 
-# Welcome to your Expo app 👋
+Healtyn is a Flutter-based mobile health assistant app designed to help users manage daily health activities.  
+It provides medicine reminders, BMI checking, lifestyle tracking, family support features, and quick doctor calls —  
+especially helpful for elderly users.  
 
-# Healthyn App
-Healtyn App is a React Native based mobile application designed to help users manage their health.
+---
 
+## 📸 Snapshots
 
+<p align="center">
+  <img src="./assets/images/Dashboard.png" alt="Dashboard" width="180"/>
+  <img src="./assets/images/Medicine_Remember.png" alt="Medicine Reminder" width="180"/>
+  <img src="./assets/images/BMI 3.png" alt="BMI Checker" width="180"/>
+  <img src="./assets/images/Call doctor (2).png" alt="Call Doctor" width="180"/>
+  <img src="./assets/images/Family Feature.png" alt="Family Feature" width="180"/>
+  <img src="./assets/images/Meditation_Tip.png" alt="Meditation Tip" width="180"/>
+  <img src="./assets/images/Health Check 2.png" alt="Health Check 2" width="180"/>
+  <img src="./assets/images/Health check.png" alt="Health Check" width="180"/>
+  <img src="./assets/images/Display.png" alt="Display Settings" width="180"/>
+  <img src="./assets/images/Lifestyle.png" alt="Lifestyle" width="180"/>
+</p>
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+---
 
-## Get started
+## ✨ Features
 
-1. Install dependencies
+### 1. Dashboard  
+- Weather updates with clothing suggestions.  
+- Search location for weather forecast.  
+- Add reminders and view upcoming medicine schedules.  
 
-   ```bash
-   npm install
-   ```
+### 2. Medicine Reminder  
+- Create schedules for prescribed medicines.  
+- Notifications with time, medicine name, dosage, photo, and duration.  
+- Save history of medicine intake.  
+- Record allergies for safety.  
 
-2. Start the app
+### 3. BMI Checker  
+- Input weight, height, and age.  
+- Get health recommendations (nutrition tips, weight control).  
 
-   ```bash
-   npx expo start
-   ```
+### 4. Call Doctor  
+- Add frequently contacted doctors.  
+- One-tap call for emergency help (especially for elderly users).  
 
-In the output, you'll find options to open the app in a
+### 5. Family Feature  
+- Add family members for quick access.  
+- Group chat to share health status and updates in real-time.  
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+### 6. Meditation Tips  
+- Add custom reminders for meditation and wellness.  
+- Integrated into dashboard for easy access.  
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### 7. Health Check  
+- Input health data to monitor current health condition.  
+- View summary and progress.  
 
-## Get a fresh project
+### 8. Display Settings  
+- Switch languages (English / Indonesian).  
+- Change app theme (light / dark).  
 
-When you're ready, run:
+### 9. Lifestyle Tracker  
+- Add workout schedules.  
+- Meditation timer with progress tracking.  
 
-```bash
-npm run reset-project
-```
+---
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## 🚀 About
 
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
-=======
+**Healtyn** is built with **Flutter** to provide a smooth, cross-platform mobile experience.  
+This app is part of my personal portfolio project.  
